@@ -5,53 +5,88 @@ namespace MxToolbox;
 use MxToolbox\Exception\MxToolboxException;
 
 class MxToolbox {
-	/**
-	 * Load blacklists from file
-	 */
-	const BLS_FROM_FILE = 'FILE';
-	/**
-	 * Load blacklists from database
-	 */
-	const BLS_FROM_MYSQL = 'MYSQL';
 
-	private $dnsResolver;
-	private $blacklists;
+	private $blackLists;
+	private $testResult;
 
 	/**
 	 * MxToolbox
-	 * @param string $dnsResolver - IP Address of your local DNS resolver
-	 * @param MxToolbox $blsFrom - Load blacklists from (::BLS_FROM_FILE, ::BLS_FROM_MYSQL)
 	 * @throws MxToolboxException
 	 */
-	public function __construct($dnsResolver, $blsFrom = self::BLS_FROM_FILE) {
-		$this->dnsResolver = $dnsResolver;
-		if ( empty($this->dnsResolver) )
-			throw new MxToolboxException('IP Address of DNS Resolver is empty!');
-		if ( !$this->checkIPAddress( $this->dnsResolver ) )
-			throw new MxToolboxException($this->dnsResolver . ' is not IPv4 address!');
-		if ( $blsFrom == self::BLS_FROM_FILE && !$this->loadBlacklistsFromFile() )
+	public function __construct() {
+		if ( !$this->loadBlacklistsFromFile() )
 			throw new MxToolboxException('Load blacklists failed!');
-		if ( $blsFrom == self::BLS_FROM_MYSQL )
-			throw new MxToolboxException('Now not supported!');
-		print_r($this->blacklists);
-	}
-	
-	public function getDNSResolver() {
-		return $this->dnsResolver;
-	}
-	
-	public function digNiTo($addr) {
-		return dns_get_record($addr, DNS_TXT);
-	}
-	
-	//public function 
-	
-	protected function checkIPAddress($addr) {
-		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 	}
 	
 	/**
-	 * Load blacklists from file
+	 * Blacklists names
+	 * @return array
+	 */
+	public function getBlackLists() {
+		return $this->blackLists;
+	}
+	
+	public function getTestResult() {
+		return $this->testResult;
+	}
+	
+	public function checkIPAddress($addr) {
+		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+	}
+	
+	
+	
+	public function testAllBlacklists($addr) {
+		$this->buildTestArray();
+		//print_r($this->testResult);
+		foreach ($this->testResult as $blackList) {
+//			if ( $blackList['blResponse'] ) {
+				$this->easyTestOneBlacklist($addr, $blackList);
+//			}
+		}
+	}
+	
+	private function easyTestOneBlacklist($addr,&$blackList) {
+		if ( $reverseIP = $this->reverseIP($addr) ) {
+//			$checkResult = dns_get_record($reverseIP . '.' . $blackList['blHostName'], DNS_TXT);
+			echo $reverseIP . '.' . $blackList['blHostName'].' - ';
+			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList['blHostName'].' TXT');
+			echo $checkResult.PHP_EOL;
+			$blackList['blCheck'] = 'yes';
+			if ( !empty($checkResult) ) {
+				$blackList['blCheck'] = 'yes';
+//				print_r($blackList);
+			}
+		}
+	}
+	
+	/**
+	 * Build array with blacklist for test, check if blaclist hostname exist
+	 */
+	private function buildTestArray() {
+		$i = 0;
+		foreach ($this->blackLists as $blackList) {
+				$this->testResult[$i]['blHostName'] = $blackList;
+//				$this->testResult[$i]['blResponse'] = false;
+				$this->testResult[$i++]['blCheck'] = NULL;
+		}
+	}
+	
+	/**
+	 * Reverse IP address 192.168.1.254 -> 254.1.168.192
+	 * @param string $addr
+	 * @return mixed (string or false on error)
+	 */
+	private function reverseIP($addr) {
+		if ( $this->checkIPAddress($addr) ) {
+			$revIpAddr = explode( ".", $addr );
+			return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
+		}
+		return false;
+	}
+	
+	/**
+	 * Load blacklists from the file blacklists.txt to array
 	 * @return boolean
 	 */
 	private function loadBlacklistsFromFile() {
@@ -62,8 +97,8 @@ class MxToolbox {
 			$tmpBlacklists = explode( PHP_EOL, $tmpBlacklists );
 			$tmpBlacklists = array_filter( $tmpBlacklists, array( $this, "clearBlacklistsArray" ));
 			foreach ( $tmpBlacklists as $blackList )
-				$this->blacklists[] = trim($blackList);
-			if ( count($this->blacklists) > 0 ) 
+				$this->blackLists[] = trim($blackList);
+			if ( count($this->blackLists) > 0 ) 
 				return true;
 		}
 		return false;
