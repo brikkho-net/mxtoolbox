@@ -19,13 +19,17 @@ class MxToolbox {
 	}
 	
 	/**
-	 * Blacklists names
+	 * Get blacklists hostnames
 	 * @return array
 	 */
 	public function getBlackLists() {
 		return $this->blackLists;
 	}
 	
+	/**
+	 * Get test results
+	 * @return array
+	 */
 	public function getTestResult() {
 		return $this->testResult;
 	}
@@ -34,30 +38,42 @@ class MxToolbox {
 		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
 	}
 	
-	
+	//TODO: check reverse DNS for IP
+	//TODO: check domain have right MX
+	//TODO: add blacklist for MX in DNS
+
+	//TODO: filter url for positive checks:
+	/*
+	hexim@hexim-nb:~/workspace/php/mxtoolbox$ dig +noall +short 2.0.0.127.zen.spamhaus.org TXT @194.8.253.11
+	 "https://www.spamhaus.org/query/ip/127.0.0.2"
+	 "https://www.spamhaus.org/sbl/query/SBL233"
+	hexim@hexim-nb:~/workspace/php/mxtoolbox$ dig +noall +short 2.0.0.127.spam.rbl.msrbl.net TXT @194.8.253.11
+	 "SPAM Sending Host - see http://www.msrbl.com/check?ip=127.0.0.2"
+	*/
+	//TODO: update check as https://en.wikipedia.org/wiki/DNSBL#DNSBL_queries ???
+	//TODO: build only alive RBLs to separate bl. file (ideal for frequent testing)
+	//TODO: check and return bool if is the IP in any RBLs
 	
 	public function testAllBlacklists($addr) {
 		$this->buildTestArray();
-		//print_r($this->testResult);
-		foreach ($this->testResult as $blackList) {
-//			if ( $blackList['blResponse'] ) {
-				$this->easyTestOneBlacklist($addr, $blackList);
-//			}
+		foreach ($this->testResult as &$blackList) {
+			if ( $blackList['blResponse'] ) {
+				echo "Check: " . $blackList['blHostName'] . PHP_EOL;
+				if ( $this->easyTestOneBlacklist($addr, $blackList['blHostName']) ) {
+					$blackList['blCheck'] = 'yes';
+				}
+			}
+			else echo "Ignore: " . $blackList['blHostName'] . PHP_EOL;
 		}
 	}
 	
-	private function easyTestOneBlacklist($addr,&$blackList) {
+	private function easyTestOneBlacklist($addr,$blackList) {
 		if ( $reverseIP = $this->reverseIP($addr) ) {
-//			$checkResult = dns_get_record($reverseIP . '.' . $blackList['blHostName'], DNS_TXT);
-			echo $reverseIP . '.' . $blackList['blHostName'].' - ';
-			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList['blHostName'].' TXT');
-			echo $checkResult.PHP_EOL;
-			$blackList['blCheck'] = 'yes';
-			if ( !empty($checkResult) ) {
-				$blackList['blCheck'] = 'yes';
-//				print_r($blackList);
-			}
+			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList.' TXT');
+			if ( !empty($checkResult) )
+				return true;
 		}
+		return false;
 	}
 	
 	/**
@@ -66,9 +82,15 @@ class MxToolbox {
 	private function buildTestArray() {
 		$i = 0;
 		foreach ($this->blackLists as $blackList) {
-				$this->testResult[$i]['blHostName'] = $blackList;
-//				$this->testResult[$i]['blResponse'] = false;
-				$this->testResult[$i++]['blCheck'] = NULL;
+			$this->testResult[$i]['blHostName'] = $blackList;
+			$this->testResult[$i]['blCheck'] = NULL;
+			$this->testResult[$i]['blPositiveURL'] = NULL;
+			// https://tools.ietf.org/html/rfc5782 cap. 5
+			if ( $this->easyTestOneBlacklist('127.0.0.2', $blackList)) {
+				$this->testResult[$i++]['blResponse'] = true;
+				continue;
+			}
+			$this->testResult[$i++]['blResponse'] = false;
 		}
 	}
 	
