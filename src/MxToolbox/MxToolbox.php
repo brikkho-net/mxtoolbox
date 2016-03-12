@@ -50,26 +50,62 @@ class MxToolbox {
 	hexim@hexim-nb:~/workspace/php/mxtoolbox$ dig +noall +short 2.0.0.127.spam.rbl.msrbl.net TXT @194.8.253.11
 	 "SPAM Sending Host - see http://www.msrbl.com/check?ip=127.0.0.2"
 	*/
-	//TODO: update check as https://en.wikipedia.org/wiki/DNSBL#DNSBL_queries ???
-	//TODO: build only alive RBLs to separate bl. file (ideal for frequent testing)
 	//TODO: check and return bool if is the IP in any RBLs
 	
-	public function testAllBlacklists($addr) {
+	/**
+	 * Check all (with rBL alive checks - slow check!)
+	 * @param unknown $addr
+	 */
+	public function checkAllRBLs($addr) {
 		$this->buildTestArray();
-		foreach ($this->testResult as &$blackList) {
+		foreach ($this->testResult as $blackList) {
 			if ( $blackList['blResponse'] ) {
-				echo "Check: " . $blackList['blHostName'] . PHP_EOL;
 				if ( $this->easyTestOneBlacklist($addr, $blackList['blHostName']) ) {
 					$blackList['blCheck'] = 'yes';
 				}
 			}
-			else echo "Ignore: " . $blackList['blHostName'] . PHP_EOL;
 		}
+	}
+
+	/**
+	 * Check all (use only alive rBLS - fast check!)
+	 * @param unknown $addr
+	 */
+	public function checkAllAlivesRBLs($addr) {
+		if ( !$this->loadAliveBlacklistsFromFile())
+			throw new MxToolboxException('Load alive blacklists failed!');
+		$this->buildTestArray();
+		print_r($this->blackLists);
+		exit;
+		foreach ($this->testResult as $blackList) {
+			if ( $this->easyTestOneBlacklist($addr, $blackList['blHostName']) ) {
+				$blackList['blCheck'] = 'yes';
+			}
+		}
+	}
+	
+	/**
+	 * Build new file with alive DNSBLs hostnames
+	 * (ideal for frequent testing)
+	 * @return boolean
+	 */
+	public function makeAliveBlacklistFile() {
+		$blAliveFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blacklistsAlive.txt';
+		if (! @$file = fopen($blAliveFile, 'w') )
+			throw new MxToolboxException("Cannot create new file: " . $blAliveFile);
+		$this->buildTestArray();
+		foreach ( $this->testResult as $blackList ) {
+			if ( $blackList['blResponse'] )
+				fwrite( $file, $blackList['blHostName'].PHP_EOL );
+		}
+		fclose($file);
+		unset($this->testResult);
+		
 	}
 	
 	private function easyTestOneBlacklist($addr,$blackList) {
 		if ( $reverseIP = $this->reverseIP($addr) ) {
-			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList.' TXT');
+			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList.'. TXT');
 			if ( !empty($checkResult) )
 				return true;
 		}
@@ -77,7 +113,7 @@ class MxToolbox {
 	}
 	
 	/**
-	 * Build array with blacklist for test, check if blaclist hostname exist
+	 * Build array with blacklist for test, 
 	 */
 	private function buildTestArray() {
 		$i = 0;
@@ -85,12 +121,13 @@ class MxToolbox {
 			$this->testResult[$i]['blHostName'] = $blackList;
 			$this->testResult[$i]['blCheck'] = NULL;
 			$this->testResult[$i]['blPositiveURL'] = NULL;
+			$this->testResult[$i]['blResponse'] = false;
+
 			// https://tools.ietf.org/html/rfc5782 cap. 5
-			if ( $this->easyTestOneBlacklist('127.0.0.2', $blackList)) {
-				$this->testResult[$i++]['blResponse'] = true;
-				continue;
-			}
-			$this->testResult[$i++]['blResponse'] = false;
+			if ( $this->easyTestOneBlacklist('127.0.0.2', $blackList) )
+				$this->testResult[$i]['blResponse'] = true;
+
+			$i++;
 		}
 	}
 	
@@ -112,7 +149,28 @@ class MxToolbox {
 	 * @return boolean
 	 */
 	private function loadBlacklistsFromFile() {
+		$this->blackLists = array();
 		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blacklists.txt';
+		if ( !is_readable( $blFile ) )
+			return false;
+		if ( ! ( $tmpBlacklists = file_get_contents( $blFile ) ) === false ) {
+			$tmpBlacklists = explode( PHP_EOL, $tmpBlacklists );
+			$tmpBlacklists = array_filter( $tmpBlacklists, array( $this, "clearBlacklistsArray" ));
+			foreach ( $tmpBlacklists as $blackList )
+				$this->blackLists[] = trim($blackList);
+			if ( count($this->blackLists) > 0 ) 
+				return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Load alive blacklists from the file blacklistsAlive.txt to array
+	 * @return boolean
+	 */
+	private function loadAliveBlacklistsFromFile() {
+		$this->blackLists = array();
+		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blacklistsAlive.txt';
 		if ( !is_readable( $blFile ) )
 			return false;
 		if ( ! ( $tmpBlacklists = file_get_contents( $blFile ) ) === false ) {
