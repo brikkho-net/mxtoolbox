@@ -15,12 +15,9 @@ class MxToolbox {
 	 */
 	public function __construct() {
 		if ( !$this->loadBlacklistsFromFile('blacklistsAlive.txt') ) {
-			echo "blAlive no exist.".PHP_EOL;
 			$this->makeAliveBlacklistFile();
 		}
 		$this->buildTestArray();
-		print_r($this->testResult);
-		exit;
 	}
 	
 	/**
@@ -35,7 +32,7 @@ class MxToolbox {
 	 * Get test results
 	 * @return mixed array|bool
 	 */
-	public function getTestResult() {
+	public function getCheckResult() {
 		if ( count($this->testResult) > 0 )
 			return $this->testResult;
 		return false;
@@ -61,15 +58,22 @@ class MxToolbox {
 	
 	/**
 	 * Check all (use only alive rBLS - fast check!)
-	 * @param unknown $addr
+	 * @param string $addr
+	 * @return boolean (if ip address is not valid)
 	 */
-	public function checkAllAlivesRBLs($addr) {
-		foreach ($this->testResult as &$blackList) {
-			if ( $this->checkOneBlacklistARecord($addr, $blackList['blHostName']) ) {
-				$blackList['blCheck'] = 'yes';
+	public function checkAllrBLS($addr) {
+		if ( $this->checkIPAddress($addr) ) {
+			foreach ($this->testResult as &$blackList) {
+				if ( $this->checkOnerBLSARecord($addr, $blackList['blHostName']) ) {
+					$blackList['blCheck'] = 'yes'; //TODO: change to true after testing! 
+					$blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
+				}
 			}
+			unset($blackList);
+			return true;
 		}
-		unset($blackList);
+		$this->testResult = false;
+		return false;
 	}
 	
 	/**
@@ -78,31 +82,48 @@ class MxToolbox {
 	 * @return boolean
 	 */
 	public function makeAliveBlacklistFile() {
-		// TODO: create new blacklistsAlive.txt file safely (CHECK IF IS NOT EMTY BEFORE REWITE ORIGINAL)
-		$blAliveFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blacklistsAlive.txt';
+		$blAlivePath = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+		$blAliveFileTmp = $blAlivePath . 'blacklistsAlive.tmp';
+		$blAliveFileOrg = $blAlivePath . 'blacklistsAlive.txt';
+		// create temp file
+		if (! @$file = fopen($blAliveFileTmp, 'w') )
+			throw new MxToolboxException('Cannot create new file: ' . $blAliveFileTmp);
 		$this->loadBlacklistsFromFile('blacklists.txt');
-		if (! @$file = fopen($blAliveFile, 'w') )
-			throw new MxToolboxException('Cannot create new file: ' . $blAliveFile);
 		$this->buildTestArray();
 		foreach ( $this->testResult as $blackList ) {
 			if ( $blackList['blResponse'] )
 				fwrite( $file, $blackList['blHostName'].PHP_EOL );
 		}
 		fclose($file);
+		// check filesize
+		if ( ! filesize($blAliveFileTmp) > 0 )
+			throw new MxToolboxException('File is empty: ' . $blAliveFileTmp);
+		// create new blacklist
+		rename($blAliveFileTmp, $blAliveFileOrg);
+		// load actual values
 		$this->loadBlacklistsFromFile('blacklistsAlive.txt');
 		$this->buildTestArray();
 	}
 	
-	private function getUrlForPositveCheck($addr,$blacklist) {
-		
+	private function getUrlForPositveCheck($addr,$blackList) {
+		$rIP = $this->reverseIP($addr);
+		$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
+		$txtResult = explode(PHP_EOL, trim($checkResult));
+		$matches = array();
+		$URLs = array();
+		foreach ($txtResult as $line) {
+			preg_match("/((\w+:\/\/)[-a-zA-Z0-9:@;?&=\/%\+\.\*!'\(\),\$_\{\}\^~\[\]`#|]+)/", $line, $matches);
+			if ( isset($matches[1]) ) 
+				$URLs[] = $matches[1];
+		}
+		return $URLs;
 	}
 	
-	private function checkOneBlacklistARecord($addr,$blackList) {
-		if ( $reverseIP = $this->reverseIP($addr) ) {
-			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList.'. A');
-			if ( !empty($checkResult) )
+	private function checkOnerBLSARecord($addr,$blackList) {
+		$rIP = $this->reverseIP($addr);
+		$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
+		if ( !empty($checkResult) )
 				return true;
-		}
 		return false;
 	}
 	
@@ -115,11 +136,11 @@ class MxToolbox {
 		foreach ($this->blackLists as $blackList) {
 			$this->testResult[$i]['blHostName'] = $blackList;
 			$this->testResult[$i]['blCheck'] = NULL;
-			$this->testResult[$i]['blPositiveURL'] = NULL;
+			$this->testResult[$i]['blPositiveResult'] = NULL;
 			$this->testResult[$i]['blResponse'] = false;
 
 			// https://tools.ietf.org/html/rfc5782 cap. 5
-			if ( $this->checkOneBlacklistARecord('127.0.0.2', $blackList) )
+			if ( $this->checkOnerBLSARecord('127.0.0.2', $blackList) )
 				$this->testResult[$i]['blResponse'] = true;
 
 			$i++;
@@ -132,11 +153,8 @@ class MxToolbox {
 	 * @return mixed (string or false on error)
 	 */
 	private function reverseIP($addr) {
-		if ( $this->checkIPAddress($addr) ) {
-			$revIpAddr = explode( ".", $addr );
-			return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
-		}
-		return false;
+		$revIpAddr = explode( ".", $addr );
+		return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
 	}
 	
 	/**
@@ -148,7 +166,6 @@ class MxToolbox {
 	private function loadBlacklistsFromFile($fileName) {
 		$this->blackLists = array();
 		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . $fileName;
-		echo $blFile.PHP_EOL;
 		if ( !is_readable( $blFile ) )
 			return false;
 		if ( ! ( $tmpBlacklists = file_get_contents( $blFile ) ) === false ) {
