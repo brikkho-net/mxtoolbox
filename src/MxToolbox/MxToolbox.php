@@ -5,7 +5,10 @@ namespace MxToolbox;
 use MxToolbox\Exception\MxToolboxException;
 
 class MxToolbox {
-
+	
+	const FILE_COMPLEX = 'complex';
+	const FILE_FAST = 'fast';
+	
 	private $blackLists;
 	private $testResult;
 
@@ -13,9 +16,15 @@ class MxToolbox {
 	 * MxToolbox
 	 * @throws MxToolboxException
 	 */
-	public function __construct() {
-		if ( !$this->loadBlacklistsFromFile() )
+	public function __construct($conf) {
+		if ( $conf == self::FILE_COMPLEX && !$this->loadBlacklistsFromFile() )
 			throw new MxToolboxException('Load blacklists failed!');
+		if ( $conf == self::FILE_FAST && !$this->loadAliveBlacklistsFromFile() ) {
+			$this->makeAliveBlacklistFile();
+			if ( !$this->loadAliveBlacklistsFromFile() )
+				throw new MxToolboxException('Load alive blacklists failed!');
+		}
+		$this->buildTestArray();
 	}
 	
 	/**
@@ -57,7 +66,7 @@ class MxToolbox {
 	 * @param unknown $addr
 	 */
 	public function checkAllRBLs($addr) {
-		$this->buildTestArray();
+		//$this->buildTestArray();
 		foreach ($this->testResult as $blackList) {
 			if ( $blackList['blResponse'] ) {
 				if ( $this->easyTestOneBlacklist($addr, $blackList['blHostName']) ) {
