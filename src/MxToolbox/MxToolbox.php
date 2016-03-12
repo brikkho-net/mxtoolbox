@@ -14,12 +14,13 @@ class MxToolbox {
 	 * @throws MxToolboxException
 	 */
 	public function __construct() {
-		if ( !$this->loadAliveBlacklistsFromFile() ) {
+		if ( !$this->loadBlacklistsFromFile('blacklistsAlive.txt') ) {
+			echo "blAlive no exist.".PHP_EOL;
 			$this->makeAliveBlacklistFile();
-			if ( !$this->loadAliveBlacklistsFromFile() )
-				throw new MxToolboxException('Load blacklists failed!');
 		}
 		$this->buildTestArray();
+		print_r($this->testResult);
+		exit;
 	}
 	
 	/**
@@ -64,7 +65,7 @@ class MxToolbox {
 	 */
 	public function checkAllAlivesRBLs($addr) {
 		foreach ($this->testResult as &$blackList) {
-			if ( $this->easyTestOneBlacklist($addr, $blackList['blHostName']) ) {
+			if ( $this->checkOneBlacklistARecord($addr, $blackList['blHostName']) ) {
 				$blackList['blCheck'] = 'yes';
 			}
 		}
@@ -77,24 +78,28 @@ class MxToolbox {
 	 * @return boolean
 	 */
 	public function makeAliveBlacklistFile() {
+		// TODO: create new blacklistsAlive.txt file safely (CHECK IF IS NOT EMTY BEFORE REWITE ORIGINAL)
 		$blAliveFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blacklistsAlive.txt';
-		$this->loadBlacklistsFromFile();
+		$this->loadBlacklistsFromFile('blacklists.txt');
 		if (! @$file = fopen($blAliveFile, 'w') )
-			throw new MxToolboxException("Cannot create new file: " . $blAliveFile);
+			throw new MxToolboxException('Cannot create new file: ' . $blAliveFile);
 		$this->buildTestArray();
 		foreach ( $this->testResult as $blackList ) {
 			if ( $blackList['blResponse'] )
 				fwrite( $file, $blackList['blHostName'].PHP_EOL );
 		}
 		fclose($file);
-		if ( !$this->loadAliveBlacklistsFromFile() )
-			throw new MxToolboxException('Load alive blacklists failed!');
+		$this->loadBlacklistsFromFile('blacklistsAlive.txt');
 		$this->buildTestArray();
 	}
 	
-	private function easyTestOneBlacklist($addr,$blackList) {
+	private function getUrlForPositveCheck($addr,$blacklist) {
+		
+	}
+	
+	private function checkOneBlacklistARecord($addr,$blackList) {
 		if ( $reverseIP = $this->reverseIP($addr) ) {
-			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList.'. TXT');
+			$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$reverseIP . '.' . $blackList.'. A');
 			if ( !empty($checkResult) )
 				return true;
 		}
@@ -114,7 +119,7 @@ class MxToolbox {
 			$this->testResult[$i]['blResponse'] = false;
 
 			// https://tools.ietf.org/html/rfc5782 cap. 5
-			if ( $this->easyTestOneBlacklist('127.0.0.2', $blackList) )
+			if ( $this->checkOneBlacklistARecord('127.0.0.2', $blackList) )
 				$this->testResult[$i]['blResponse'] = true;
 
 			$i++;
@@ -135,32 +140,15 @@ class MxToolbox {
 	}
 	
 	/**
-	 * Load blacklists from the file blacklists.txt to array
+	 * Load blacklists from the file $fileName to array
+	 * @param string $fileName
 	 * @throws MxToolboxException;
-	 * @return 
+	 * @return mixed throw|bool
 	 */
-	private function loadBlacklistsFromFile() {
+	private function loadBlacklistsFromFile($fileName) {
 		$this->blackLists = array();
-		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blacklists.txt';
-		if ( !is_readable( $blFile ) )
-			throw new MxToolboxException("Cannot load file: " . $blAliveFile);
-		if ( ! ( $tmpBlacklists = file_get_contents( $blFile ) ) === false ) {
-			$tmpBlacklists = explode( PHP_EOL, $tmpBlacklists );
-			$tmpBlacklists = array_filter( $tmpBlacklists, array( $this, "clearBlacklistsArray" ));
-			foreach ( $tmpBlacklists as $blackList )
-				$this->blackLists[] = trim($blackList);
-			if ( ! count($this->blackLists) > 0 ) 
-				throw new MxToolboxException("Blacklist is empty: " . $blAliveFile);
-		}
-	}
-	
-	/**
-	 * Load alive blacklists from the file blacklistsAlive.txt to array
-	 * @return boolean
-	 */
-	private function loadAliveBlacklistsFromFile() {
-		$this->blackLists = array();
-		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'blacklistsAlive.txt';
+		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . $fileName;
+		echo $blFile.PHP_EOL;
 		if ( !is_readable( $blFile ) )
 			return false;
 		if ( ! ( $tmpBlacklists = file_get_contents( $blFile ) ) === false ) {
@@ -168,8 +156,9 @@ class MxToolbox {
 			$tmpBlacklists = array_filter( $tmpBlacklists, array( $this, "clearBlacklistsArray" ));
 			foreach ( $tmpBlacklists as $blackList )
 				$this->blackLists[] = trim($blackList);
-			if ( count($this->blackLists) > 0 ) 
-				return true;
+			if ( ! count($this->blackLists) > 0 ) 
+				throw new MxToolboxException("Blacklist is empty: " . $blFile);
+			return true;
 		}
 		return false;
 	}
