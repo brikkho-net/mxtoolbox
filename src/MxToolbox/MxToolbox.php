@@ -8,6 +8,7 @@ class MxToolbox {
 	
 	private $blackLists;
 	private $testResult;
+	private $a;
 
 	/**
 	 * MxToolbox
@@ -46,15 +47,7 @@ class MxToolbox {
 	//TODO: check domain have right MX
 	//TODO: add blacklist for MX in DNS
 
-	//TODO: filter url for positive checks:
-	/*
-	hexim@hexim-nb:~/workspace/php/mxtoolbox$ dig +noall +short 2.0.0.127.zen.spamhaus.org TXT @194.8.253.11
-	 "https://www.spamhaus.org/query/ip/127.0.0.2"
-	 "https://www.spamhaus.org/sbl/query/SBL233"
-	hexim@hexim-nb:~/workspace/php/mxtoolbox$ dig +noall +short 2.0.0.127.spam.rbl.msrbl.net TXT @194.8.253.11
-	 "SPAM Sending Host - see http://www.msrbl.com/check?ip=127.0.0.2"
-	*/
-	//TODO: check and return bool if is the IP in any RBLs
+	//TODO: check and return bool if is the IP in any RBLs ?
 	
 	/**
 	 * Check all (use only alive rBLS - fast check!)
@@ -104,6 +97,19 @@ class MxToolbox {
 		$this->loadBlacklistsFromFile('blacklistsAlive.txt');
 		$this->buildTestArray();
 	}
+	
+	/**
+	 * Check if IP address have a PTR record
+	 * @param string $addr
+	 * @return boolean
+	 */
+	public function checkExistPTR($addr) {
+		$ptr = dns_get_record( $this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR );
+		if ( isset($ptr[0]['target']) )
+			return true;
+		return false;
+	}
+	
 	
 	private function getUrlForPositveCheck($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
