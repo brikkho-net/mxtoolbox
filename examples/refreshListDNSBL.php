@@ -11,7 +11,16 @@ try {
 	 * Create MxToolbox object
 	 * by default blacklist is not loaded
 	 */
-	$mxt = new MxToolbox(true,'/usr/bin/dig');
+	$mxt = new MxToolbox('/usr/bin/dig');
+	/**
+	 * Push one or more IP address of your DNS resovers
+	 */
+	$mxt->pushDNSResolverIP('127.0.0.1');
+	$mxt->pushDNSResolverIP('192.168.1.1');
+	/**
+	 * Load blacklist
+	 */
+	$mxt->loadBlacklist();
 	/**
 	 * refresh DNSBL alive host names file list (run only one or few times a day)
 	 */

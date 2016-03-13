@@ -10,11 +10,20 @@ try {
 	 * IP address for test
 	 * @link https://tools.ietf.org/html/rfc5782 cap. 5
 	 */
-	$addr = '127.0.0.2';
+	$addr = '194.8.253.5';
 	/**
 	 * Create MxToolbox object
 	 */
-	$mxt = new MxToolbox(true,'/usr/bin/dig');
+	$mxt = new MxToolbox('/usr/bin/dig');
+	/**
+	 * Push one or more IP address of your DNS resovers
+	 */
+	$mxt->pushDNSResolverIP('127.0.0.1');
+	$mxt->pushDNSResolverIP('192.168.1.1');
+	/**
+	 * Load blacklist
+	 */
+	$mxt->loadBlacklist();
 	/**
 	 * check IP address
 	 */

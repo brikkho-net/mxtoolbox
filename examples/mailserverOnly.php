@@ -13,11 +13,20 @@ try {
 	/**
 	 * Create MxToolbox object
 	 */
-	$mxt = new MxToolbox(true,'/usr/bin/dig');
+	$mxt = new MxToolbox('/usr/bin/dig');
 	/**
 	 * Do any only if IP address have a reverse PTR record
 	 */
 	if ( $mxt->checkExistPTR($addr) ) {
+		/**
+		 * Push one or more IP address of your DNS resovers
+		 */
+		$mxt->pushDNSResolverIP('127.0.0.1');
+		$mxt->pushDNSResolverIP('192.168.1.1');
+		/**
+		 * Load blacklist
+		 */
+		$mxt->loadBlacklist();
 		/**
 		 * search IP address in all DNSBL if the IP address have a reverse PTR record
 		 * and domain name from PTR have any MX record corresponding with the PTR.
