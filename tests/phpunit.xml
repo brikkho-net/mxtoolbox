@@ -1,0 +1,27 @@
+<phpunit backupGlobals="false"
+		 backupStaticAttributes="false"
+		 colors="true"
+		 convertErrorsToExceptions="true"
+		 convertNoticesToExceptions="true"
+		 convertWarningsToExceptions="true"
+		 processIsolation="false"
+		 stopOnFailure="false"
+		 syntaxCheck="false"
+		 bootstrap="./bootstrap.php"
+	>
+	<testsuite name="MxToolbox">
+		<directory>./</directory>	  	
+	</testsuite>
+    
+	<filter>
+		<whitelist>
+			<directory suffix=".php">../*</directory>
+			<exclude>
+				<directory suffix=".php">../examples</directory>
+			</exclude>
+			<exclude>
+				<directory suffix=".php">../tests</directory>
+			</exclude>
+		</whitelist>
+	</filter>   
+</phpunit>

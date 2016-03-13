@@ -11,7 +11,7 @@ try {
 	 * Create MxToolbox object
 	 * by default blacklist is not loaded
 	 */
-	$mxt = new MxToolbox();
+	$mxt = new MxToolbox(true,'/usr/bin/dig');
 	/**
 	 * refresh DNSBL alive host names file list (run only one or few times a day)
 	 */

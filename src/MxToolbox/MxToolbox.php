@@ -110,6 +110,8 @@ class MxToolbox {
 	 * @return boolean
 	 */
 	public function checkExistPTR($addr) {
+		$this->recordPTR = '';
+		$this->domainName = '';
 		if ( ! $this->validateIPAddress($addr) )
 			return false;
 		$ptr = dns_get_record( $this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR );
@@ -138,6 +140,9 @@ class MxToolbox {
 	 * @return boolean - TRUE if process is done, FALSE on non valid IP address
 	 */
 	public function checkAllrBLS($addr) {
+		if ( ! file_exists($this->digPath) )
+			throw new MxToolboxException('DIG path: ' . $this->digPath . ' File does not exist!');
+		
 		if ( $this->validateIPAddress($addr) && count($this->testResult) > 0 ) {
 			foreach ($this->testResult as &$blackList) {
 				if ( $this->checkOnerBLSARecord($addr, $blackList['blHostName']) ) {
@@ -158,6 +163,8 @@ class MxToolbox {
 	 * @return boolean
 	 */
 	public function makeAliveBlacklistFile() {
+		if ( ! file_exists($this->digPath) )
+			throw new MxToolboxException('DIG path: ' . $this->digPath . ' File does not exist!');
 		$blAlivePath = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 		$blAliveFileTmp = $blAlivePath . 'blacklistsAlive.tmp';
 		$blAliveFileOrg = $blAlivePath . 'blacklistsAlive.txt';
@@ -240,7 +247,6 @@ class MxToolbox {
 	 * @param string $fileName
 	 * @throws MxToolboxException;
 	 * @return mixed throw|boolean
-	 * TODO: check return values
 	 */
 	private function loadBlacklistsFromFile($fileName) {
 		$this->blackLists = array();
