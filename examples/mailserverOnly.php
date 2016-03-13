@@ -20,7 +20,7 @@ try {
 	if ( $mxt->checkExistPTR($addr) ) {
 		/**
 		 * search IP address in all DNSBL if the IP address have a reverse PTR record
-		 * and domain name from PTR have any MX record correspondig with the PTR.
+		 * and domain name from PTR have any MX record corresponding with the PTR.
 		 *
 		 * getPTR() and getDomainName() return FALSE without calling checkExistPTR()
 		 */
