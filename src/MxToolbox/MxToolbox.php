@@ -1,8 +1,7 @@
 <?php
 /**
- * MxToolBox Lib
+ * MxToolBox
  * @version 0.0.1
- * 
  */
 namespace MxToolbox;
 
@@ -185,7 +184,7 @@ class MxToolbox {
 	}
 
 	/**
-	 * Build array with blacklist for test, 
+	 * Build the array for check od DNSBL
 	 */
 	private function buildTestArray() {
 		$this->testResult = array();
@@ -207,7 +206,7 @@ class MxToolbox {
 	/**
 	 * Reverse IP address 192.168.1.254 -> 254.1.168.192
 	 * @param string $addr
-	 * @return mixed (string or false on error)
+	 * @return string
 	 */
 	private function reverseIP($addr) {
 		$revIpAddr = explode( ".", $addr );
@@ -218,7 +217,8 @@ class MxToolbox {
 	 * Load blacklists from the file $fileName to array
 	 * @param string $fileName
 	 * @throws MxToolboxException;
-	 * @return mixed throw|bool
+	 * @return mixed throw|boolean
+	 * TODO: check return values
 	 */
 	private function loadBlacklistsFromFile($fileName) {
 		$this->blackLists = array();
