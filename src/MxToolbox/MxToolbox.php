@@ -1,15 +1,32 @@
 <?php
-
+/**
+ * MxToolBox Lib
+ * @version 0.0.1
+ * 
+ */
 namespace MxToolbox;
 
 use MxToolbox\Exception\MxToolboxException;
 
 class MxToolbox {
 	
+	/**
+	 * @var PTR record from the method checkExistPTR()
+	 */
+	private $recordPTR;
+	/**
+	 * @var domain name from the method checkExistPTR()
+	 */
+	private $domainName;
+	/**
+	 * @var DNSBL array 
+	 */
 	private $blackLists;
+	/**
+	 * @var DNSBL test results
+	 */
 	private $testResult;
-	private $a;
-
+	
 	/**
 	 * MxToolbox
 	 * @throws MxToolboxException
@@ -39,26 +56,71 @@ class MxToolbox {
 		return false;
 	}
 	
-	public function checkIPAddress($addr) {
-		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+	/**
+	 * Get PTR record
+	 * @return mixed string|bool
+	 */
+	public function getPTR() {
+		if ( !empty($this->recordPTR) )
+			return $this->recordPTR;
+		return false;
 	}
 	
-	//TODO: check reverse DNS for IP
-	//TODO: check domain have right MX
-	//TODO: add blacklist for MX in DNS
+	/**
+	 * Get domain name
+	 * @return mixed string|bool
+	 */
+	public function getDomainName() {
+		if ( !empty($this->domainName) )
+			return $this->domainName;
+		return false;
+	}
 
-	//TODO: check and return bool if is the IP in any RBLs ?
+	/**
+	 * Get MX records from domain name
+	 * @param string $hostName
+	 * @return mixed - ARRAY with MX records or FALSE
+	 */
+	public function getMXRecords($hostName) {
+		if ( $this->checkHostName($hostName) ) {
+			$ptr = dns_get_record( $hostName, DNS_MX );
+			if ( isset($ptr[0]['target']) ) {
+				$MXRecords = array();
+				foreach ($ptr as $mx)
+					$MXRecords[] = $mx['target'];
+				return $MXRecords;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Check if IP address have a PTR record
+	 * @param string $addr
+	 * @return boolean
+	 */
+	public function checkExistPTR($addr) {
+		$ptr = dns_get_record( $this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR );
+		if ( isset($ptr[0]['target']) ) {
+			$regs = array();
+			$this->recordPTR = $ptr[0]['target'];
+			if ( preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $ptr[0]['target'], $regs) )
+				$this->domainName = $regs['domain'];
+			return true;
+		}
+		return false;
+	}
 	
 	/**
 	 * Check all (use only alive rBLS - fast check!)
 	 * @param string $addr
-	 * @return boolean (if ip address is not valid)
+	 * @return boolean - TRUE if process is done, FALSE on non valid IP address
 	 */
 	public function checkAllrBLS($addr) {
-		if ( $this->checkIPAddress($addr) ) {
+		if ( filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
 			foreach ($this->testResult as &$blackList) {
 				if ( $this->checkOnerBLSARecord($addr, $blackList['blHostName']) ) {
-					$blackList['blCheck'] = 'yes'; //TODO: change to true after testing! 
+					$blackList['blPositive'] = true;
 					$blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
 				}
 			}
@@ -68,7 +130,7 @@ class MxToolbox {
 		$this->testResult = false;
 		return false;
 	}
-	
+
 	/**
 	 * Build new file with alive DNSBLs hostnames
 	 * (ideal for frequent testing)
@@ -83,10 +145,11 @@ class MxToolbox {
 			throw new MxToolboxException('Cannot create new file: ' . $blAliveFileTmp);
 		$this->loadBlacklistsFromFile('blacklists.txt');
 		$this->buildTestArray();
-		foreach ( $this->testResult as $blackList ) {
+		foreach ( $this->testResult as &$blackList ) {
 			if ( $blackList['blResponse'] )
 				fwrite( $file, $blackList['blHostName'].PHP_EOL );
 		}
+		unset($blackList);
 		fclose($file);
 		// check filesize
 		if ( ! filesize($blAliveFileTmp) > 0 )
@@ -97,20 +160,7 @@ class MxToolbox {
 		$this->loadBlacklistsFromFile('blacklistsAlive.txt');
 		$this->buildTestArray();
 	}
-	
-	/**
-	 * Check if IP address have a PTR record
-	 * @param string $addr
-	 * @return boolean
-	 */
-	public function checkExistPTR($addr) {
-		$ptr = dns_get_record( $this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR );
-		if ( isset($ptr[0]['target']) )
-			return true;
-		return false;
-	}
-	
-	
+
 	private function getUrlForPositveCheck($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
 		$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
@@ -118,21 +168,22 @@ class MxToolbox {
 		$matches = array();
 		$URLs = array();
 		foreach ($txtResult as $line) {
-			preg_match("/((\w+:\/\/)[-a-zA-Z0-9:@;?&=\/%\+\.\*!'\(\),\$_\{\}\^~\[\]`#|]+)/", $line, $matches);
-			if ( isset($matches[1]) ) 
+			if ( preg_match("/((\w+:\/\/)[-a-zA-Z0-9:@;?&=\/%\+\.\*!'\(\),\$_\{\}\^~\[\]`#|]+)/", $line, $matches) )
 				$URLs[] = $matches[1];
 		}
 		return $URLs;
 	}
-	
+
 	private function checkOnerBLSARecord($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
-		$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
+		// TODO: set path to dig
+		// TODO: random resolver frm list of resolvers ?
+		$checkResult = shell_exec('dig @194.8.253.11 +time=5 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
 		if ( !empty($checkResult) )
 				return true;
 		return false;
 	}
-	
+
 	/**
 	 * Build array with blacklist for test, 
 	 */
@@ -141,7 +192,7 @@ class MxToolbox {
 		$i = 0;
 		foreach ($this->blackLists as $blackList) {
 			$this->testResult[$i]['blHostName'] = $blackList;
-			$this->testResult[$i]['blCheck'] = NULL;
+			$this->testResult[$i]['blPositive'] = NULL;
 			$this->testResult[$i]['blPositiveResult'] = NULL;
 			$this->testResult[$i]['blResponse'] = false;
 
@@ -152,7 +203,7 @@ class MxToolbox {
 			$i++;
 		}
 	}
-	
+
 	/**
 	 * Reverse IP address 192.168.1.254 -> 254.1.168.192
 	 * @param string $addr
@@ -162,7 +213,7 @@ class MxToolbox {
 		$revIpAddr = explode( ".", $addr );
 		return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
 	}
-	
+
 	/**
 	 * Load blacklists from the file $fileName to array
 	 * @param string $fileName
@@ -176,7 +227,7 @@ class MxToolbox {
 			return false;
 		if ( ! ( $tmpBlacklists = file_get_contents( $blFile ) ) === false ) {
 			$tmpBlacklists = explode( PHP_EOL, $tmpBlacklists );
-			$tmpBlacklists = array_filter( $tmpBlacklists, array( $this, "clearBlacklistsArray" ));
+			$tmpBlacklists = array_filter( $tmpBlacklists, array( $this, "checkHostName" ));
 			foreach ( $tmpBlacklists as $blackList )
 				$this->blackLists[] = trim($blackList);
 			if ( ! count($this->blackLists) > 0 ) 
@@ -185,23 +236,12 @@ class MxToolbox {
 		}
 		return false;
 	}
-	
-	private function clearBlacklistsArray($blacklist) {
+
+	private function checkHostName($hostName) {
 		$validHostnameRegex = "/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/";
-		if ( preg_match( $validHostnameRegex, trim($blacklist) ) )
+		if ( preg_match( $validHostnameRegex, trim($hostName) ) )
 			return true;
 		return false;
 	}
-	
-/*
-dig +short TXT 5.253.8.194.zen.spamhaus.org @194.8.253.11
-	"https://www.spamhaus.org/query/ip/127.0.0.2"
-	"https://www.spamhaus.org/sbl/query/SBL233"
-dig +short 2.0.0.127.zen.spamhaus.org @194.8.253.11
-	127.0.0.4
-	127.0.0.2
-	127.0.0.10
-*/
-	
-	
+
 }
