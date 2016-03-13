@@ -30,5 +30,5 @@ try {
 	var_dump($mxt->getCheckResult());
 
 } catch ( MxToolboxException $e ) {
-	echo 'Caught exception: ',  $e->getMessage(), "\n";
+	echo 'Caught exception: ',  $e->getMessage(), PHP_EOL;
 }
