@@ -11,12 +11,17 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'vendor/autoload.php';
  */
 
 try {
-	$addr = '194.8.253.5';
+	//$addr = '194.8.253.5';
+	$addr = '127.0.0.2'; // for response test only
 	$mxt = new MxToolbox();
+	$mxt->checkAllrBLS($addr);
+	print_r($mxt->getCheckResult());
+	return;
+	
 	/**
 	 * refresh DNSBL alive host names file list (run only one or few times a day)
 	 */
-	$mxt->makeAliveBlacklistFile();
+	//$mxt->makeAliveBlacklistFile();
 
 	/**
 	 * Do any only if IP address have a reverse PTR record
