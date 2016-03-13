@@ -8,11 +8,11 @@ class constructTest extends MxToolboxCaseTest {
 
 	public function testConstruct() {
 		try {
-			$mxt = new MxToolbox(true,'/usr/bin/dig');
+			$mxt = new MxToolbox('/usr/bin/dig');
 			unset($mxt);
 			$mxt = new MxToolbox();
 			unset($mxt);
-			$mxt = new MxToolbox(true,'');
+			$mxt = new MxToolbox('/usr/DIG');
 		}
 		catch (MxToolboxException $e) {
 			$this->assertContains('File does not exist!', $e->getMessage());
