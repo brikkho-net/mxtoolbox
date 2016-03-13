@@ -47,6 +47,10 @@ class MxToolbox {
 		}
 	}
 	
+	/**
+	 * Load blacklist and create test array
+	 * @throws MxToolboxException - if any error
+	 */
 	public function loadBlacklist() {
 		if ( !$this->loadBlacklistsFromFile('blacklistsAlive.txt') ) {
 			$this->makeAliveBlacklistFile();
@@ -226,8 +230,7 @@ class MxToolbox {
 
 	private function checkOnerBLSARecord($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
-		// TODO: random resolver from list of resolvers ?
-		$checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=5 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
+		$checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
 		if ( !empty($checkResult) )
 				return true;
 		return false;

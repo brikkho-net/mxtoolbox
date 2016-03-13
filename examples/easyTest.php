@@ -10,7 +10,7 @@ try {
 	 * IP address for test
 	 * @link https://tools.ietf.org/html/rfc5782 cap. 5
 	 */
-	$addr = '194.8.253.5';
+	$addr = '';
 	/**
 	 * Create MxToolbox object
 	 */
@@ -18,7 +18,7 @@ try {
 	/**
 	 * Push one or more IP address of your DNS resovers
 	 */
-	$mxt->pushDNSResolverIP('127.0.0.1');
+	$mxt->pushDNSResolverIP('172.0.0.1');
 	$mxt->pushDNSResolverIP('192.168.1.1');
 	/**
 	 * Load blacklist
