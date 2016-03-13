@@ -7,11 +7,12 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'../src/MxToolbox/autoload.ph
 
 try {
 	/**
-	 * real IP address of mail server for test
+	 * real IP address of a mail server for test
 	 */
-	$addr = '194.8.253.5';
+	$addr = '';
 	/**
 	 * Create MxToolbox object
+	 * by default blacklist is not loaded
 	 */
 	$mxt = new MxToolbox();
 	/**

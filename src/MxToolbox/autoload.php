@@ -4,7 +4,7 @@
 		function ($class) {
 			static $map = [
 					'MxToolbox\MxToolbox' => 'MxToolbox.php',
-					'MxToolbox\Exception\MxToolboxException' => 'Exception\MxToolboxException.php'
+					'MxToolbox\Exception\MxToolboxException' => 'Exception/MxToolboxException.php'
 			];
 				
 			if (isset($map[$class]))

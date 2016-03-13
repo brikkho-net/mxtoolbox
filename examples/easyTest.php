@@ -14,7 +14,7 @@ try {
 	/**
 	 * Create MxToolbox object
 	 */
-	$mxt = new MxToolbox();
+	$mxt = new MxToolbox(true,'/usr/bin/dig');
 	/**
 	 * check IP address
 	 */

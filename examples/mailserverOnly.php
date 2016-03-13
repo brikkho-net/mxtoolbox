@@ -7,13 +7,13 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'../src/MxToolbox/autoload.ph
 
 try {
 	/**
-	 * real IP address of mail server for test
+	 * real IP address of a mail server for test
 	 */
 	$addr = '';
 	/**
 	 * Create MxToolbox object
 	 */
-	$mxt = new MxToolbox();
+	$mxt = new MxToolbox(true,'/usr/bin/dig');
 	/**
 	 * Do any only if IP address have a reverse PTR record
 	 */

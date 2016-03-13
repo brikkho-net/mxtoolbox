@@ -9,6 +9,7 @@ try {
 
 	/**
 	 * Create MxToolbox object
+	 * by default blacklist is not loaded
 	 */
 	$mxt = new MxToolbox();
 	/**

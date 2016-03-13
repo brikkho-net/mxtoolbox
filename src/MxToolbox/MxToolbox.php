@@ -25,16 +25,27 @@ class MxToolbox {
 	 * @var DNSBL test results
 	 */
 	private $testResult;
+	/**
+	 * @var whereis dig
+	 */
+	private $digPath;
 	
 	/**
 	 * MxToolbox
+	 * @param boolean $load - defautl FALSE, TRUE for loading the blacklist, digPath is required if TRUE
+	 * @param string $digPath - whereis dig
 	 * @throws MxToolboxException
 	 */
-	public function __construct() {
-		if ( !$this->loadBlacklistsFromFile('blacklistsAlive.txt') ) {
-			$this->makeAliveBlacklistFile();
+	public function __construct($load = false, $digPath = '') {
+		if ($load) {
+			if ( !file_exists($digPath) )
+				throw new MxToolboxException('DIG path: ' . $digPath . ' File not exist!');
+			$this->digPath = $digPath;
+			if ( !$this->loadBlacklistsFromFile('blacklistsAlive.txt') ) {
+				$this->makeAliveBlacklistFile();
+			}
+			$this->buildTestArray();
 		}
-		$this->buildTestArray();
 	}
 	
 	/**
@@ -99,6 +110,8 @@ class MxToolbox {
 	 * @return boolean
 	 */
 	public function checkExistPTR($addr) {
+		if ( ! $this->validateIPAddress($addr) )
+			return false;
 		$ptr = dns_get_record( $this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR );
 		if ( isset($ptr[0]['target']) ) {
 			$regs = array();
@@ -111,12 +124,21 @@ class MxToolbox {
 	}
 	
 	/**
+	 * Validate if string is valid IP address
+	 * @param string $addr
+	 * @return boolean
+	 */
+	public function validateIPAddress($addr) {
+		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+	}
+	
+	/**
 	 * Check all (use only alive rBLS - fast check!)
 	 * @param string $addr
 	 * @return boolean - TRUE if process is done, FALSE on non valid IP address
 	 */
 	public function checkAllrBLS($addr) {
-		if ( filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ) ) {
+		if ( $this->validateIPAddress($addr) && count($this->testResult) > 0 ) {
 			foreach ($this->testResult as &$blackList) {
 				if ( $this->checkOnerBLSARecord($addr, $blackList['blHostName']) ) {
 					$blackList['blPositive'] = true;
@@ -126,7 +148,7 @@ class MxToolbox {
 			unset($blackList);
 			return true;
 		}
-		$this->testResult = false;
+		$this->testResult = array();
 		return false;
 	}
 
@@ -162,7 +184,8 @@ class MxToolbox {
 
 	private function getUrlForPositveCheck($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
-		$checkResult = shell_exec('dig @194.8.253.11 +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
+		// TODO: random resolver from list of resolvers ?
+		$checkResult = shell_exec( $this->digPath . ' @194.8.253.11 +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
 		$txtResult = explode(PHP_EOL, trim($checkResult));
 		$matches = array();
 		$URLs = array();
@@ -175,9 +198,8 @@ class MxToolbox {
 
 	private function checkOnerBLSARecord($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
-		// TODO: set path to dig
-		// TODO: random resolver frm list of resolvers ?
-		$checkResult = shell_exec('dig @194.8.253.11 +time=5 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
+		// TODO: random resolver from list of resolvers ?
+		$checkResult = shell_exec($this->digPath . ' @194.8.253.11 +time=5 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
 		if ( !empty($checkResult) )
 				return true;
 		return false;
