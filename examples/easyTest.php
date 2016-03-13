@@ -15,9 +15,9 @@ try {
 	 * Create MxToolbox object
 	 */
 	$mxt = new MxToolbox();
-    /**
-     * check IP address
-     */
+	/**
+	 * check IP address
+	 */
 	$mxt->checkAllrBLS($addr);
 	/**
 	 * Show result

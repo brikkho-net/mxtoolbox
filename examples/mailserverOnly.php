@@ -20,7 +20,9 @@ try {
 	if ( $mxt->checkExistPTR($addr) ) {
 		/**
 		 * search IP address in all DNSBL if the IP address have a reverse PTR record
-		 * and domain name from PTR have any MX record correspondig with the PTR
+		 * and domain name from PTR have any MX record correspondig with the PTR.
+		 *
+		 * getPTR() and getDomainName() return FALSE without calling checkExistPTR()
 		 */
 		if (! array_search($mxt->getPTR(), $mxt->getMXRecords($mxt->getDomainName())) === false ) {
 			$mxt->checkAllrBLS($addr);
@@ -32,7 +34,7 @@ try {
 		 	* []['blPositiveResult'][] = array of URL address if IP address have the positive chech (some DNSBL not supported return any URL)
 		 	* []['blResponse'] = true if DNSBL host name is alive and send test response before test
 		 	*/
-			print_r($mxt->getCheckResult());
+			var_dump($mxt->getCheckResult());
 		}
 	}
 
