@@ -39,7 +39,7 @@ class MxToolbox {
 	public function __construct($load = false, $digPath = '') {
 		if ($load) {
 			if ( !file_exists($digPath) )
-				throw new MxToolboxException('DIG path: ' . $digPath . ' File not exist!');
+				throw new MxToolboxException('DIG path: ' . $digPath . ' File does not exist!');
 			$this->digPath = $digPath;
 			if ( !$this->loadBlacklistsFromFile('blacklistsAlive.txt') ) {
 				$this->makeAliveBlacklistFile();
