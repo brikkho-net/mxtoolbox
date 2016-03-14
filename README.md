@@ -20,7 +20,7 @@ or
 
 ```{
     "require": {
-        "monolog/monolog": "1.0.*"
+        "mxtoolbox/mxtoolbox": "0.0.*"
     }
 }```
 
