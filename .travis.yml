@@ -13,12 +13,18 @@ addons:
   apt:
     packages:
     - dnsutils
+    code_climate:
+        repo_token: 78f6ef7ba154b03b8f3abbd9913bef999191427add26561220fd0fecd4b2d1e0
 
 script: 
     - phpunit --configuration tests/phpunit.xml --coverage-text --coverage-clover build/logs/clover.xml
 
 before_script:
     - travis_retry composer self-update
+
+after_script:
+    - CODECLIMATE_REPO_TOKEN="78f6ef7ba154b03b8f3abbd9913bef999191427add26561220fd0fecd4b2d1e0" ./vendor/bin/test-reporter --stdout > codeclimate.json
+    - "curl -X POST -d @codeclimate.json -H 'Content-Type: application/json' -H 'User-Agent: Code Climate (PHP Test Reporter v0.1.1)' https://codeclimate.com/test_reports"
 
 before_install:
     - pip install --user codecov
