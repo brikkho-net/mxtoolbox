@@ -15,6 +15,7 @@ exclude_paths:
   - tests/**/*
   - examples/**/*
   - "composer.json"
+  - "blacklists.txt"
   - "README.md"
   - "LICENSE.md"
   - "CHANGELOG.md"
