@@ -13,8 +13,8 @@ ratings:
   - "**.php"
 exclude_paths:
   - tests/**/*
-  - examples/**/*
   - vendor/**/*
+  - examples/**/*
   - "composer.json"
   - "src/MxToolbox/blacklists.txt"
   - "README.md"
