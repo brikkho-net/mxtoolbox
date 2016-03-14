@@ -12,17 +12,19 @@
 - PHP > 5.6.x
 - Installed dnsutils (dig)
 
-## Install
+## Installation / Usage
 
-- composer require mxtoolbox/mxtoolbox
+1. composer require mxtoolbox/mxtoolbox
 
-or
+2. Create a composer.json defining your dependencies.
 
-```{
+    ``` json
+    {
     "require": {
         "mxtoolbox/mxtoolbox": "0.0.*"
+        }
     }
-}```
+    ```
 
 ## License
 
