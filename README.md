@@ -12,6 +12,18 @@
 - PHP > 5.6.x
 - Installed dnsutils (dig)
 
+## Install
+
+- composer require mxtoolbox/mxtoolbox
+
+or
+
+```{
+    "require": {
+        "monolog/monolog": "1.0.*"
+    }
+}```
+
 ## License
 
 [MIT](https://github.com/heximcz/mxtoolbox/blob/master/LICENSE.md)
