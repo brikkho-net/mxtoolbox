@@ -19,7 +19,7 @@ try {
 	 */
 	if ( $mxt->checkExistPTR($addr) ) {
 		/**
-		 * Push one or more IP address of your DNS resovers
+		 * Push one or more IP address of your DNS resolvers
 		 */
 		$mxt->pushDNSResolverIP('127.0.0.1');
 		$mxt->pushDNSResolverIP('192.168.1.1');

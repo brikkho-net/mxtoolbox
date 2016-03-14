@@ -16,9 +16,9 @@ try {
 	 */
 	$mxt = new MxToolbox('/usr/bin/dig');
 	/**
-	 * Push one or more IP address of your DNS resovers
+	 * Push one or more IP address of your DNS resolvers
 	 */
-	$mxt->pushDNSResolverIP('172.0.0.1');
+	$mxt->pushDNSResolverIP('127.0.0.1');
 	$mxt->pushDNSResolverIP('192.168.1.1');
 	/**
 	 * Load blacklist
