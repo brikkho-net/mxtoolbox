@@ -9,6 +9,9 @@ matrix:
   allow_failures:
     - php: hhvm
 
+services:
+    - dnsutils
+
 script: 
     - phpunit --configuration tests/phpunit.xml --coverage-text --coverage-clover build/logs/clover.xml
 
