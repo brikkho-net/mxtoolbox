@@ -16,17 +16,68 @@
 
 1. Via composer
     
-    ``` composer require mxtoolbox/mxtoolbox ```
+    ```
+    composer require mxtoolbox/mxtoolbox
+    ```
 
 2. Create a composer.json defining your dependencies.
 
     ``` json
     {
     "require": {
-        "mxtoolbox/mxtoolbox": "0.0.*"
+        "mxtoolbox/mxtoolbox": ">=0.0.1"
         }
     }
     ```
+3. Example usage:
+
+```php
+<?php
+
+use MxToolbox\MxToolbox;
+use MxToolbox\Exception\MxToolboxException;
+
+require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'vendor/autoload.php';
+
+try {
+	/**
+	 * IP address for test
+	 * @link https://tools.ietf.org/html/rfc5782 cap. 5
+	 */
+	$addr = '';
+	/**
+	 * Create MxToolbox object
+	 */
+	$mxt = new MxToolbox('/usr/bin/dig');
+	/**
+	 * Push one or more IP address of your DNS resolvers
+	 */
+	$mxt->pushDNSResolverIP('127.0.0.1');
+	$mxt->pushDNSResolverIP('127.0.1.1');
+	/**
+	 * Load blacklist
+	 */
+	$mxt->loadBlacklist();
+	/**
+	 * check IP address
+	 */
+	$mxt->checkAllrBLS($addr);
+	/**
+	 * Show results.
+	 * Structure:
+	 * []['blHostName'] = DNSBL host name
+	 * []['blPositive'] = true if IP addres have the positive check
+	 * []['blPositiveResult'][] = array of URL address if IP address have the positive chech (some DNSBL not supported return any URL)
+	 * []['blResponse'] = true if DNSBL host name is alive and send test response before test
+	 */
+	var_dump($mxt->getCheckResult());
+
+} catch ( MxToolboxException $e ) {
+	echo 'Caught exception: ',  $e->getMessage(), PHP_EOL;
+}
+```
+
+    [More examples](https://github.com/heximcz/mxtoolbox/tree/master/examples)
 
 ## License
 
