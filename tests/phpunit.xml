@@ -20,7 +20,7 @@
 				<directory>../examples</directory>
 				<directory>../tests</directory>
 				<directory>../vendor</directory>
-				<file>../src//MxToolbox/autoload.php</file>
+				<file>../src/MxToolbox/autoload.php</file>
 			</exclude>
 		</whitelist>
 	</filter>   
