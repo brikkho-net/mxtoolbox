@@ -17,7 +17,7 @@ before_script:
 
 before_install:
     - pip install --user codecov
-    - apt install dnsutils
+    - apt-get install dnsutils
 
 after_success:
     - - bash <(curl -s https://codecov.io/bash)
