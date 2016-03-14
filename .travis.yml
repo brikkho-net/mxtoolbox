@@ -21,6 +21,7 @@ script:
 
 before_script:
     - travis_retry composer self-update
+    - travis_retry composer update
 
 after_script:
     - CODECLIMATE_REPO_TOKEN="78f6ef7ba154b03b8f3abbd9913bef999191427add26561220fd0fecd4b2d1e0" ./vendor/bin/test-reporter --stdout > codeclimate.json
