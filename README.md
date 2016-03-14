@@ -67,7 +67,7 @@ try {
 	 * Structure:
 	 * []['blHostName'] = DNSBL host name
 	 * []['blPositive'] = true if IP addres have the positive check
-	 * []['blPositiveResult'][] = array of URL address if IP address have the positive chech (some DNSBL not supported return any URL)
+	 * []['blPositiveResult'][] = array of URL address if IP address have the positive chech
 	 * []['blResponse'] = true if DNSBL host name is alive and send test response before test
 	 */
 	var_dump($mxt->getCheckResult());
