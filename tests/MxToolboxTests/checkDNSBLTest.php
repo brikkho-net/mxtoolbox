@@ -36,7 +36,6 @@ class checkDNSBLTest extends MxToolboxCaseTest {
 		try {
 			$mxt = new MxToolbox('/usr/bin/dig');
 			$mxt->loadBlacklist();
-			$this->assertFalse( $mxt->checkAllrBLS('127.0.0.2') );
 		}
 		catch (MxToolboxException $e) {
 			$this->assertContains('No DNS resolver here!', $e->getMessage());
@@ -48,7 +47,6 @@ class checkDNSBLTest extends MxToolboxCaseTest {
 			$mxt = new MxToolbox();
 			$mxt->pushDNSResolverIP('8.8.8.8');
 			$mxt->loadBlacklist();
-			$this->assertFalse( $mxt->checkAllrBLS('127.0.0.2') );
 		}
 		catch (MxToolboxException $e) {
 			$this->assertContains('DIG path:', $e->getMessage());
