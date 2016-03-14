@@ -14,6 +14,7 @@ ratings:
 exclude_paths:
   - tests/**/*
   - examples/**/*
+  - vendor/**/*
   - "composer.json"
   - "src/MxToolbox/blacklists.txt"
   - "README.md"
