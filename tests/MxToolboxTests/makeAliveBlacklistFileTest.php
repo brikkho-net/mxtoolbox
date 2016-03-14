@@ -8,8 +8,9 @@ class makeAliveBlacklistFileTest extends MxToolboxCaseTest {
 
 	public function testMakeBlacklist() {
 		try {
-			$mxt = new MxToolbox(true,'/usr/bin/dig');
+			$mxt = new MxToolbox('/usr/bin/dig');
 			$mxt->pushDNSResolverIP('8.8.8.8');
+			$mxt->loadBlacklist();
 			$mxt->makeAliveBlacklistFile();
 			$this->assertTrue( file_exists(dirname(__FILE__) . '/../../src/MxToolbox/blacklistsAlive.txt') );
 			unset($mxt);

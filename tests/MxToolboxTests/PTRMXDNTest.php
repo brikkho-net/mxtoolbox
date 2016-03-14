@@ -19,16 +19,22 @@ class PTRMXDNTest extends MxToolboxCaseTest {
 		$mxt = new MxToolbox();
 		$this->assertTrue( $mxt->checkExistPTR('8.8.8.8') );
 		$this->assertInternalType( 'array', $mxt->getMXRecords( $mxt->getDomainName() ) );
-		$this->assertFalse ( $mxt->checkExistPTR('127.0.0.256') );
-		$this->assertFalse ( $mxt->getMXRecords( $mxt->getDomainName() ) );
+		$this->assertFalse( $mxt->checkExistPTR('127.0.0.256') );
+		$this->assertFalse( $mxt->getMXRecords( $mxt->getDomainName() ) );
 	}
 
 	public function testDomainName() {
 		$mxt = new MxToolbox();
 		$this->assertTrue( $mxt->checkExistPTR('8.8.8.8') );
 		$this->assertInternalType( 'string', $mxt->getDomainName() );
-		$this->assertFalse ( $mxt->checkExistPTR('127.0.0.256') );
-		$this->assertFalse ( $mxt->getDomainName() );
+		$this->assertFalse( $mxt->checkExistPTR('127.0.0.256') );
+		$this->assertFalse( $mxt->getDomainName() );
 	}
 
+	public function testPushSNDResolver() {
+		$mxt = new MxToolbox();
+		$this->assertTrue( $mxt->pushDNSResolverIP('8.8.8.8') );
+		$this->assertFalse( $mxt->pushDNSResolverIP('8.8.8.300') );
+	}
+	
 }
