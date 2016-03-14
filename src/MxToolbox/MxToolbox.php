@@ -1,7 +1,14 @@
 <?php
 /**
- * MxToolBox
+ * MxToolBox - test your IP address on very known spam databases and blacklists
+ * 
+ * @author Lubomir Spacek
+ * @license MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
+ * 
  * @version 0.0.1
+ * 
  */
 namespace MxToolbox;
 
