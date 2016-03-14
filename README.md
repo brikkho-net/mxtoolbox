@@ -14,7 +14,9 @@
 
 ## Installation / Usage
 
-1. composer require mxtoolbox/mxtoolbox
+1. Via composer
+    
+    ``` composer require mxtoolbox/mxtoolbox ```
 
 2. Create a composer.json defining your dependencies.
 
