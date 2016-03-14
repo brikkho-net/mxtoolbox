@@ -16,19 +16,19 @@
 
 1. Via composer
     
-    ```
-    composer require mxtoolbox/mxtoolbox
-    ```
+```
+    composer require mxtoolbox/mxtoolbox    
+```
 
 2. Create a composer.json defining your dependencies.
 
-    ``` json
+```json
     {
     "require": {
         "mxtoolbox/mxtoolbox": ">=0.0.1"
         }
     }
-    ```
+```
 3. Example usage:
 
 ```php
@@ -77,7 +77,7 @@ try {
 }
 ```
 
-    [More examples](https://github.com/heximcz/mxtoolbox/tree/master/examples)
+[More examples](https://github.com/heximcz/mxtoolbox/tree/master/examples)
 
 ## License
 
