@@ -41,9 +41,8 @@ class MxToolbox {
 	 */
 	public function __construct($digPath = '') {
 		if ($digPath!='') {
-			if ( !file_exists($digPath) )
-				throw new MxToolboxException('DIG path: ' . $digPath . ' File does not exist!');
 			$this->digPath = $digPath;
+			$this->checkDigPath();
 		}
 	}
 	
@@ -166,9 +165,7 @@ class MxToolbox {
 	 * @return boolean - TRUE if process is done, FALSE on non valid IP address or if the blacklist is not loaded 
 	 */
 	public function checkAllrBLS($addr) {
-		if ( ! file_exists($this->digPath) )
-			throw new MxToolboxException('DIG path: ' . $this->digPath . ' File does not exist!');
-		
+		$this->checkDigPath();
 		if ( $this->validateIPAddress($addr) && count($this->testResult) > 0 ) {
 			foreach ($this->testResult as &$blackList) {
 				if ( $this->checkOnerBLSARecord($addr, $blackList['blHostName']) ) {
@@ -189,8 +186,7 @@ class MxToolbox {
 	 * @return boolean
 	 */
 	public function makeAliveBlacklistFile() {
-		if ( ! file_exists($this->digPath) )
-			throw new MxToolboxException('DIG path: ' . $this->digPath . ' File does not exist!');
+		$this->checkDigPath();
 		$blAlivePath = dirname(__FILE__) . DIRECTORY_SEPARATOR;
 		$blAliveFileTmp = $blAlivePath . 'blacklistsAlive.tmp';
 		$blAliveFileOrg = $blAlivePath . 'blacklistsAlive.txt';
@@ -213,6 +209,15 @@ class MxToolbox {
 		// load actual values
 		$this->loadBlacklistsFromFile('blacklistsAlive.txt');
 		$this->buildTestArray();
+	}
+	
+	/**
+	 * Check if path to the 'dig' exist
+	 * @throws MxToolboxException
+	 */
+	public function checkDigPath() {
+		if ( ! file_exists($this->digPath) )
+			throw new MxToolboxException('DIG path: ' . $this->digPath . ' File does not exist!');
 	}
 
 	private function getUrlForPositveCheck($addr,$blackList) {
@@ -241,6 +246,7 @@ class MxToolbox {
 	 */
 	private function buildTestArray() {
 		$this->testResult = array();
+		$this->checkDigPath();
 		$i = 0;
 		foreach ($this->blackLists as $blackList) {
 			$this->testResult[$i]['blHostName'] = $blackList;
