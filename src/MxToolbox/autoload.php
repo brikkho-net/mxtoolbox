@@ -4,6 +4,7 @@
 		function ($class) {
 			static $map = [
 					'MxToolbox\MxToolbox' => 'MxToolbox.php',
+					'MxToolbox\AbstractMxToolbox' => 'AbstractMxToolbox.php',
 					'MxToolbox\Exception\MxToolboxException' => 'Exception/MxToolboxException.php'
 			];
 				

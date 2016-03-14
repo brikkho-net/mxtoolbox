@@ -5,34 +5,10 @@
  */
 namespace MxToolbox;
 
+use MxToolbox\AbstractMxToolbox;
 use MxToolbox\Exception\MxToolboxException;
 
-class MxToolbox {
-	
-	/**
-	 * @var PTR record from the method checkExistPTR()
-	 */
-	private $recordPTR;
-	/**
-	 * @var domain name from the method checkExistPTR()
-	 */
-	private $domainName;
-	/**
-	 * @var DNSBL array 
-	 */
-	private $blackLists;
-	/**
-	 * @var DNSBL test results
-	 */
-	private $testResult;
-	/**
-	 * @var whereis dig
-	 */
-	private $digPath;
-	/**
-	 * @var DNS resolvers
-	 */
-	private $resolvers;
+class MxToolbox extends AbstractMxToolbox {
 	
 	/**
 	 * MxToolbox
@@ -104,10 +80,10 @@ class MxToolbox {
 		if ( $this->checkHostName($hostName) ) {
 			$ptr = dns_get_record( $hostName, DNS_MX );
 			if ( isset($ptr[0]['target']) ) {
-				$MXRecords = array();
+				$MxRecords = array();
 				foreach ($ptr as $mx)
-					$MXRecords[] = $mx['target'];
-				return $MXRecords;
+					$MxRecords[] = $mx['target'];
+				return $MxRecords;
 			}
 		}
 		return false;
@@ -218,94 +194,6 @@ class MxToolbox {
 	public function checkDigPath() {
 		if ( ! file_exists($this->digPath) )
 			throw new MxToolboxException('DIG path: ' . $this->digPath . ' File does not exist!');
-	}
-
-	private function getUrlForPositveCheck($addr,$blackList) {
-		$rIP = $this->reverseIP($addr);
-		$checkResult = shell_exec( $this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
-		$txtResult = explode(PHP_EOL, trim($checkResult));
-		$matches = array();
-		$URLs = array();
-		foreach ($txtResult as $line) {
-			if ( preg_match("/((\w+:\/\/)[-a-zA-Z0-9:@;?&=\/%\+\.\*!'\(\),\$_\{\}\^~\[\]`#|]+)/", $line, $matches) )
-				$URLs[] = $matches[1];
-		}
-		return $URLs;
-	}
-
-	private function checkOnerBLSARecord($addr,$blackList) {
-		$rIP = $this->reverseIP($addr);
-		$checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
-		if ( !empty($checkResult) )
-				return true;
-		return false;
-	}
-
-	/**
-	 * Build the array for check od DNSBL
-	 */
-	private function buildTestArray() {
-		$this->testResult = array();
-		$this->checkDigPath();
-		$i = 0;
-		foreach ($this->blackLists as $blackList) {
-			$this->testResult[$i]['blHostName'] = $blackList;
-			$this->testResult[$i]['blPositive'] = NULL;
-			$this->testResult[$i]['blPositiveResult'] = NULL;
-			$this->testResult[$i]['blResponse'] = false;
-
-			// https://tools.ietf.org/html/rfc5782 cap. 5
-			if ( $this->checkOnerBLSARecord('127.0.0.2', $blackList) )
-				$this->testResult[$i]['blResponse'] = true;
-
-			$i++;
-		}
-	}
-
-	/**
-	 * Reverse IP address 192.168.1.254 -> 254.1.168.192
-	 * @param string $addr
-	 * @return string
-	 */
-	private function reverseIP($addr) {
-		$revIpAddr = explode( ".", $addr );
-		return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
-	}
-
-	/**
-	 * Load blacklists from the file $fileName to array
-	 * @param string $fileName
-	 * @throws MxToolboxException;
-	 * @return mixed throw|boolean
-	 */
-	private function loadBlacklistsFromFile($fileName) {
-		$this->blackLists = array();
-		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . $fileName;
-		if ( !is_readable( $blFile ) )
-			return false;
-		if ( ! ( $tmpBlacklists = file_get_contents( $blFile ) ) === false ) {
-			$tmpBlacklists = explode( PHP_EOL, $tmpBlacklists );
-			$tmpBlacklists = array_filter( $tmpBlacklists, array( $this, "checkHostName" ));
-			foreach ( $tmpBlacklists as $blackList )
-				$this->blackLists[] = trim($blackList);
-			if ( ! count($this->blackLists) > 0 ) 
-				throw new MxToolboxException("Blacklist is empty: " . $blFile);
-			return true;
-		}
-		return false;
-	}
-
-	private function checkHostName($hostName) {
-		$validHostnameRegex = "/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/";
-		if ( preg_match( $validHostnameRegex, trim($hostName) ) )
-			return true;
-		return false;
-	}
-	
-	private function getRandomDNSResolverIP() {
-		if ( ! count($this->resolvers) > 0 )
-			throw new MxToolboxException('No DNS resolver here!');
-		return $this->resolvers[array_rand($this->resolvers, 1)];
 	}
 
 }
