@@ -12,9 +12,9 @@ ratings:
   paths:
   - "src/**"
 exclude_paths:
-  - "**/tests/**/*"
-  - "**/vendor/**/*"
-  - "**/examples/**/*"
+  - "../tests/**/*"
+  - "../vendor/**/*"
+  - "../examples/**/*"
   - "composer.json"
   - "src/MxToolbox/autoload.php"
   - "src/MxToolbox/blacklists.txt"

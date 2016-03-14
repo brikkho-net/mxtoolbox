@@ -17,13 +17,10 @@
 		<whitelist>
 			<directory suffix=".php">../*</directory>
 			<exclude>
-				<directory suffix=".php">../examples/*</directory>
-			</exclude>
-			<exclude>
-				<directory suffix=".php">../tests/*</directory>
-			</exclude>
-			<exclude>
-				<directory>../vendor/*</directory>
+				<directory>../examples</directory>
+				<directory>../tests</directory>
+				<directory>../vendor</directory>
+				<file>../src//MxToolbox/autoload.php</file>
 			</exclude>
 		</whitelist>
 	</filter>   
