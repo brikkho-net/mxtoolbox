@@ -17,7 +17,6 @@ script:
 
 before_script:
     - travis_retry composer self-update
-    - travis_retry composer update
 
 before_install:
     - pip install --user codecov
