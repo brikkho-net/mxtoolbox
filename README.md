@@ -14,13 +14,13 @@
 
 ## Installation / Usage
 
-1. Via composer
+- 1. Via composer
     
 ```
     composer require mxtoolbox/mxtoolbox    
 ```
 
-2. Create a composer.json defining your dependencies.
+- 2. Create a composer.json defining your dependencies.
 
 ```json
     {
@@ -29,7 +29,8 @@
         }
     }
 ```
-3. Example usage:
+
+- 3. Example usage:
 
 ```php
 <?php
@@ -42,7 +43,6 @@ require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'vendor/autoload.php';
 try {
 	/**
 	 * IP address for test
-	 * @link https://tools.ietf.org/html/rfc5782 cap. 5
 	 */
 	$addr = '';
 	/**
