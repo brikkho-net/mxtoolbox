@@ -10,11 +10,11 @@ engines:
     enabled: true
 ratings:
   paths:
-  - "**.php"
+  - "src/**"
 exclude_paths:
-  - tests/**/*
-  - vendor/**/*
-  - examples/**/*
+  - "tests/**/*"
+  - "**/vendor/**/*"
+  - "examples/**/*"
   - "composer.json"
   - "src/MxToolbox/blacklists.txt"
   - "README.md"
