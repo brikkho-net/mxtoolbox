@@ -17,10 +17,10 @@
 		<whitelist>
 			<directory suffix=".php">../*</directory>
 			<exclude>
-				<directory>../examples/*</directory>
+				<directory suffix=".php">../examples/*</directory>
 			</exclude>
 			<exclude>
-				<directory>../tests/*</directory>
+				<directory suffix=".php">../tests/*</directory>
 			</exclude>
 			<exclude>
 				<directory>../vendor/*</directory>
