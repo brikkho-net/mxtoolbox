@@ -9,9 +9,6 @@ matrix:
   allow_failures:
     - php: hhvm
 
-services:
-    - dnsutils
-
 script: 
     - phpunit --configuration tests/phpunit.xml --coverage-text --coverage-clover build/logs/clover.xml
 
@@ -20,6 +17,7 @@ before_script:
 
 before_install:
     - pip install --user codecov
+    - apt install dnsutils
 
 after_success:
     - - bash <(curl -s https://codecov.io/bash)
