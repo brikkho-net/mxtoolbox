@@ -80,10 +80,10 @@ class MxToolbox extends AbstractMxToolbox {
 		if ( $this->checkHostName($hostName) ) {
 			$ptr = dns_get_record( $hostName, DNS_MX );
 			if ( isset($ptr[0]['target']) ) {
-				$MxRecords = array();
+				$mxRecords = array();
 				foreach ($ptr as $mx)
-					$MxRecords[] = $mx['target'];
-				return $MxRecords;
+					$mxRecords[] = $mx['target'];
+				return $mxRecords;
 			}
 		}
 		return false;
