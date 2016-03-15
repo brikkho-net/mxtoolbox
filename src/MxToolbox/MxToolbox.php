@@ -7,7 +7,7 @@
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
  * 
- * @version 0.0.1
+ * @version 0.0.2-dev
  * 
  */
 namespace MxToolbox;
@@ -119,13 +119,15 @@ class MxToolbox extends AbstractMxToolbox {
 	
 	/**
 	 * Push IP address of a DNS resolver to the reslovers list
-	 * (udp port 53 must be open)
+	 * (tcp port 53 must be open)
+	 * (UDP sockets will sometimes appear to have opened without an error, even if the remote host is unreachable.)
+	 * (DNS Works On Both TCP and UDP ports)
 	 * @param string $addr
 	 * @return boolean
 	 */
 	public function pushDNSResolverIP($addr) {
 		$errno = ''; $errstr = '';
-		if ( $this->validateIPAddress($addr) && $fss = @fsockopen( 'udp://'.$addr, 53, $errno, $errstr, 5 )) {
+		if ( $this->validateIPAddress($addr) && $fss = @fsockopen( 'tcp://'.$addr, 53, $errno, $errstr, 5 )) {
 			fclose($fss);
 			$this->resolvers[] = $addr;
 			return true;
