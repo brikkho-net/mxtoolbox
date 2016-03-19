@@ -46,6 +46,10 @@ abstract class AbstractMxToolbox {
 
 	protected function checkOnerBLSARecord($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
+		// dig @194.8.253.11 -4 +noall +answer +stats 2.0.0.127.xbl.spamhaus.org A
+		// TODO: +stats , parse query time
+		// TODO: -4
+		
 		$checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
 		if ( !empty($checkResult) )
 				return true;
@@ -64,7 +68,7 @@ abstract class AbstractMxToolbox {
 			$this->testResult[$index]['blPositive'] = false;
 			$this->testResult[$index]['blPositiveResult'] = array();
 			$this->testResult[$index]['blResponse'] = false;
-
+			// TODO: add query time
 			// https://tools.ietf.org/html/rfc5782 cap. 5
 			if ( $this->checkOnerBLSARecord('127.0.0.2', $blackList) )
 				$this->testResult[$index]['blResponse'] = true;
