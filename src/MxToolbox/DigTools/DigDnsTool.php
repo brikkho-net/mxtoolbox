@@ -1,0 +1,93 @@
+<?php
+namespace MxToolbox\DigTools;
+
+use MxToolbox\Exceptions\MxToolboxLogicException;
+
+class DigDnsTool {
+
+	/**
+	 * @var array DNS resolvers IP addresses
+	 */
+	protected $resolvers;
+	protected $digPath;
+	
+	protected function getUrlForPositveCheck($addr,$blackList) {
+		$rIP = $this->reverseIP($addr);
+		$checkResult = shell_exec( $this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
+		$txtResult = explode(PHP_EOL, trim($checkResult));
+		$matches = array();
+		$urlAddress = array();
+		foreach ($txtResult as $line) {
+			if ( preg_match("/((\w+:\/\/)[-a-zA-Z0-9:@;?&=\/%\+\.\*!'\(\),\$_\{\}\^~\[\]`#|]+)/", $line, $matches) )
+				$urlAddress[] = $matches[1];
+		}
+		return $urlAddress;
+	}
+	
+	protected function checkDnsblPtrRecord($addr,$blackList) {
+		$rIP = $this->reverseIP($addr);
+		// dig @194.8.253.11 -4 +noall +answer +stats 2.0.0.127.xbl.spamhaus.org A
+		// TODO: +stats , parse query time
+		// TODO: -4
+		echo $this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A'.PHP_EOL;
+//		exit;
+		$checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
+		if ( !empty($checkResult) )
+			return true;
+		return false;
+	}
+	
+	protected function checkHostName($hostName) {
+		$validHostnameRegex = "/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/";
+		if ( preg_match( $validHostnameRegex, trim($hostName) ) )
+			return true;
+		return false;
+	}
+	
+	protected function getRandomDNSResolverIP() {
+		if ( ! count($this->resolvers) > 0 )
+			throw new MxToolboxLogicException('No DNS resolver here!');
+		return $this->resolvers[array_rand($this->resolvers, 1)];
+	}
+
+	/**
+	 * Reverse IP address 192.168.1.254 -> 254.1.168.192
+	 * @param string $addr
+	 * @return string
+	 */
+	protected function reverseIP($addr) {
+		$revIpAddr = explode( ".", $addr );
+		return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
+	}
+	
+	/**
+	 * Push IP address of a DNS resolver to the reslovers list
+	 * (tcp port 53 must be open)
+	 * (UDP sockets will sometimes appear to have opened without an error, even if the remote host is unreachable.)
+	 * (DNS Works On Both TCP and UDP ports)
+	 * @param string $addr
+	 * @return this
+	 * @throws MxToolboxLogicException
+	 */
+	public function pushDNSResolverIP($addr) {
+		$errno = ''; $errstr = '';
+		if ( $this->validateIPAddress($addr) && $fss = @fsockopen( 'tcp://'.$addr, 53, $errno, $errstr, 5 )) {
+			fclose($fss);
+			$this->resolvers[] = $addr;
+			return $this;
+		}
+		throw new MxToolboxLogicException('DNS Resolver: '.$addr.' do not response on port 53.');
+	}
+	
+
+	/**
+	 * Validate if string is valid IP address
+	 * @param string $addr
+	 * @return boolean
+	 */
+	public function validateIPAddress($addr) {
+		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+	}
+	
+	
+}

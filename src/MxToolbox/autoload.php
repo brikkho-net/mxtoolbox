@@ -5,7 +5,11 @@
 			static $map = [
 					'MxToolbox\MxToolbox' => 'MxToolbox.php',
 					'MxToolbox\AbstractMxToolbox' => 'AbstractMxToolbox.php',
-					'MxToolbox\Exception\MxToolboxException' => 'Exception/MxToolboxException.php'
+					'MxToolbox\Exceptions\MxToolboxLogicException' => 'Exceptions/MxToolboxExceptions.php',
+					'MxToolbox\Exceptions\MxToolboxRuntimeException' => 'Exceptions/MxToolboxExceptions.php',
+					'MxToolbox\FileSystem\BlacklistsHostnameFile' => 'FileSystem/BlacklistsHostnameFile.php',
+					'MxToolbox\DataGrid\MxToolboxDataGrid' => 'DataGrid/MxToolboxDataGrid.php',
+					'MxToolbox\DigTools\DigDnsTool' => 'DigTools/DigDnsTool.php'
 			];
 				
 			if (isset($map[$class]))

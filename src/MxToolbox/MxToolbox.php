@@ -13,7 +13,9 @@
 namespace MxToolbox;
 
 use MxToolbox\AbstractMxToolbox;
-use MxToolbox\Exception\MxToolboxException;
+use MxToolbox\Exceptions\MxToolboxLogicException;
+use MxToolbox\Exceptions\MxToolboxRuntimeException;
+use MxToolbox\FileSystem\BlacklistsHostnameFile;
 
 class MxToolbox extends AbstractMxToolbox {
 	
@@ -23,7 +25,7 @@ class MxToolbox extends AbstractMxToolbox {
 	 * @throws MxToolboxException
 	 */
 	public function __construct($digPath = '') {
-		if ($digPath!='') {
+		if ( $digPath!='' ) {
 			$this->digPath = $digPath;
 			$this->checkDigPath();
 		}
@@ -31,21 +33,46 @@ class MxToolbox extends AbstractMxToolbox {
 	
 	/**
 	 * Load blacklist and create test array
-	 * @throws MxToolboxException - if any error
+	 * @param array $blacklistHostNames - optional
+	 * @return this
+	 * @throws MxToolboxRuntimeException;
+	 * @throws MxToolboxLogicException;
 	 */
-	public function loadBlacklist() {
-		if ( !$this->loadBlacklistsFromFile('blacklistsAlive.txt') ) {
-			$this->makeAliveBlacklistFile();
+	public function buildBlacklistHostnamesArray(&$blacklistHostNames = NULL) {
+		if ( is_null($blacklistHostNames) ) {
+			try {
+				//echo "is null ";
+				$hosts = new BlacklistsHostnameFile();
+				$hosts->loadBlacklistsFromFile('blacklistsAlive.txt');
+				$this->setTestResultArray($hosts->getBlacklistsHostNames());
+				//print_r($this->dataGrid->getTestResultArray());
+				return $this;
+			}
+			catch ( MxToolboxRuntimeException $e ) {
+				if ( $e->getCode()==400 ) {
+					// the alive blacklists file does not exist, create it
+					$hosts->loadBlacklistsFromFile('blacklists.txt');
+					$this->setTestResultArray( $hosts->getBlacklistsHostNames() );
+					$hosts->makeAliveBlacklistFile( $this->setDnsblResponse()->getTestResultArray() );
+					return $this;
+				}
+				return $e;
+			}
 		}
-		$this->buildTestArray();
+		//echo "not null ";
+		$this->dataGrid->setTestResultArray($blacklistHostNames);
+		return $this;
 	}
 	
 	/**
-	 * Get blacklists hostnames
+	 * Get test blacklist array
 	 * @return array
+	 * @throws MxToolboxLogicException
 	 */
-	public function getBlackLists() {
-		return $this->blackLists;
+	public function &getTestBlacklistsArray() {
+		if ( is_array($this->getTestResultArray()) && count($this->getTestResultArray()) > 0 )
+			return $this->getTestResultArray();
+		throw new MxToolboxLogicException('Array is empty. Call buildBlacklistHostnamesArray() first.');
 	}
 	
 	/**
@@ -117,32 +144,6 @@ class MxToolbox extends AbstractMxToolbox {
 		return false;
 	}
 	
-	/**
-	 * Push IP address of a DNS resolver to the reslovers list
-	 * (tcp port 53 must be open)
-	 * (UDP sockets will sometimes appear to have opened without an error, even if the remote host is unreachable.)
-	 * (DNS Works On Both TCP and UDP ports)
-	 * @param string $addr
-	 * @return boolean
-	 */
-	public function pushDNSResolverIP($addr) {
-		$errno = ''; $errstr = '';
-		if ( $this->validateIPAddress($addr) && $fss = @fsockopen( 'tcp://'.$addr, 53, $errno, $errstr, 5 )) {
-			fclose($fss);
-			$this->resolvers[] = $addr;
-			return true;
-		}
-		return false;
-	}
-
-	/**
-	 * Validate if string is valid IP address
-	 * @param string $addr
-	 * @return boolean
-	 */
-	public function validateIPAddress($addr) {
-		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
-	}
 	
 	/**
 	 * Check all (use only alive rBLS - fast check!)
@@ -165,36 +166,6 @@ class MxToolbox extends AbstractMxToolbox {
 		return false;
 	}
 
-	/**
-	 * Build new file with alive DNSBLs hostnames
-	 * (ideal for frequent testing)
-	 * @return boolean
-	 */
-	public function makeAliveBlacklistFile() {
-		$this->checkDigPath();
-		$blAlivePath = dirname(__FILE__) . DIRECTORY_SEPARATOR;
-		$blAliveFileTmp = $blAlivePath . 'blacklistsAlive.tmp';
-		$blAliveFileOrg = $blAlivePath . 'blacklistsAlive.txt';
-		// create temp file
-		if (! @$file = fopen($blAliveFileTmp, 'w') )
-			throw new MxToolboxException('Cannot create new file: ' . $blAliveFileTmp);
-		$this->loadBlacklistsFromFile('blacklists.txt');
-		$this->buildTestArray();
-		foreach ( $this->testResult as &$blackList ) {
-			if ( $blackList['blResponse'] )
-				fwrite( $file, $blackList['blHostName'].PHP_EOL );
-		}
-		unset($blackList);
-		fclose($file);
-		// check filesize
-		if ( ! filesize($blAliveFileTmp) > 0 )
-			throw new MxToolboxException('File is empty: ' . $blAliveFileTmp);
-		// create new blacklist
-		rename($blAliveFileTmp, $blAliveFileOrg);
-		// load actual values
-		$this->loadBlacklistsFromFile('blacklistsAlive.txt');
-		$this->buildTestArray();
-	}
 	
 	/**
 	 * Check if path to the 'dig' exist
@@ -202,7 +173,7 @@ class MxToolbox extends AbstractMxToolbox {
 	 */
 	public function checkDigPath() {
 		if ( ! file_exists($this->digPath) )
-			throw new MxToolboxException('DIG path: ' . $this->digPath . ' File does not exist!');
+			throw new MxToolboxLogicException('DIG path: ' . $this->digPath . ' File does not exist!');
 	}
 
 }

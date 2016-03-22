@@ -19,7 +19,11 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-			"MxToolbox\\" : "src/MxToolbox/"
+			"MxToolbox\\" : "src/MxToolbox",
+			"MxToolbox\\FileSystem\\" : "src/MxToolbox/FileSystem",
+			"MxToolbox\\Exceptions\\" : "src/MxToolbox/Exceptions",
+			"MxToolbox\\DigTool\\" : "src/MxToolbox/DigTools",
+			"MxToolbox\\DataGrid\\" : "src/MxToolbox/DataGrid"
 		}
 	}
 }
