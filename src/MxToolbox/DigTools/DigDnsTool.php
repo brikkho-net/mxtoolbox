@@ -9,11 +9,15 @@ class DigDnsTool {
 	 * @var array DNS resolvers IP addresses
 	 */
 	protected $resolvers;
+	/**
+	 * @var string Path where is dig
+	 */
 	protected $digPath;
 	
 	protected function getUrlForPositveCheck($addr,$blackList) {
 		$rIP = $this->reverseIP($addr);
-		$checkResult = shell_exec( $this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
+		$checkResult = shell_exec( $this->digPath . ' @' . $this->getRandomDNSResolverIP() . 
+				' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' TXT');
 		$txtResult = explode(PHP_EOL, trim($checkResult));
 		$matches = array();
 		$urlAddress = array();
@@ -24,14 +28,21 @@ class DigDnsTool {
 		return $urlAddress;
 	}
 	
-	protected function checkDnsblPtrRecord($addr,$blackList) {
+	/**
+	 * Check DNSBL PTR Record
+	 * TODO: ipv6 support
+	 * TODO: +stats , parse query time
+	 * TODO: return string|boolean
+	 * @param string $addr
+	 * @param string $blackList
+	 * @param string $record 'A,TXT,AAAA', default 'A'
+	 * @return boolean
+	 */
+	protected function checkDnsblPtrRecord($addr,$blackList,$record = 'A') {
 		$rIP = $this->reverseIP($addr);
 		// dig @194.8.253.11 -4 +noall +answer +stats 2.0.0.127.xbl.spamhaus.org A
-		// TODO: +stats , parse query time
-		// TODO: -4
-		echo $this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A'.PHP_EOL;
-//		exit;
-		$checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() . ' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' A');
+		$checkResult = shell_exec( $this->digPath . ' @' . $this->getRandomDNSResolverIP() . 
+				' +time=3 +tries=1 +noall +answer '.$rIP . '.' . $blackList.' '.$record );
 		if ( !empty($checkResult) )
 			return true;
 		return false;
