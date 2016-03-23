@@ -1,29 +1,30 @@
 {
-	"name" : "mxtoolbox/mxtoolbox",
-	"description" : "IP blacklist tools",
-	"type" : "library",
-	"license" : "MIT",
-	"keywords" : [
-		"mxtoolbox"
-	],
-	"authors" : [{
-			"name" : "Lubomir Spacek",
-			"homepage" : "https://best-hosting.cz"
-		}
-	],
-	"require" : {
-		"php" : ">=5.6.5"
-	},
-	"require-dev" : {
-		"codeclimate/php-test-reporter" : "dev-master"
-	},
-	"autoload" : {
-		"psr-4" : {
-			"MxToolbox\\" : "src/MxToolbox",
-			"MxToolbox\\FileSystem\\" : "src/MxToolbox/FileSystem",
-			"MxToolbox\\Exceptions\\" : "src/MxToolbox/Exceptions",
-			"MxToolbox\\DigTool\\" : "src/MxToolbox/DigTools",
-			"MxToolbox\\DataGrid\\" : "src/MxToolbox/DataGrid"
-		}
-	}
+  "name": "mxtoolbox/mxtoolbox",
+  "description": "IP blacklist tools",
+  "type": "library",
+  "license": "MIT",
+  "keywords": [
+    "mxtoolbox"
+  ],
+  "authors": [
+    {
+      "name": "Lubomir Spacek",
+      "homepage": "https://best-hosting.cz",
+    }
+  ],
+  "require": {
+    "php": ">=5.6.5"
+  },
+  "require-dev": {
+    "codeclimate/php-test-reporter": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "MxToolbox\\": "src/MxToolbox",
+      "MxToolbox\\FileSystem\\": "src/MxToolbox/FileSystem",
+      "MxToolbox\\Exceptions\\": "src/MxToolbox/Exceptions",
+      "MxToolbox\\NetworkTools\\": "src/MxToolbox/NetworkTools",
+      "MxToolbox\\DataGrid\\": "src/MxToolbox/DataGrid",
+    }
+  }
 }

@@ -2,9 +2,9 @@
 namespace MxToolbox\DataGrid;
 
 use MxToolbox\Exceptions\MxToolboxLogicException;
-use MxToolbox\DigTools\DigDnsTool;
+use MxToolbox\DigTools\NetworkTools;
 
-class MxToolboxDataGrid extends DigDnsTool {
+class MxToolboxDataGrid extends NetworkTools {
 
 	protected $testResult;
 

@@ -19,7 +19,9 @@ use MxToolbox\FileSystem\BlacklistsHostnameFile;
 class MxToolbox extends AbstractMxToolbox
 {
 
-
+    /**
+     * MxToolbox constructor.
+     */
     public function __construct()
     {
         $this->configure();
@@ -28,7 +30,7 @@ class MxToolbox extends AbstractMxToolbox
     /**
      * Configures the current command.
      */
-    public function configure()
+    protected function configure()
     {
     }
 
@@ -42,8 +44,8 @@ class MxToolbox extends AbstractMxToolbox
     public function buildBlacklistHostnamesArray(&$blacklistHostNames = NULL)
     {
         if (is_null($blacklistHostNames)) {
+            $hosts = new BlacklistsHostnameFile();
             try {
-                $hosts = new BlacklistsHostnameFile();
                 $hosts->loadBlacklistsFromFile('blacklistsAlive.txt');
                 $this->setTestResultArray($hosts->getBlacklistsHostNames());
                 return $this;

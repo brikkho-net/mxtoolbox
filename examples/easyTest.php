@@ -8,7 +8,10 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../src/MxToolbox/autoloa
 class easyTest extends MxToolbox
 {
 
-    public function configure()
+    /**
+     * Configure MXToolbox
+     */
+    protected function configure()
     {
         $this
             ->setDigPath('/usr/bin/dig')
@@ -17,6 +20,7 @@ class easyTest extends MxToolbox
     }
 
     /**
+     * Test IP address
      * @param $addr
      */
     public function testMyIPAddress($addr)
