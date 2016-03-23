@@ -1,15 +1,4 @@
 <?php
-/**
- * MxToolBox - test your IP address on very known spam databases and blacklists
- * 
- * @author Lubomir Spacek
- * @license MIT
- * @link https://github.com/heximcz/mxtoolbox
- * @link https://best-hosting.cz
- * 
- * @version 0.0.2-dev
- * 
- */
 namespace MxToolbox;
 
 use MxToolbox\AbstractMxToolbox;
@@ -17,23 +6,33 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\FileSystem\BlacklistsHostnameFile;
 
+/**
+ * MxToolBox - test your IP address on very known spam databases and blacklists
+ *
+ * @author Lubomir Spacek
+ * @license MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
+ *
+ * @version 0.0.2-dev
+ *
+ */
 class MxToolbox extends AbstractMxToolbox {
+
 	
+	public function __construct() {
+		$this->configure();
+	}
 	/**
-	 * MxToolbox
-	 * @param string $digPath - whereis dig
-	 * @throws MxToolboxException
+	 * Configures the current command.
 	 */
-	public function __construct($digPath = '') {
-		if ( $digPath!='' ) {
-			$this->digPath = $digPath;
-			$this->checkDigPath();
-		}
+	public function configure() {
+		
 	}
 	
 	/**
 	 * Load blacklist and create test array
-	 * @param array $blacklistHostNames - optional
+	 * @param array reference $blacklistHostNames - optional (you may use your own blaclist array)
 	 * @return this
 	 * @throws MxToolboxRuntimeException;
 	 * @throws MxToolboxLogicException;
@@ -41,16 +40,13 @@ class MxToolbox extends AbstractMxToolbox {
 	public function buildBlacklistHostnamesArray(&$blacklistHostNames = NULL) {
 		if ( is_null($blacklistHostNames) ) {
 			try {
-				//echo "is null ";
 				$hosts = new BlacklistsHostnameFile();
 				$hosts->loadBlacklistsFromFile('blacklistsAlive.txt');
 				$this->setTestResultArray($hosts->getBlacklistsHostNames());
-				//print_r($this->dataGrid->getTestResultArray());
 				return $this;
 			}
 			catch ( MxToolboxRuntimeException $e ) {
 				if ( $e->getCode()==400 ) {
-					// the alive blacklists file does not exist, create it
 					$hosts->loadBlacklistsFromFile('blacklists.txt');
 					$this->setTestResultArray( $hosts->getBlacklistsHostNames() );
 					$hosts->makeAliveBlacklistFile( $this->setDnsblResponse()->getTestResultArray() );
@@ -59,8 +55,7 @@ class MxToolbox extends AbstractMxToolbox {
 				return $e;
 			}
 		}
-		//echo "not null ";
-		$this->dataGrid->setTestResultArray($blacklistHostNames);
+		$this->setTestResultArray($blacklistHostNames);
 		return $this;
 	}
 	
@@ -75,13 +70,26 @@ class MxToolbox extends AbstractMxToolbox {
 		throw new MxToolboxLogicException('Array is empty. Call buildBlacklistHostnamesArray() first.');
 	}
 	
+	//sprintf('The command defined in "%s" cannot have an empty name.', get_class($this))
+	
 	/**
-	 * Get test results
-	 * @return mixed array|bool
+	 * Check all (use only alive rBLS - fast check!)
+	 * @param string $addr
+	 * @return boolean - TRUE if process is done, FALSE on non valid IP address or if the blacklist is not loaded
 	 */
-	public function getCheckResult() {
-		if ( count($this->testResult) > 0 )
-			return $this->testResult;
+	public function checkAllDnsbl($addr) {
+		$this->checkDigPath();
+		if ( $this->validateIPAddress($addr) && count($this->testResult) > 0 ) {
+			foreach ($this->testResult as &$blackList) {
+				if ( $this->checkOnerBLSARecord($addr, $blackList['blHostName']) ) {
+					$blackList['blPositive'] = true;
+					$blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
+				}
+			}
+			unset($blackList);
+			return true;
+		}
+		$this->testResult = array();
 		return false;
 	}
 	
@@ -144,36 +152,5 @@ class MxToolbox extends AbstractMxToolbox {
 		return false;
 	}
 	
-	
-	/**
-	 * Check all (use only alive rBLS - fast check!)
-	 * @param string $addr
-	 * @return boolean - TRUE if process is done, FALSE on non valid IP address or if the blacklist is not loaded 
-	 */
-	public function checkAllrBLS($addr) {
-		$this->checkDigPath();
-		if ( $this->validateIPAddress($addr) && count($this->testResult) > 0 ) {
-			foreach ($this->testResult as &$blackList) {
-				if ( $this->checkOnerBLSARecord($addr, $blackList['blHostName']) ) {
-					$blackList['blPositive'] = true;
-					$blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
-				}
-			}
-			unset($blackList);
-			return true;
-		}
-		$this->testResult = array();
-		return false;
-	}
-
-	
-	/**
-	 * Check if path to the 'dig' exist
-	 * @throws MxToolboxException
-	 */
-	public function checkDigPath() {
-		if ( ! file_exists($this->digPath) )
-			throw new MxToolboxLogicException('DIG path: ' . $this->digPath . ' File does not exist!');
-	}
 
 }

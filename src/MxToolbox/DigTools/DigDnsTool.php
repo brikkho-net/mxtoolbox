@@ -5,13 +5,9 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 
 class DigDnsTool {
 
-	/**
-	 * @var array DNS resolvers IP addresses
-	 */
+	/** @var array DNS resolvers IP addresses */
 	protected $resolvers;
-	/**
-	 * @var string Path where is dig
-	 */
+	/** @var string Path where is dig */
 	protected $digPath;
 	
 	protected function getUrlForPositveCheck($addr,$blackList) {
@@ -77,7 +73,7 @@ class DigDnsTool {
 	 * (UDP sockets will sometimes appear to have opened without an error, even if the remote host is unreachable.)
 	 * (DNS Works On Both TCP and UDP ports)
 	 * @param string $addr
-	 * @return this
+	 * @return $this
 	 * @throws MxToolboxLogicException
 	 */
 	public function pushDNSResolverIP($addr) {
@@ -90,15 +86,40 @@ class DigDnsTool {
 		throw new MxToolboxLogicException('DNS Resolver: '.$addr.' do not response on port 53.');
 	}
 	
+	/**
+	 * Set path to dig utility, etc: '/usr/bin/dig'
+	 * @param string $digPath
+	 * @return $this
+	 * @throws MxToolboxLogicException
+	 */
+	public function setDigPath($digPath) {
+		if ( $digPath!='' ) {
+			$this->digPath = $digPath;
+			$this->checkDigPath();
+			return $this;
+		}
+		throw new MxToolboxLogicException('Dig path is empty.');
+	}
 
 	/**
 	 * Validate if string is valid IP address
 	 * @param string $addr
 	 * @return boolean
 	 */
-	public function validateIPAddress($addr) {
-		return filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 );
+	protected function validateIPAddress($addr) {
+		if (filter_var ( $addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 ))
+			return true;
+		throw new MxToolboxLogicException('IP address '.$addr.' is not valid.');
 	}
 	
+	/**
+	 * Check if path to the 'dig' exist
+	 * @throws MxToolboxLogicException
+	 */
+	protected function checkDigPath() {
+		if ( ! file_exists($this->digPath) )
+			throw new MxToolboxLogicException('DIG path: ' . $this->digPath . ' File does not exist!');
+		return $this;
+	}
 	
 }

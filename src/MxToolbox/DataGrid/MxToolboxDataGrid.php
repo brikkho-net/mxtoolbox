@@ -17,7 +17,7 @@ class MxToolboxDataGrid extends DigDnsTool {
 	/**
 	 * Build the array for check DNSBLs
 	 * @param array $blacklistHostnamesArray
-	 * @return this
+	 * @return $this
 	 * @throws MxToolboxLogicException
 	 */
 	protected function setTestResultArray(&$blacklistHostnamesArray) {
@@ -34,12 +34,16 @@ class MxToolboxDataGrid extends DigDnsTool {
 			unset($blackList);
 			return $this;
 		}
-		throw new MxToolboxLogicException( get_class($this).' Input parameter is empty.');
+		throw new MxToolboxLogicException( get_class($this).' Input parameter is empty or is not a array.');
 	}
 	
+	/**
+	 * @see @link https://tools.ietf.org/html/rfc5782 cap. 5
+	 * @return \MxToolbox\DataGrid\MxToolboxDataGrid
+	 */
 	protected function setDnsblResponse() {
 		foreach ($this->testResult as $key => $val) {
-			if ( $this->checkDnsblPtrRecord('127.0.0.2', $val['blHostName']) )
+			if ( $this->checkDnsblPtrRecord('127.0.0.2', $val['blHostName'], 'A') )
 				$this->testResult[$key]['blResponse'] = true;
 		}
 		return $this;

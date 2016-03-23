@@ -7,6 +7,7 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 
 class BlacklistsHostnameFile {
 
+	/** @var array blacklists */
 	private $blacklistHostNames;
 
 	/**
