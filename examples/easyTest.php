@@ -28,6 +28,7 @@ class easyTest extends MxToolbox
 
     /**
      * Configure MXToolbox
+     * configure() is abstract function and must by implemented
      */
     protected function configure()
     {
