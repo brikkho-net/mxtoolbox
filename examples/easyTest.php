@@ -42,13 +42,13 @@ class easyTest extends MxToolbox
     {
 
         try {
-//            $this->checkIpAddressOnDnsbl($addr);
-//            var_dump($this->getBlacklistsArray());
+            $this->checkIpAddressOnDnsbl($addr);
+            var_dump($this->getBlacklistsArray());
 //            $stdin = fopen('php://stdin', 'r');
 //            $response = fgetc($stdin);
 //            fclose($stdin);
 //            $this->cleanBlacklistArray();
-            $this->updateAliveBlacklistFile();
+//            $this->updateAliveBlacklistFile();
 //            var_dump($this->getBlacklistsArray());
             //$this->checkIpAddressOnDnsbl($addr);
             //var_dump($this->getBlacklistsArray());

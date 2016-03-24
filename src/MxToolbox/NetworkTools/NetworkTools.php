@@ -71,18 +71,6 @@ class NetworkTools extends DigParser
     }
 
     /**
-     * Check one hostname for response on 127.0.0.2
-     * @param string $host
-     * @return bool
-     */
-    public function isDnsblResponse(&$host) {
-        $digOutput = $this->checkDnsblPtrRecord('127.0.0.2', $this->getRandomDNSResolverIP(), $host, 'A');
-        if ($this->isNoError($digOutput))
-            return true;
-        return false;
-    }
-    
-    /**
      * Get Dns resolvers array
      * @return array
      */
@@ -113,6 +101,35 @@ class NetworkTools extends DigParser
     }
 
     /**
+     * Check DNSBL PTR Record
+     * TODO: ipv6 support
+     * @param string $addr
+     * @param string $dnsResolver
+     * @param string $blackList
+     * @param string $record 'A,TXT,AAAA?', default 'A'
+     * @return string
+     */
+    public function getDigResult($addr, $dnsResolver, $blackList, $record = 'A')
+    {
+        // dig @127.0.0.1 +nocmd 2.0.0.127.xbl.spamhaus.org A
+        $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
+            ' +time=3 +tries=1 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
+        return $checkResult;
+    }
+
+    /**
+     * Check one hostname for response on 127.0.0.2
+     * @param string $host
+     * @return bool
+     */
+    public function isDnsblResponse(&$host) {
+        $digOutput = $this->getDigResult('127.0.0.2', $this->getRandomDNSResolverIP(), $host, 'A');
+        if ($this->isNoError($digOutput))
+            return true;
+        return false;
+    }
+
+    /**
      * Check all (use only alive rBLS - fast check!)
      * @param string $addr
      * @param array $testResult
@@ -123,11 +140,12 @@ class NetworkTools extends DigParser
     {
         if ($this->validateIPAddress($addr) && count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
-                $digOutput = $this->checkDnsblPtrRecord($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'TXT');
+                $digOutput = $this->getDigResult($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'TXT');
                 if ($this->isNoError($digOutput)) {
                     $blackList['blPositive'] = true;
                     $blackList['blPositiveResult'] = $this->getPositiveUrlAddresses($digOutput);
                 }
+                $blackList['blQueryTime'] = $this->getQueryTime($digOutput);
             }
             unset($blackList);
             return $this;
@@ -135,25 +153,6 @@ class NetworkTools extends DigParser
         throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.',get_class(),__FUNCTION__));
     }
 
-    /**
-     * Check DNSBL PTR Record
-     * TODO: ipv6 support
-     * TODO: +stats , parse query time
-     * TODO: return string|boolean
-     * @param string $addr
-     * @param string $dnsResolver
-     * @param string $blackList
-     * @param string $record 'A,TXT,AAAA?', default 'A'
-     * @return string
-     */
-    public function checkDnsblPtrRecord($addr, $dnsResolver, $blackList, $record = 'A')
-    {
-        // dig @127.0.0.1 +nocmd 2.0.0.127.xbl.spamhaus.org A
-        $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
-            ' +time=3 +tries=1 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
-        return $checkResult;
-    }
- 
     /**
      * Reverse IP address 192.168.1.254 -> 254.1.168.192
      * @param string $addr

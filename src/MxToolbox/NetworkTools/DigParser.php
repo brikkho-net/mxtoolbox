@@ -1,11 +1,4 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: hexim
- * Date: 24.3.16
- * Time: 14:48
- */
-
 namespace MxToolbox\NetworkTools;
 
 /**
@@ -14,26 +7,27 @@ namespace MxToolbox\NetworkTools;
  */
 class DigParser
 {
-/*
-NOERROR (RCODE:0) : DNS Query completed successfully
-FORMERR (RCODE:1) : DNS Query Format Error
-SERVFAIL (RCODE:2) : Server failed to complete the DNS request
-NXDOMAIN (RCODE:3) : Domain name does not exist
-NOTIMP (RCODE:4) : Function not implemented
-REFUSED (RCODE:5) : The server refused to answer for the query
-YXDOMAIN (RCODE:6) : Name that should not exist, does exist
-XRRSET (RCODE:7) : RRset that should not exist, does exist
-NOTAUTH (RCODE:9) : Server not authoritative for the zone
-NOTZONE (RCODE:10) : Name not in zone
-*/
+    /*
+    NOERROR (RCODE:0) : DNS Query completed successfully
+    FORMERR (RCODE:1) : DNS Query Format Error
+    SERVFAIL (RCODE:2) : Server failed to complete the DNS request
+    NXDOMAIN (RCODE:3) : Domain name does not exist
+    NOTIMP (RCODE:4) : Function not implemented
+    REFUSED (RCODE:5) : The server refused to answer for the query
+    YXDOMAIN (RCODE:6) : Name that should not exist, does exist
+    XRRSET (RCODE:7) : RRset that should not exist, does exist
+    NOTAUTH (RCODE:9) : Server not authoritative for the zone
+    NOTZONE (RCODE:10) : Name not in zone
+    */
 
     /**
      * Is NOERROR in dig answer
      * @param string $digOutput
      * @return bool
      */
-    protected function isNoError(&$digOutput) {
-        if (preg_match('/\NOERROR\b/',$digOutput))
+    protected function isNoError(&$digOutput)
+    {
+        if (preg_match('/\NOERROR\b/', $digOutput))
             return true;
         return false;
     }
@@ -43,7 +37,8 @@ NOTZONE (RCODE:10) : Name not in zone
      * @param string $digOutput
      * @return array
      */
-    protected function getPositiveUrlAddresses(&$digOutput) {
+    protected function getPositiveUrlAddresses(&$digOutput)
+    {
         $txtResult = explode(PHP_EOL, trim($digOutput));
         $matches = array();
         $urlAddress = array();
@@ -53,6 +48,18 @@ NOTZONE (RCODE:10) : Name not in zone
         }
         return $urlAddress;
 
+    }
+
+    /**
+     * Get query time value fron dig output
+     * @param $digOutput
+     * @return mixed|bool
+     */
+    protected function getQueryTime(&$digOutput)
+    {
+        if (preg_match("/\;; Query time:.*\b/", $digOutput, $matches))
+            return filter_var($matches[0], FILTER_SANITIZE_NUMBER_INT);
+        return false;
     }
 
 }
