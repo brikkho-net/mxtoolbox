@@ -2,6 +2,7 @@
 namespace MxToolbox\NetworkTools;
 
 use MxToolbox\Exceptions\MxToolboxLogicException;
+use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 //use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
@@ -16,13 +17,11 @@ class NetworkTools extends DigParser
     private $dnsResolvers;
     /** @var string Path where is dig */
     private $digPath;
-    /** @var  NetworkTools obj */
-    private $netTool;
     /** @var string PTR record from the method checkExistPTR() */
     private $recordPTR;
     /** @var string domain name from the method checkExistPTR() */
     private $domainName;
-    
+
     /**
      * Push one IP address of a DNS resolver to the resolvers list
      * (tcp port 53 must be open)
@@ -41,7 +40,7 @@ class NetworkTools extends DigParser
         }
         throw new MxToolboxLogicException('DNS Resolver: ' . $addr . ' do not response on port 53.');
     }
-    
+
     /**
      * Set path to dig utility, etc: '/usr/bin/dig'
      * @param string $digPath
@@ -59,23 +58,36 @@ class NetworkTools extends DigParser
 
     /**
      * Set 'blResponse' in testResult array on true if is dnsbl hostname alive
-     * @see @link https://tools.ietf.org/html/rfc5782 cap. 5
-     * @return \MxToolbox\DataGrid\MxToolboxDataGrid
+     * @param array $testResults
+     * @return $this
      */
     public function setDnsblResponse(&$testResults)
     {
         foreach ($testResults as $key => $val) {
-            if ($this->checkDnsblPtrRecord('127.0.0.2', $this->getRandomDNSResolverIP(), $val['blHostName'], 'A'))
+            if ($this->isDnsblResponse($val['blHostName']))
                 $testResults[$key]['blResponse'] = true;
         }
         return $this;
     }
 
     /**
+     * Check one hostname for response on 127.0.0.2
+     * @param string $host
+     * @return bool
+     */
+    public function isDnsblResponse(&$host) {
+        $digOutput = $this->checkDnsblPtrRecord('127.0.0.2', $this->getRandomDNSResolverIP(), $host, 'A');
+        if ($this->isNoError($digOutput))
+            return true;
+        return false;
+    }
+    
+    /**
      * Get Dns resolvers array
      * @return array
      */
-    public function &getDnsResolvers() {
+    public function &getDnsResolvers()
+    {
         return $this->dnsResolvers;
     }
 
@@ -83,10 +95,11 @@ class NetworkTools extends DigParser
      * Get DIG path
      * @return string
      */
-    public function &getDigPath() {
+    public function &getDigPath()
+    {
         return $this->digPath;
     }
-    
+
     /**
      * Get random DNS IP address from array
      * @return mixed
@@ -102,24 +115,24 @@ class NetworkTools extends DigParser
     /**
      * Check all (use only alive rBLS - fast check!)
      * @param string $addr
-     * @return boolean - TRUE if process is done, FALSE on non valid IP address or if the blacklist is not loaded
+     * @param array $testResult
+     * @return $this
+     * @throws MxToolboxRuntimeException
      */
-    public function checkAllDnsbl($addr,&$testResult)
+    public function checkAllDnsbl($addr, &$testResult)
     {
         if ($this->validateIPAddress($addr) && count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
-                //echo $addr.':'.$blackList['blHostName'].PHP_EOL;
-                //continue;
-                if ($this->checkDnsblPtrRecord($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'A')) {
+                $digOutput = $this->checkDnsblPtrRecord($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'TXT');
+                if ($this->isNoError($digOutput)) {
                     $blackList['blPositive'] = true;
-                    //$blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
+                    $blackList['blPositiveResult'] = $this->getPositiveUrlAddresses($digOutput);
                 }
             }
             unset($blackList);
-            return true;
+            return $this;
         }
-        $testResult = array();
-        return false;
+        throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.',get_class(),__FUNCTION__));
     }
 
     /**
@@ -128,64 +141,25 @@ class NetworkTools extends DigParser
      * TODO: +stats , parse query time
      * TODO: return string|boolean
      * @param string $addr
+     * @param string $dnsResolver
      * @param string $blackList
      * @param string $record 'A,TXT,AAAA?', default 'A'
-     * @return boolean
+     * @return string
      */
     public function checkDnsblPtrRecord($addr, $dnsResolver, $blackList, $record = 'A')
     {
-        $reverseIp = $this->reverseIP($addr);
-        // dig @194.8.253.11 -4 +noall +answer +stats 2.0.0.127.xbl.spamhaus.org A
+        // dig @127.0.0.1 +nocmd 2.0.0.127.xbl.spamhaus.org A
         $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
-            ' +time=3 +tries=1 +noall +answer ' . $reverseIp . '.' . $blackList . ' ' . $record);
-        if (!empty($checkResult))
-            return true;
-        return false;
+            ' +time=3 +tries=1 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
+        return $checkResult;
     }
-
-
-
-
+ 
     /**
-     * xxx
-     * @param string $addr
-     * @param string $blackList
-     * @return array
-     */
-/*    protected function getUrlForPositveCheck($addr, $blackList)
-    {
-        $rIP = $this->reverseIP($addr);
-        $checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() .
-            ' +time=3 +tries=1 +noall +answer ' . $rIP . '.' . $blackList . ' TXT');
-        $txtResult = explode(PHP_EOL, trim($checkResult));
-        $matches = array();
-        $urlAddress = array();
-        foreach ($txtResult as $line) {
-            if (preg_match("/((\w+:\/\/)[-a-zA-Z0-9:@;?&=\/%\+\.\*!'\(\),\$_\{\}\^~\[\]`#|]+)/", $line, $matches))
-                $urlAddress[] = $matches[1];
-        }
-        return $urlAddress;
-    }*/
-
-    /**
-     * Check string is domain like
-     * @param string $hostName
-     * @return bool
-     */
-    public function checkHostName($hostName)
-    {
-        $validHostnameRegex = "/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/";
-        if (preg_match($validHostnameRegex, trim($hostName)))
-            return true;
-        return false;
-    }
-
-     /**
      * Reverse IP address 192.168.1.254 -> 254.1.168.192
      * @param string $addr
      * @return string
      */
-    private function reverseIP($addr)
+    protected function reverseIP($addr)
     {
         $revIpAddr = explode(".", $addr);
         return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
@@ -202,5 +176,21 @@ class NetworkTools extends DigParser
             return true;
         throw new MxToolboxLogicException('IP address: ' . $addr . ' is not valid.');
     }
+
+    // under this not work
+
+    /**
+     * Check string is domain like
+     * @param string $hostName
+     * @return bool
+     */
+    private function checkHostName($hostName)
+    {
+        $validHostnameRegex = "/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/";
+        if (preg_match($validHostnameRegex, trim($hostName)))
+            return true;
+        return false;
+    }
+
 
 }

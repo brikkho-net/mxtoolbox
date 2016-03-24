@@ -79,7 +79,6 @@ rbl.blockedservers.com
 rbl.dns-servicios.com
 rbl.efnet.org
 rbl.efnetrbl.org
-rbl.iprange.net
 rbl.schulte.org
 rbl.talkactive.net
 rbl2.triumf.ca

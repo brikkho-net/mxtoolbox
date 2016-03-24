@@ -20,10 +20,13 @@ use MxToolbox\NetworkTools\NetworkTools;
  */
 abstract class MxToolbox
 {
-
+    /** @var BlacklistsHostnameFile */
     private $fileSys;
+    /** @var MxToolboxDataGrid */
     private $dataGrid;
+    /** @var NetworkTools */
     private $netTool;
+    
     /**
      * MxToolbox constructor.
      */
@@ -71,6 +74,26 @@ abstract class MxToolbox
     }
 
     /**
+     * @param array $ownBlacklist optional, default nothing
+     * @return $this
+     * @throws MxToolboxRuntimeException
+     * @throws MxToolboxLogicException
+     */
+    protected function setBlacklists(&$ownBlacklist = null) {
+        try {
+            $this->dataGrid->buildBlacklistHostNamesArray($ownBlacklist);
+            return $this;
+        }
+        catch (MxToolboxRuntimeException $e) {
+            if ($e->getCode() == 400) {
+                $this->dataGrid->buildNewBlacklistHostNames();
+                return $this;
+            }
+            return $e;
+        }
+    }
+
+    /**
      * Get DNS resolvers
      * @return array
      */
@@ -84,26 +107,6 @@ abstract class MxToolbox
      */
     protected function getDigPath() {
         return $this->netTool->getDigPath();
-    }
-
-    /**
-     * @param array $ownBlacklist optional, default nothing
-     * @return $this
-     * @throws MxToolboxRuntimeException
-     * @throws MxToolboxLogicException
-     */
-    protected function setBlacklists(&$ownBlacklist = null) {
-        try {
-            $this->dataGrid->buildBlacklistHostnamesArray($ownBlacklist);
-            return $this;
-        }
-        catch (MxToolboxRuntimeException $e) {
-            if ($e->getCode() == 400) {
-                $this->dataGrid->buildNewBlacklistHostNames();
-                return $this;
-            }
-            return $e;
-        }
     }
 
     /**
@@ -127,7 +130,21 @@ abstract class MxToolbox
         $this->setBlacklists();
         return $this;
     }
-    
+
+    /**
+     * Clean blacklist array from previous search
+     * @return $this
+     */
+    protected function cleanBlacklistArray() {
+        $this->dataGrid->cleanPrevResults();
+        return $this;
+    }
+
+    /**
+     * Check IP address on all DNSBL servers
+     * @param string $addr
+     * @return $this
+     */
     protected function checkIpAddressOnDnsbl(&$addr) {
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
         return $this;

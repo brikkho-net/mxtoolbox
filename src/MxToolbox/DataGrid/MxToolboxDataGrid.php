@@ -2,6 +2,7 @@
 namespace MxToolbox\DataGrid;
 
 use MxToolbox\Exceptions\MxToolboxLogicException;
+use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\FileSystem\BlacklistsHostnameFile;
 use MxToolbox\NetworkTools\NetworkTools;
 
@@ -11,7 +12,7 @@ use MxToolbox\NetworkTools\NetworkTools;
  */
 class MxToolboxDataGrid
 {
-    
+
     /**
      * Structure:
      * []['blHostName'] = dnsbl hostname
@@ -25,7 +26,7 @@ class MxToolboxDataGrid
     protected $testResult;
     /** @var NetworkTools */
     private $netTool;
-    /** @var BlacklistsHostnameFile  */
+    /** @var BlacklistsHostnameFile */
     private $fileSys;
 
     /**
@@ -35,11 +36,11 @@ class MxToolboxDataGrid
      */
     public function __construct(BlacklistsHostnameFile &$fileSys, NetworkTools &$netTool)
     {
-        if($fileSys instanceof BlacklistsHostnameFile)
+        if ($fileSys instanceof BlacklistsHostnameFile)
             $this->fileSys = $fileSys;
-        if($netTool instanceof NetworkTools)
+        if ($netTool instanceof NetworkTools)
             $this->netTool = $netTool;
-   }
+    }
 
     public function &getTestResultArray()
     {
@@ -49,13 +50,14 @@ class MxToolboxDataGrid
     }
 
     /**
-     * Load blacklist and create test array.
+     * Load alive blacklists and create test array.
+     * @see BlacklistsHostnameFile::loadBlacklistsFromFile()
      * @param array $blacklistHostNames - optional (you may use your own blacklist array, default NULL)
      * @return $this
      * @throws MxToolboxRuntimeException;
      * @throws MxToolboxLogicException;
      */
-    public function buildBlacklistHostnamesArray(&$blacklistHostNames = NULL)
+    public function buildBlacklistHostNamesArray(&$blacklistHostNames = NULL)
     {
         if (is_null($blacklistHostNames) || !is_array($blacklistHostNames)) {
             $this->fileSys->loadBlacklistsFromFile('blacklistsAlive.txt');
@@ -66,21 +68,25 @@ class MxToolboxDataGrid
         return $this;
     }
 
+    /**
+     * Load default blacklist and check all for alive
+     * @see BlacklistsHostnameFile::makeAliveBlacklistFile
+     * @return $this
+     * @throws MxToolboxLogicException
+     * @throws MxToolboxRuntimeException
+     */
     public function buildNewBlacklistHostNames()
     {
         $this->fileSys->loadBlacklistsFromFile('blacklists.txt');
+        // set default blacklists to $testResults
         $this->setTestResultArray($this->fileSys->getBlacklistsHostNames(), false);
-        
-        if ($this->isArrayInitialized($this->getTestResultArray())) {
-            $this->fileSys->makeAliveBlacklistFile(
-                $this->getTestResultArray(
-                    $this->netTool->setDnsblResponse($this->getTestResultArray())
-                )
-            );
-            $this->buildBlacklistHostnamesArray($this->fileSys->getBlacklistsHostNames());
-            return $this;
-        }
-        throw new MxToolboxLogicException(sprintf('Array is empty in %s\%s()', get_class(), __FUNCTION__));
+        // set only alive host names
+        $this->netTool->setDnsblResponse($this->getTestResultArray());
+        // check all for alive
+        $this->fileSys->makeAliveBlacklistFile($this->getTestResultArray());
+        // build array from blacklistAlive file
+        $this->buildBlacklistHostNamesArray();
+        return $this;
     }
 
     /**
@@ -112,10 +118,11 @@ class MxToolboxDataGrid
      * @return $this
      * @throws MxToolboxLogicException
      */
-    protected function cleanPrevResults()
+    public function cleanPrevResults()
     {
         if ($this->isArrayInitialized($this->testResult)) {
             foreach ($this->testResult as $index => &$blackList) {
+                $this->testResult[$index]['blResponse'] = $this->netTool->isDnsblResponse($this->testResult[$index]['blHostName']);
                 $this->testResult[$index]['blPositive'] = false;
                 $this->testResult[$index]['blPositiveResult'] = array();
                 $this->testResult[$index]['blQueryTime'] = false;
@@ -127,8 +134,8 @@ class MxToolboxDataGrid
     }
 
     /**
-     * Simple check if any array is initialized and non empty
-     * @param array
+     * Simple check if var is a array and non empty
+     * @param array $anyArray
      * @return bool
      */
     protected function isArrayInitialized(&$anyArray)

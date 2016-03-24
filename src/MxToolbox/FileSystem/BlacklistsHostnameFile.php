@@ -40,7 +40,7 @@ class BlacklistsHostnameFile
     }
 
     /**
-     * Load blacklists hostnames from a file
+     * Load blacklists host names from a file
      *
      * @param string $fileName
      * @throws MxToolboxRuntimeException;
@@ -65,11 +65,12 @@ class BlacklistsHostnameFile
     }
 
     /**
-     * Build new file with alive DNSBLs host names (refresh is ideal for frequent testing)
+     * Build new file with alive DNSBLs host names
      *
      * @param array $aliveBlacklists
      * @return $this
      * @throws MxToolboxRuntimeException
+     * @throws MxToolboxLogicException
      */
     public function makeAliveBlacklistFile(&$aliveBlacklists)
     {
