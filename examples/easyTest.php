@@ -89,6 +89,9 @@ class easyTest extends MxToolbox
              * ['mxRecords'][array]
              */
             var_dump($this->getDomainInformation($addr));
+            
+            // Is correct setting as mail server
+            var_dump($this->isMailServer($addr));
 
         } catch (MxToolboxRuntimeException $e) {
             echo $e->getMessage();

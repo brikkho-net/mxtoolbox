@@ -129,10 +129,26 @@ abstract class MxToolbox
      * @param $addr - ip address
      * @return array|bool - return array or FALSE if no information here.
      */
-    protected function getDomainInformation($addr) {
+    protected function getDomainInformation($addr)
+    {
         $info = $this->netTool->getDomainDetailInfo($addr);
         if (count($info) > 0)
             return $info;
+        return false;
+    }
+
+    /**
+     * Checks if IP address have the PTR record in any MX records.
+     * Evidently this is correct setting MX and PTR for domain.
+     * @param $addr - ip address
+     * @return bool
+     */
+    protected function isMailServer($addr)
+    {
+        if ($info = $this->getDomainInformation($addr)) {
+            if (!in_array($info['ptrRecord'], $info['mxRecords']) === false)
+                return true;
+        }
         return false;
     }
 
