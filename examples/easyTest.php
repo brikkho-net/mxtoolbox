@@ -28,7 +28,7 @@ class easyTest extends MxToolbox
         $this
             ->setDig('/usr/bin/dig')
             ->setDnsResolver('127.0.0.1')
-            ->setDnsResolver('194.8.253.11')
+//            ->setDnsResolver('194.8.253.11')
 /*            ->setDnsResolver('194.8.252.1')*/
             ->setBlacklists();
         //->setBlacklists($this->myBlacklist);
@@ -46,9 +46,9 @@ class easyTest extends MxToolbox
             //$this->updateAliveBlacklistFile();
             //var_dump($this->getBlacklistsArray());
             //$this->checkIpAddressOnDnsbl($addr);
-            var_dump($this->getBlacklistsArray());
-            var_dump($this->getDnsResolvers());
-            var_dump($this->getDigPath());
+            //var_dump($this->getBlacklistsArray());
+            //var_dump($this->getDnsResolvers());
+            //var_dump($this->getDigPath());
 //            $this->
             
         } catch (MxToolboxRuntimeException $e) {

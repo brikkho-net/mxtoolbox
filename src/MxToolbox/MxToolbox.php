@@ -94,12 +94,12 @@ abstract class MxToolbox
      */
     protected function setBlacklists(&$ownBlacklist = null) {
         try {
-            $this->dataGrid->buildBlacklistHostnamesArray($this->fileSys, $ownBlacklist);
+            $this->dataGrid->buildBlacklistHostnamesArray($ownBlacklist);
             return $this;
         }
         catch (MxToolboxRuntimeException $e) {
             if ($e->getCode() == 400) {
-                $this->dataGrid->buildNewBlacklistHostNames($this->fileSys,$this->netTool);
+                $this->dataGrid->buildNewBlacklistHostNames();
                 return $this;
             }
             return $e;
@@ -129,7 +129,7 @@ abstract class MxToolbox
     }
     
     protected function checkIpAddressOnDnsbl(&$addr) {
-        $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray(), $this->netTool);
+        $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
         return $this;
     }
     

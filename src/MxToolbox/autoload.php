@@ -10,7 +10,8 @@
 				'MxToolbox\Exceptions\MxToolboxRuntimeException' => 'Exceptions/MxToolboxRuntimeExceptions.php',
 				'MxToolbox\FileSystem\BlacklistsHostnameFile' => 'FileSystem/BlacklistsHostnameFile.php',
 				'MxToolbox\DataGrid\MxToolboxDataGrid' => 'DataGrid/MxToolboxDataGrid.php',
-				'MxToolbox\NetworkTools\NetworkTools' => 'NetworkTools/NetworkTools.php'
+				'MxToolbox\NetworkTools\NetworkTools' => 'NetworkTools/NetworkTools.php',
+				'MxToolbox\NetworkTools\DigParser' => 'NetworkTools/DigParser.php'
 			];
 				
 			if (isset($map[$class]))

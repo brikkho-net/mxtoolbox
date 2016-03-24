@@ -9,7 +9,7 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
  * Class NetworkTools
  * @package MxToolbox\NetworkTools
  */
-class NetworkTools
+class NetworkTools extends DigParser
 {
 
     /** @var array DNS resolvers IP addresses */
@@ -65,7 +65,7 @@ class NetworkTools
     public function setDnsblResponse(&$testResults)
     {
         foreach ($testResults as $key => $val) {
-            if ($this->checkDnsblPtrRecord('127.0.0.2', $this->getDnsResolvers(), $val['blHostName'], 'A'))
+            if ($this->checkDnsblPtrRecord('127.0.0.2', $this->getRandomDNSResolverIP(), $val['blHostName'], 'A'))
                 $testResults[$key]['blResponse'] = true;
         }
         return $this;
@@ -99,7 +99,6 @@ class NetworkTools
         return $this->dnsResolvers[array_rand($this->dnsResolvers, 1)];
     }
 
-
     /**
      * Check all (use only alive rBLS - fast check!)
      * @param string $addr
@@ -109,7 +108,9 @@ class NetworkTools
     {
         if ($this->validateIPAddress($addr) && count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
-                if ($this->checkDnsblPtrRecord($addr, $this->getDnsResolvers(), $blackList['blHostName'], 'A')) {
+                //echo $addr.':'.$blackList['blHostName'].PHP_EOL;
+                //continue;
+                if ($this->checkDnsblPtrRecord($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'A')) {
                     $blackList['blPositive'] = true;
                     //$blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
                 }
@@ -117,9 +118,31 @@ class NetworkTools
             unset($blackList);
             return true;
         }
-        $this->testResult = array();
+        $testResult = array();
         return false;
     }
+
+    /**
+     * Check DNSBL PTR Record
+     * TODO: ipv6 support
+     * TODO: +stats , parse query time
+     * TODO: return string|boolean
+     * @param string $addr
+     * @param string $blackList
+     * @param string $record 'A,TXT,AAAA?', default 'A'
+     * @return boolean
+     */
+    public function checkDnsblPtrRecord($addr, $dnsResolver, $blackList, $record = 'A')
+    {
+        $reverseIp = $this->reverseIP($addr);
+        // dig @194.8.253.11 -4 +noall +answer +stats 2.0.0.127.xbl.spamhaus.org A
+        $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
+            ' +time=3 +tries=1 +noall +answer ' . $reverseIp . '.' . $blackList . ' ' . $record);
+        if (!empty($checkResult))
+            return true;
+        return false;
+    }
+
 
 
 
@@ -143,28 +166,6 @@ class NetworkTools
         }
         return $urlAddress;
     }*/
-
-    /**
-     * Check DNSBL PTR Record
-     * TODO: ipv6 support
-     * TODO: +stats , parse query time
-     * TODO: return string|boolean
-     * @param string $addr
-     * @param string $blackList
-     * @param string $record 'A,TXT,AAAA', default 'A'
-     * @return boolean
-     */
-    public function checkDnsblPtrRecord($addr, &$blackList, $record = 'A')
-    {
-        $reverseIp = $this->reverseIP($addr);
-        //$this->dnsResolvers = $dnsResolvers;
-        // dig @194.8.253.11 -4 +noall +answer +stats 2.0.0.127.xbl.spamhaus.org A
-        $checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() .
-            ' +time=3 +tries=1 +noall +answer ' . $reverseIp . '.' . $blackList . ' ' . $record);
-        if (!empty($checkResult))
-            return true;
-        return false;
-    }
 
     /**
      * Check string is domain like

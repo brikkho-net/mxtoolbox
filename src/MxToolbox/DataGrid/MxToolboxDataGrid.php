@@ -37,7 +37,7 @@ class MxToolboxDataGrid
     {
         if($fileSys instanceof BlacklistsHostnameFile)
             $this->fileSys = $fileSys;
-        if($fileSys instanceof NetworkTools)
+        if($netTool instanceof NetworkTools)
             $this->netTool = $netTool;
    }
 
