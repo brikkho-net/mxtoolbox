@@ -17,10 +17,16 @@ class NetworkTools extends DigQueryParser
     private $dnsResolvers;
     /** @var string Path where is dig */
     private $digPath;
-    /** @var string PTR record from the method checkExistPTR() */
-    private $recordPTR;
-    /** @var string domain name from the method checkExistPTR() */
+
+    /** Additional information for IP address
+     * @see getDomainDetailInfo()
+     */
+    /** @var string PTR record of ip address */
+    private $ptrRecord;
+    /** @var string of a domain name for ip address */
     private $domainName;
+    /** @var array of any mx records for ip address */
+    private $mxRecords;
 
     /**
      * Push one IP address of a DNS resolver to the resolvers list
@@ -89,18 +95,6 @@ class NetworkTools extends DigQueryParser
     }
 
     /**
-     * Get random DNS IP address from array
-     * @return mixed
-     * @throws MxToolboxLogicException
-     */
-    private function getRandomDNSResolverIP()
-    {
-        if (!count($this->dnsResolvers) > 0)
-            throw new MxToolboxLogicException('No DNS resolver here!');
-        return $this->dnsResolvers[array_rand($this->dnsResolvers, 1)];
-    }
-
-    /**
      * Check DNSBL PTR Record
      * TODO: ipv6 support
      * @param string $addr
@@ -115,6 +109,22 @@ class NetworkTools extends DigQueryParser
         $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
             ' +time=3 +tries=1 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
         return $checkResult;
+    }
+
+    /**
+     * Get some additional information about ip address as PTR,Domain name, MX records
+     * @param $addr
+     * @return array
+     */
+    public function getDomainDetailInfo(&$addr)
+    {
+        $info = array();
+        if ($this->checkExistPTR($addr)) {
+            $info['domainName'] = $this->domainName;
+            $info['ptrRecord'] = $this->ptrRecord;
+            $info['mxRecords'] = $this->getMxRecords($this->domainName);
+        }
+        return $info;
     }
 
     /**
@@ -177,57 +187,33 @@ class NetworkTools extends DigQueryParser
         throw new MxToolboxLogicException('IP address: ' . $addr . ' is not valid.');
     }
 
-    // under this not work
-
     /**
-     * Check string is domain like
-     * @param string $hostName
-     * @return bool
+     * Get random DNS IP address from array
+     * @return mixed
+     * @throws MxToolboxLogicException
      */
-    private function checkHostName($hostName)
+    private function getRandomDNSResolverIP()
     {
-        $validHostnameRegex = "/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/";
-        if (preg_match($validHostnameRegex, trim($hostName)))
-            return true;
-        return false;
-    }
-
-    /**
-     * Get PTR record
-     * @return mixed string|bool
-     */
-    public function getPTR()
-    {
-        if (!empty($this->recordPTR))
-            return $this->recordPTR;
-        return false;
-    }
-
-    /**
-     * Get domain name
-     * @return mixed string|bool
-     */
-    public function getDomainName()
-    {
-        if (!empty($this->domainName))
-            return $this->domainName;
-        return false;
+        if (!count($this->dnsResolvers) > 0)
+            throw new MxToolboxLogicException('No DNS resolver here!');
+        return $this->dnsResolvers[array_rand($this->dnsResolvers, 1)];
     }
 
     /**
      * Get MX records from domain name
      * @param string $hostName
-     * @return mixed - ARRAY with MX records or FALSE
+     * @return boolean
      */
-    public function getMXRecords($hostName)
+    private function getMxRecords($hostName)
     {
-        if ($this->checkHostName($hostName)) {
+        if (preg_match("/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/", trim($hostName))) {
             $ptr = dns_get_record($hostName, DNS_MX);
             if (isset($ptr[0]['target'])) {
                 $mxRecords = array();
                 foreach ($ptr as $mx)
                     $mxRecords[] = $mx['target'];
-                return $mxRecords;
+                $this->mxRecords = $mxRecords;
+                return $this->mxRecords;
             }
         }
         return false;
@@ -238,19 +224,20 @@ class NetworkTools extends DigQueryParser
      * @param string $addr
      * @return boolean
      */
-    public function checkExistPTR($addr)
+    private function checkExistPTR($addr)
     {
-        $this->recordPTR = '';
-        $this->domainName = '';
         if (!$this->validateIPAddress($addr))
             return false;
-        $ptr = dns_get_record($this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR);
-        if (isset($ptr[0]['target'])) {
-            $regs = array();
-            $this->recordPTR = $ptr[0]['target'];
-            if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $ptr[0]['target'], $regs))
-                $this->domainName = $regs['domain'];
-            return true;
+        $digResponse = $this->getDigResult($addr, $this->getRandomDNSResolverIP(), 'in-addr.arpa', 'PTR');
+        if ($this->isNoError($digResponse)) {
+            $ptr = dns_get_record($this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR);
+            if (isset($ptr[0]['target'])) {
+                $regs = array();
+                $this->ptrRecord = $ptr[0]['target'];
+                if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $ptr[0]['target'], $regs))
+                    $this->domainName = $regs['domain'];
+                return true;
+            }
         }
         return false;
     }

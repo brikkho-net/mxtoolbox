@@ -124,6 +124,19 @@ abstract class MxToolbox
     }
 
     /**
+     * Get some additional information about IP address (PTR record, Domain name, MX records )
+     * Array structure: ['domainName'],['ptrRecord'],['mxRecords'][array]
+     * @param $addr - ip address
+     * @return array|bool - return array or FALSE if no information here.
+     */
+    protected function getDomainInformation($addr) {
+        $info = $this->netTool->getDomainDetailInfo($addr);
+        if (count($info) > 0)
+            return $info;
+        return false;
+    }
+
+    /**
      * Refresh alive blacklists host names in static file (/blacklistsAlive.txt)
      * @return $this
      * @throws MxToolboxRuntimeException

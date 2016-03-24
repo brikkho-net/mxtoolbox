@@ -53,7 +53,7 @@ class DigQueryParser
     /**
      * Get query time value fron dig output
      * @param $digOutput
-     * @return mixed|bool
+     * @return string|bool
      */
     protected function getQueryTime(&$digOutput)
     {

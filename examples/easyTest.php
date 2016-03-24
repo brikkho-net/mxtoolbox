@@ -56,7 +56,7 @@ class easyTest extends MxToolbox
     {
 
         try {
-            $this->checkIpAddressOnDnsbl($addr);
+            //$this->checkIpAddressOnDnsbl($addr);
             /*
              * getBlacklistsArray() structure:
              * []['blHostName'] = dnsbl hostname
@@ -65,10 +65,9 @@ class easyTest extends MxToolbox
              * []['blResponse'] = true if DNSBL host name is alive and send test response before test
              * []['blQueryTime'] = false or response time of a last dig query
              */
-            var_dump($this->getBlacklistsArray());
+            //var_dump($this->getBlacklistsArray());
 
-            /*
-             * Clean old results before next test
+            /* Cleaning old results before next test
              * TRUE = check responses for all DNSBL again (default value)
              * FALSE = only cleaning old results (response = true)
              */
@@ -82,6 +81,14 @@ class easyTest extends MxToolbox
 
             // get DIG path
             //var_dump($this->getDigPath());
+            
+            /* Get additional iformation for IP address
+             * Array structure:
+             * ['domainName']
+             * ['ptrRecord']
+             * ['mxRecords'][array]
+             */
+            var_dump($this->getDomainInformation($addr));
 
         } catch (MxToolboxRuntimeException $e) {
             echo $e->getMessage();
@@ -99,4 +106,6 @@ $myBlacklist = array(
 
 $test = new easyTest($myBlacklist);
 $test->testMyIPAddress('41.71.171.23');
+$test->testMyIPAddress('194.8.253.5');
+
 
