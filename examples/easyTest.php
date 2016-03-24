@@ -5,6 +5,9 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../src/MxToolbox/autoload.php';
 
+/**
+ * Class easyTest
+ */
 class easyTest extends MxToolbox
 {
 
@@ -14,12 +17,11 @@ class easyTest extends MxToolbox
     /**
      * easyTest constructor.
      */
-    public function __construct()
+    public function __construct($myBlacklist)
     {
-        $this->myBlacklist = array(
-            0 => 'zen.spamhaus.org',
-            1 => 'xbl.spamhaus.org'
-        );
+        if(is_array($myBlacklist))
+            $this->myBlacklist = $myBlacklist;
+        // MxToolbox construct
         parent::__construct();
     }
 
@@ -39,15 +41,15 @@ class easyTest extends MxToolbox
             //->setDnsResolver('8.8.4.4')
 
             // load default blacklists
-            ->setBlacklists();
+            //->setBlacklists();
 
             // load your own blacklist array (will be auto validate on response)    
-            //->setBlacklists($this->myBlacklist);
+            ->setBlacklists($this->myBlacklist);
     }
 
     /**
      * Test IP address
-     * @param mixed $addr
+     * @param string $addr
      */
     public function testMyIPAddress($addr)
     {
@@ -61,7 +63,6 @@ class easyTest extends MxToolbox
              * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
              * []['blResponse'] = true if DNSBL host name is alive and send test response before test
              * []['blQueryTime'] = false or response time of a last dig query
-             *
              */
             var_dump($this->getBlacklistsArray());
 
@@ -71,10 +72,13 @@ class easyTest extends MxToolbox
              * FALSE = only cleaning old results (response = true)
              */
             $this->cleanBlacklistArray(false);
+
             // update the blacklistAlive.txt file
             //$this->updateAliveBlacklistFile();
+
             // get array with dns resolvers
             //var_dump($this->getDnsResolvers());
+
             // get DIG path
             //var_dump($this->getDigPath());
 
@@ -87,6 +91,11 @@ class easyTest extends MxToolbox
 
 }
 
-$test = new easyTest();
+$myBlacklist = array(
+    0 => 'zen.spamhaus.org',
+    1 => 'xbl.spamhaus.org'
+);
+
+$test = new easyTest($myBlacklist);
 $test->testMyIPAddress('41.71.171.23');
 
