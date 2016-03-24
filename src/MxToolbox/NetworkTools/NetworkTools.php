@@ -10,7 +10,7 @@ use MxToolbox\Exceptions\MxToolboxRuntimeException;
  * Class NetworkTools
  * @package MxToolbox\NetworkTools
  */
-class NetworkTools extends DigParser
+class NetworkTools extends DigQueryParser
 {
 
     /** @var array DNS resolvers IP addresses */
@@ -38,7 +38,7 @@ class NetworkTools extends DigParser
             $this->dnsResolvers[] = $addr;
             return $this;
         }
-        throw new MxToolboxLogicException('DNS Resolver: ' . $addr . ' do not response on port 53.');
+        throw new MxToolboxLogicException('DNS Resolver: tcp://' . $addr . ':53 can\'t open listening socket.');
     }
 
     /**
@@ -122,7 +122,8 @@ class NetworkTools extends DigParser
      * @param string $host
      * @return bool
      */
-    public function isDnsblResponse(&$host) {
+    public function isDnsblResponse(&$host)
+    {
         $digOutput = $this->getDigResult('127.0.0.2', $this->getRandomDNSResolverIP(), $host, 'A');
         if ($this->isNoError($digOutput))
             return true;
@@ -150,7 +151,7 @@ class NetworkTools extends DigParser
             unset($blackList);
             return $this;
         }
-        throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.',get_class(),__FUNCTION__));
+        throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
     }
 
     /**
@@ -191,5 +192,67 @@ class NetworkTools extends DigParser
         return false;
     }
 
+    /**
+     * Get PTR record
+     * @return mixed string|bool
+     */
+    public function getPTR()
+    {
+        if (!empty($this->recordPTR))
+            return $this->recordPTR;
+        return false;
+    }
+
+    /**
+     * Get domain name
+     * @return mixed string|bool
+     */
+    public function getDomainName()
+    {
+        if (!empty($this->domainName))
+            return $this->domainName;
+        return false;
+    }
+
+    /**
+     * Get MX records from domain name
+     * @param string $hostName
+     * @return mixed - ARRAY with MX records or FALSE
+     */
+    public function getMXRecords($hostName)
+    {
+        if ($this->checkHostName($hostName)) {
+            $ptr = dns_get_record($hostName, DNS_MX);
+            if (isset($ptr[0]['target'])) {
+                $mxRecords = array();
+                foreach ($ptr as $mx)
+                    $mxRecords[] = $mx['target'];
+                return $mxRecords;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Check if IP address have a PTR record
+     * @param string $addr
+     * @return boolean
+     */
+    public function checkExistPTR($addr)
+    {
+        $this->recordPTR = '';
+        $this->domainName = '';
+        if (!$this->validateIPAddress($addr))
+            return false;
+        $ptr = dns_get_record($this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR);
+        if (isset($ptr[0]['target'])) {
+            $regs = array();
+            $this->recordPTR = $ptr[0]['target'];
+            if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $ptr[0]['target'], $regs))
+                $this->domainName = $regs['domain'];
+            return true;
+        }
+        return false;
+    }
 
 }

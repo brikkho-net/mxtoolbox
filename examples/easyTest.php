@@ -8,13 +8,17 @@ require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../src/MxToolbox/autoloa
 class easyTest extends MxToolbox
 {
 
+    /** @var array - my own blacklist hostnames array */
     public $myBlacklist = array();
 
+    /**
+     * easyTest constructor.
+     */
     public function __construct()
     {
         $this->myBlacklist = array(
             0 => 'zen.spamhaus.org',
-            1 => 'zen2.spamhaus.org'
+            1 => 'xbl.spamhaus.org'
         );
         parent::__construct();
     }
@@ -26,11 +30,18 @@ class easyTest extends MxToolbox
     protected function configure()
     {
         $this
+            // path to the dig tool
             ->setDig('/usr/bin/dig')
+
+            // multiple set is allowed
             ->setDnsResolver('127.0.0.1')
-            //->setDnsResolver('194.8.253.11')
-            //->setDnsResolver('194.8.252.1')
+            //->setDnsResolver('8.8.8.8')
+            //->setDnsResolver('8.8.4.4')
+
+            // load default blacklists
             ->setBlacklists();
+
+            // load your own blacklist array (will be auto validate on response)    
             //->setBlacklists($this->myBlacklist);
     }
 
@@ -43,17 +54,26 @@ class easyTest extends MxToolbox
 
         try {
             $this->checkIpAddressOnDnsbl($addr);
+            /*
+             * getBlacklistsArray() structure:
+             * []['blHostName'] = dnsbl hostname
+             * []['blPositive'] = true if IP addres have the positive check
+             * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
+             * []['blResponse'] = true if DNSBL host name is alive and send test response before test
+             * []['blQueryTime'] = false or response time of a last dig query
+             *
+             */
             var_dump($this->getBlacklistsArray());
 
-            /**
+            /*
              * Clean old results before next test
-             * TRUE = +check on response for all again
-             * FALSE = only cleaning old results
+             * TRUE = check responses for all DNSBL again (default value)
+             * FALSE = only cleaning old results (response = true)
              */
             $this->cleanBlacklistArray(false);
-            // update blacklistAlive.txt
+            // update the blacklistAlive.txt file
             //$this->updateAliveBlacklistFile();
-            // get dns resolvers array
+            // get array with dns resolvers
             //var_dump($this->getDnsResolvers());
             // get DIG path
             //var_dump($this->getDigPath());
@@ -63,21 +83,10 @@ class easyTest extends MxToolbox
         } catch (MxToolboxLogicException $e) {
             echo $e->getMessage();
         }
-        // check IP address
-        //	$mxt->checkAllrBLS($addr);
-        /*
-        * Show result
-        * Structure:
-        * []['blHostName'] = DNSBL host name
-        * []['blPositive'] = true if IP addres have the positive check
-        * []['blPositiveResult'][] = array of a URL addresses if IP address have the positive check
-        * []['blResponse'] = true if DNSBL host name is alive and send test response before test
-        */
-        //	var_dump($mxt->getCheckResult());
     }
 
 }
 
 $test = new easyTest();
-$test->testMyIPAddress('127.0.0.2');
+$test->testMyIPAddress('41.71.171.23');
 

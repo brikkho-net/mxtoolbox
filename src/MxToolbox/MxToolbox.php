@@ -1,11 +1,11 @@
 <?php
 namespace MxToolbox;
 
+use MxToolbox\NetworkTools\NetworkTools;
 use MxToolbox\DataGrid\MxToolboxDataGrid;
+use MxToolbox\FileSystem\BlacklistsHostnameFile;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
-use MxToolbox\FileSystem\BlacklistsHostnameFile;
-use MxToolbox\NetworkTools\NetworkTools;
 
 /**
  * MxToolBox - test your IP address on very known spam databases and blacklists
@@ -26,24 +26,24 @@ abstract class MxToolbox
     private $dataGrid;
     /** @var NetworkTools */
     private $netTool;
-    
+
     /**
      * MxToolbox constructor.
      */
     public function __construct()
     {
-       try {
-           $this->netTool = new NetworkTools();
-           $this->fileSys = new BlacklistsHostnameFile();
-           $this->dataGrid = new MxToolboxDataGrid($this->fileSys, $this->netTool);
-           $this->configure();
-       } catch (MxToolboxLogicException $e) {
-           echo $e->getMessage();
-           exit(1);
-       } catch (MxToolboxRuntimeException $e) {
-           echo $e->getMessage();
-           exit(1);
-       }
+        try {
+            $this->netTool = new NetworkTools();
+            $this->fileSys = new BlacklistsHostnameFile();
+            $this->dataGrid = new MxToolboxDataGrid($this->fileSys, $this->netTool);
+            $this->configure();
+        } catch (MxToolboxLogicException $e) {
+            echo $e->getMessage();
+            exit(1);
+        } catch (MxToolboxRuntimeException $e) {
+            echo $e->getMessage();
+            exit(1);
+        }
     }
 
     /**
@@ -57,7 +57,8 @@ abstract class MxToolbox
      * @return $this
      * @throws MxToolboxLogicException
      */
-    protected function setDig($digPath) {
+    protected function setDig($digPath)
+    {
         $this->netTool->setDigPath($digPath);
         return $this;
     }
@@ -68,7 +69,8 @@ abstract class MxToolbox
      * @return $this
      * @throws MxToolboxLogicException
      */
-    protected function setDnsResolver($addr) {
+    protected function setDnsResolver($addr)
+    {
         $this->netTool->setDnsResolverIP($addr);
         return $this;
     }
@@ -79,12 +81,12 @@ abstract class MxToolbox
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    protected function setBlacklists(&$ownBlacklist = null) {
+    protected function setBlacklists(&$ownBlacklist = null)
+    {
         try {
             $this->dataGrid->buildBlacklistHostNamesArray($ownBlacklist);
             return $this;
-        }
-        catch (MxToolboxRuntimeException $e) {
+        } catch (MxToolboxRuntimeException $e) {
             if ($e->getCode() == 400) {
                 $this->dataGrid->buildNewBlacklistHostNames();
                 return $this;
@@ -97,7 +99,8 @@ abstract class MxToolbox
      * Get DNS resolvers
      * @return array
      */
-    protected function getDnsResolvers() {
+    protected function getDnsResolvers()
+    {
         return $this->netTool->getDnsResolvers();
     }
 
@@ -105,7 +108,8 @@ abstract class MxToolbox
      * Get DIG path
      * @return string
      */
-    protected function getDigPath() {
+    protected function getDigPath()
+    {
         return $this->netTool->getDigPath();
     }
 
@@ -125,7 +129,8 @@ abstract class MxToolbox
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    protected function updateAliveBlacklistFile() {
+    protected function updateAliveBlacklistFile()
+    {
         $this->fileSys->deleteAliveBlacklist();
         $this->setBlacklists();
         return $this;
@@ -133,10 +138,13 @@ abstract class MxToolbox
 
     /**
      * Clean blacklist array from previous search
+     *
      * @param bool $checkResponse - default TRUE, FALSE is faster but without check DNSBL response
      * @return $this
+     * @throws MxToolboxLogicException
      */
-    protected function cleanBlacklistArray($checkResponse = true) {
+    protected function cleanBlacklistArray($checkResponse = true)
+    {
         $this->dataGrid->cleanPrevResults($checkResponse);
         return $this;
     }
@@ -145,76 +153,12 @@ abstract class MxToolbox
      * Check IP address on all DNSBL servers
      * @param string $addr
      * @return $this
+     * @throws MxToolboxRuntimeException
      */
-    protected function checkIpAddressOnDnsbl(&$addr) {
+    protected function checkIpAddressOnDnsbl(&$addr)
+    {
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
         return $this;
     }
-    
-    // not ok under this
-    
-    /**
-     * Get PTR record
-     * @return mixed string|bool
-     */
-    public function getPTR()
-    {
-        if (!empty($this->recordPTR))
-            return $this->recordPTR;
-        return false;
-    }
-
-    /**
-     * Get domain name
-     * @return mixed string|bool
-     */
-    public function getDomainName()
-    {
-        if (!empty($this->domainName))
-            return $this->domainName;
-        return false;
-    }
-
-    /**
-     * Get MX records from domain name
-     * @param string $hostName
-     * @return mixed - ARRAY with MX records or FALSE
-     */
-    public function getMXRecords($hostName)
-    {
-        if ($this->checkHostName($hostName)) {
-            $ptr = dns_get_record($hostName, DNS_MX);
-            if (isset($ptr[0]['target'])) {
-                $mxRecords = array();
-                foreach ($ptr as $mx)
-                    $mxRecords[] = $mx['target'];
-                return $mxRecords;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Check if IP address have a PTR record
-     * @param string $addr
-     * @return boolean
-     */
-    public function checkExistPTR($addr)
-    {
-        $this->recordPTR = '';
-        $this->domainName = '';
-        if (!$this->validateIPAddress($addr))
-            return false;
-        $ptr = dns_get_record($this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR);
-        if (isset($ptr[0]['target'])) {
-            $regs = array();
-            $this->recordPTR = $ptr[0]['target'];
-            if (preg_match('/(?P<domain>[a-z0-9][a-z0-9\-]{1,63}\.[a-z\.]{2,6})$/i', $ptr[0]['target'], $regs))
-                $this->domainName = $regs['domain'];
-            return true;
-        }
-        return false;
-    }
-
 
 }

@@ -1,5 +1,4 @@
 <?php
-
 namespace MxToolbox\FileSystem;
 
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
@@ -109,7 +108,8 @@ class BlacklistsHostnameFile
      * @return $this
      * @throws MxToolboxRuntimeException
      */
-    public function deleteAliveBlacklist() {
+    public function deleteAliveBlacklist()
+    {
         $blAliveFile = $this->blacklistPath . 'blacklistsAlive.txt';
         if (!is_readable($blAliveFile))
             throw new MxToolboxRuntimeException("File does not exist: " . $blAliveFile);
@@ -117,4 +117,5 @@ class BlacklistsHostnameFile
         return $this;
 
     }
+
 }

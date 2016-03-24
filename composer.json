@@ -21,10 +21,10 @@
   "autoload": {
     "psr-4": {
       "MxToolbox\\": "src/MxToolbox",
-      "MxToolbox\\FileSystem\\": "src/MxToolbox/FileSystem",
-      "MxToolbox\\Exceptions\\": "src/MxToolbox/Exceptions",
-      "MxToolbox\\NetworkTools\\": "src/MxToolbox/NetworkTools",
       "MxToolbox\\DataGrid\\": "src/MxToolbox/DataGrid",
+      "MxToolbox\\Exceptions\\": "src/MxToolbox/Exceptions",
+      "MxToolbox\\FileSystem\\": "src/MxToolbox/FileSystem",
+      "MxToolbox\\NetworkTools\\": "src/MxToolbox/NetworkTools",
     }
   }
 }

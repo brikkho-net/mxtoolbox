@@ -5,7 +5,7 @@ namespace MxToolbox\NetworkTools;
  * Class DigParser
  * @package MxToolbox\NetworkTools
  */
-class DigParser
+class DigQueryParser
 {
     /*
     NOERROR (RCODE:0) : DNS Query completed successfully
