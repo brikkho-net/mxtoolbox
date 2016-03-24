@@ -16,11 +16,13 @@ class NetworkTools
     private $dnsResolvers;
     /** @var string Path where is dig */
     private $digPath;
+    /** @var  NetworkTools obj */
+    private $netTool;
     /** @var string PTR record from the method checkExistPTR() */
     private $recordPTR;
     /** @var string domain name from the method checkExistPTR() */
     private $domainName;
-
+    
     /**
      * Push one IP address of a DNS resolver to the resolvers list
      * (tcp port 53 must be open)
@@ -60,18 +62,29 @@ class NetworkTools
      * @see @link https://tools.ietf.org/html/rfc5782 cap. 5
      * @return \MxToolbox\DataGrid\MxToolboxDataGrid
      */
-    public function setDnsblResponse(&$testResults, NetworkTools &$netTool)
+    public function setDnsblResponse(&$testResults)
     {
         foreach ($testResults as $key => $val) {
-            if ($this->checkDnsblPtrRecord('127.0.0.2', $netTool->getDnsResolvers(), $val['blHostName'], 'A'))
+            if ($this->checkDnsblPtrRecord('127.0.0.2', $this->getDnsResolvers(), $val['blHostName'], 'A'))
                 $testResults[$key]['blResponse'] = true;
         }
         return $this;
     }
 
-
+    /**
+     * Get Dns resolvers array
+     * @return array
+     */
     public function &getDnsResolvers() {
         return $this->dnsResolvers;
+    }
+
+    /**
+     * Get DIG path
+     * @return string
+     */
+    public function &getDigPath() {
+        return $this->digPath;
     }
     
     /**
@@ -92,11 +105,11 @@ class NetworkTools
      * @param string $addr
      * @return boolean - TRUE if process is done, FALSE on non valid IP address or if the blacklist is not loaded
      */
-    public function checkAllDnsbl($addr,&$testResult, NetworkTools &$netTool)
+    public function checkAllDnsbl($addr,&$testResult)
     {
         if ($this->validateIPAddress($addr) && count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
-                if ($this->checkDnsblPtrRecord($addr, $netTool->getDnsResolvers(), $blackList['blHostName'], 'A')) {
+                if ($this->checkDnsblPtrRecord($addr, $this->getDnsResolvers(), $blackList['blHostName'], 'A')) {
                     $blackList['blPositive'] = true;
                     //$blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
                 }
@@ -141,10 +154,10 @@ class NetworkTools
      * @param string $record 'A,TXT,AAAA', default 'A'
      * @return boolean
      */
-    public function checkDnsblPtrRecord($addr, &$dnsResolvers, &$blackList, $record = 'A')
+    public function checkDnsblPtrRecord($addr, &$blackList, $record = 'A')
     {
         $reverseIp = $this->reverseIP($addr);
-        $this->dnsResolvers = $dnsResolvers;
+        //$this->dnsResolvers = $dnsResolvers;
         // dig @194.8.253.11 -4 +noall +answer +stats 2.0.0.127.xbl.spamhaus.org A
         $checkResult = shell_exec($this->digPath . ' @' . $this->getRandomDNSResolverIP() .
             ' +time=3 +tries=1 +noall +answer ' . $reverseIp . '.' . $blackList . ' ' . $record);

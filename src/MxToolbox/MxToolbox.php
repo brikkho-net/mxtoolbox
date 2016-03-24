@@ -30,9 +30,9 @@ abstract class MxToolbox
     public function __construct()
     {
        try {
-           $this->fileSys = new BlacklistsHostnameFile();
            $this->netTool = new NetworkTools();
-           $this->dataGrid = new MxToolboxDataGrid();
+           $this->fileSys = new BlacklistsHostnameFile();
+           $this->dataGrid = new MxToolboxDataGrid($this->fileSys, $this->netTool);
            $this->configure();
        } catch (MxToolboxLogicException $e) {
            echo $e->getMessage();
@@ -68,6 +68,22 @@ abstract class MxToolbox
     protected function setDnsResolver($addr) {
         $this->netTool->setDnsResolverIP($addr);
         return $this;
+    }
+
+    /**
+     * Get DNS resolvers
+     * @return array
+     */
+    protected function getDnsResolvers() {
+        return $this->netTool->getDnsResolvers();
+    }
+
+    /**
+     * Get DIG path
+     * @return string
+     */
+    protected function getDigPath() {
+        return $this->netTool->getDigPath();
     }
 
     /**

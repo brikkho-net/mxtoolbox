@@ -11,7 +11,7 @@ use MxToolbox\NetworkTools\NetworkTools;
  */
 class MxToolboxDataGrid
 {
-
+    
     /**
      * Structure:
      * []['blHostName'] = dnsbl hostname
@@ -23,12 +23,24 @@ class MxToolboxDataGrid
      * @var array for dnsbl tests
      */
     protected $testResult;
+    /** @var NetworkTools */
+    private $netTool;
+    /** @var BlacklistsHostnameFile  */
+    private $fileSys;
 
     /**
      * Get test results array
      * @return array
      * @throws MxToolboxLogicException
      */
+    public function __construct(BlacklistsHostnameFile &$fileSys, NetworkTools &$netTool)
+    {
+        if($fileSys instanceof BlacklistsHostnameFile)
+            $this->fileSys = $fileSys;
+        if($fileSys instanceof NetworkTools)
+            $this->netTool = $netTool;
+   }
+
     public function &getTestResultArray()
     {
         if ($this->isArrayInitialized($this->testResult))
@@ -43,29 +55,29 @@ class MxToolboxDataGrid
      * @throws MxToolboxRuntimeException;
      * @throws MxToolboxLogicException;
      */
-    public function buildBlacklistHostnamesArray(BlacklistsHostnameFile &$fileSys, &$blacklistHostNames = NULL)
+    public function buildBlacklistHostnamesArray(&$blacklistHostNames = NULL)
     {
         if (is_null($blacklistHostNames) || !is_array($blacklistHostNames)) {
-            $fileSys->loadBlacklistsFromFile('blacklistsAlive.txt');
-            $this->setTestResultArray($fileSys->getBlacklistsHostNames(), true);
+            $this->fileSys->loadBlacklistsFromFile('blacklistsAlive.txt');
+            $this->setTestResultArray($this->fileSys->getBlacklistsHostNames(), true);
             return $this;
         }
         $this->setTestResultArray($blacklistHostNames, true);
         return $this;
     }
 
-    public function buildNewBlacklistHostNames(BlacklistsHostnameFile &$fileSys, NetworkTools &$netTool)
+    public function buildNewBlacklistHostNames()
     {
-        $fileSys->loadBlacklistsFromFile('blacklists.txt');
-        $this->setTestResultArray($fileSys->getBlacklistsHostNames(), false);
+        $this->fileSys->loadBlacklistsFromFile('blacklists.txt');
+        $this->setTestResultArray($this->fileSys->getBlacklistsHostNames(), false);
         
         if ($this->isArrayInitialized($this->getTestResultArray())) {
-            $fileSys->makeAliveBlacklistFile(
+            $this->fileSys->makeAliveBlacklistFile(
                 $this->getTestResultArray(
-                    $netTool->setDnsblResponse($this->getTestResultArray(),$netTool)
+                    $this->netTool->setDnsblResponse($this->getTestResultArray())
                 )
             );
-            $this->buildBlacklistHostnamesArray($fileSys, $netTool);
+            $this->buildBlacklistHostnamesArray($this->fileSys->getBlacklistsHostNames());
             return $this;
         }
         throw new MxToolboxLogicException(sprintf('Array is empty in %s\%s()', get_class(), __FUNCTION__));
