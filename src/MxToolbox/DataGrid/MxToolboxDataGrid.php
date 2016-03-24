@@ -115,14 +115,18 @@ class MxToolboxDataGrid
 
     /**
      * Clean previous results, reinitialize array
+     * @param bool $checkResponse - FALSE is faster but without check DNSBL response
      * @return $this
      * @throws MxToolboxLogicException
      */
-    public function cleanPrevResults()
+    public function cleanPrevResults($checkResponse = true)
     {
         if ($this->isArrayInitialized($this->testResult)) {
             foreach ($this->testResult as $index => &$blackList) {
-                $this->testResult[$index]['blResponse'] = $this->netTool->isDnsblResponse($this->testResult[$index]['blHostName']);
+                // here is default true because blacklist is loaded from alive file 
+                $this->testResult[$index]['blResponse'] = true;
+                if ($checkResponse)
+                    $this->testResult[$index]['blResponse'] = $this->netTool->isDnsblResponse($this->testResult[$index]['blHostName']);
                 $this->testResult[$index]['blPositive'] = false;
                 $this->testResult[$index]['blPositiveResult'] = array();
                 $this->testResult[$index]['blQueryTime'] = false;

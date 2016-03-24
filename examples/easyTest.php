@@ -28,10 +28,10 @@ class easyTest extends MxToolbox
         $this
             ->setDig('/usr/bin/dig')
             ->setDnsResolver('127.0.0.1')
-//            ->setDnsResolver('194.8.253.11')
-            /*            ->setDnsResolver('194.8.252.1')*/
+            //->setDnsResolver('194.8.253.11')
+            //->setDnsResolver('194.8.252.1')
             ->setBlacklists();
-        //->setBlacklists($this->myBlacklist);
+            //->setBlacklists($this->myBlacklist);
     }
 
     /**
@@ -44,15 +44,18 @@ class easyTest extends MxToolbox
         try {
             $this->checkIpAddressOnDnsbl($addr);
             var_dump($this->getBlacklistsArray());
-//            $stdin = fopen('php://stdin', 'r');
-//            $response = fgetc($stdin);
-//            fclose($stdin);
-//            $this->cleanBlacklistArray();
-//            $this->updateAliveBlacklistFile();
-//            var_dump($this->getBlacklistsArray());
-            //$this->checkIpAddressOnDnsbl($addr);
-            //var_dump($this->getBlacklistsArray());
+
+            /**
+             * Clean old results before next test
+             * TRUE = +check on response for all again
+             * FALSE = only cleaning old results
+             */
+            $this->cleanBlacklistArray(false);
+            // update blacklistAlive.txt
+            //$this->updateAliveBlacklistFile();
+            // get dns resolvers array
             //var_dump($this->getDnsResolvers());
+            // get DIG path
             //var_dump($this->getDigPath());
 
         } catch (MxToolboxRuntimeException $e) {
@@ -76,6 +79,5 @@ class easyTest extends MxToolbox
 }
 
 $test = new easyTest();
-//$test->testMyIPAddress('127.0.0.2');
-$test->testMyIPAddress('194.8.253.5');
+$test->testMyIPAddress('127.0.0.2');
 

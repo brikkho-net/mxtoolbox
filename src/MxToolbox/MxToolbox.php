@@ -133,10 +133,11 @@ abstract class MxToolbox
 
     /**
      * Clean blacklist array from previous search
+     * @param bool $checkResponse - default TRUE, FALSE is faster but without check DNSBL response
      * @return $this
      */
-    protected function cleanBlacklistArray() {
-        $this->dataGrid->cleanPrevResults();
+    protected function cleanBlacklistArray($checkResponse = true) {
+        $this->dataGrid->cleanPrevResults($checkResponse);
         return $this;
     }
 
