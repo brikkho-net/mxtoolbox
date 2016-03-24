@@ -5,84 +5,115 @@ namespace MxToolbox\FileSystem;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 
-class BlacklistsHostnameFile {
+/**
+ * Class BlacklistsHostnameFile
+ * @package MxToolbox\FileSystem
+ */
+class BlacklistsHostnameFile
+{
 
-	/** @var array blacklists */
-	private $blacklistHostNames;
+    /** @var array blacklists */
+    private $blacklistHostNames;
 
-	/**
-	 * Get blacklist hostnames
-	 * 
-	 * @return array
-	 * @throws MxToolboxLogicException
-	 */
-	public function &getBlacklistsHostNames() {
-		if ( is_array($this->blacklistHostNames) && count($this->blacklistHostNames) > 0 )
-			return $this->blacklistHostNames;
-		throw new MxToolboxLogicException('Array is empty, load blacklist first.');
-	}
+    /** @var string path to blacklist files folder */
+    private $blacklistPath;
 
-	/**
-	 * Load blacklists from the file
-	 * 
-	 * @param string $fileName
-	 * @throws MxToolboxRuntimeException;
-	 * @throws MxToolboxLogicException;
-	 * @return $this
-	 */
-	public function loadBlacklistsFromFile($fileName) {
-		$this->blacklistHostNames = array();
-		$blFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . $fileName;
-		if ( !is_readable( $blFile ) )
-			throw new MxToolboxRuntimeException("Blacklists file is not readable: " . $blFile, 400);
+    /**
+     * BlacklistsHostnameFile constructor.
+     */
+    public function __construct()
+    {
+        $this->blacklistPath = dirname(__FILE__) . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR;
+    }
 
-		if ( !( $this->blacklistHostNames = file( $blFile, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES )) === false ) {
-			if ( ! count($this->blacklistHostNames) > 0 ) {
-				throw new MxToolboxLogicException("Blacklist file is empty: " . $blFile);
-			}
-			return $this;
-		}
-		throw new MxToolboxRuntimeException("Cannot get contents from blacklists file: " . $blFile, 500);
-	}
+    /**
+     * Get blacklists host names
+     *
+     * @return array
+     * @throws MxToolboxLogicException
+     */
+    public function &getBlacklistsHostNames()
+    {
+        if (is_array($this->blacklistHostNames) && count($this->blacklistHostNames) > 0)
+            return $this->blacklistHostNames;
+        throw new MxToolboxLogicException('Array is empty, load blacklist first.');
+    }
 
-	/**
-	 * Build new file with alive DNSBLs hostnames (refresh is ideal for frequent testing)
-	 * 
-	 * @param array $aliveBlacklists
-	 * @return $this
-	 * @throws MxToolboxRuntimeException
-	 */
-	public function makeAliveBlacklistFile(&$aliveBlacklists) {
-		//print_r($aliveBlacklists);
-		//exit;
-		if ( !array_key_exists('blHostName', $aliveBlacklists[0]))
-			throw new MxToolboxLogicException("Cannot found index ['blHostName'] in array. Build test array first.");
+    /**
+     * Load blacklists hostnames from a file
+     *
+     * @param string $fileName
+     * @throws MxToolboxRuntimeException;
+     * @throws MxToolboxLogicException;
+     * @return $this
+     */
+    public function loadBlacklistsFromFile($fileName)
+    {
+        $blFile = $this->blacklistPath . $fileName;
+        if (!is_readable($blFile))
+            throw new MxToolboxRuntimeException("Blacklists file does not exist", 400);
 
-			$blAliveFileTmp = dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . $blAlivePath . 'blacklistsAlive.tmp';
-		$blAliveFileOrg = dirname ( __FILE__ ) . DIRECTORY_SEPARATOR . $blAlivePath . 'blacklistsAlive.txt';
+        if (!($this->blacklistHostNames = file($blFile, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES)) === false) {
+            if (!count($this->blacklistHostNames) > 0) {
+                throw new MxToolboxLogicException(sprintf('Blacklist file' . $blFile . ' is empty in %s\%s()',
+                    get_class(), __FUNCTION__));
+            }
+            return $this;
+        }
+        throw new MxToolboxRuntimeException(sprintf('Cannot get contents from: ' . $blFile . ' in %s\%s()',
+            get_class(), __FUNCTION__), 500);
+    }
 
-		// create temp file
-		if (! @$file = fopen ( $blAliveFileTmp, 'w' ))
-			throw new MxToolboxRuntimeException ( 'Cannot create new file: ' . $blAliveFileTmp );
+    /**
+     * Build new file with alive DNSBLs host names (refresh is ideal for frequent testing)
+     *
+     * @param array $aliveBlacklists
+     * @return $this
+     * @throws MxToolboxRuntimeException
+     */
+    public function makeAliveBlacklistFile(&$aliveBlacklists)
+    {
+        if (!array_key_exists('blHostName', $aliveBlacklists[0]))
+            throw new MxToolboxLogicException("Cannot found index ['blHostName'] in array. Build test array first.");
 
-		foreach ( $aliveBlacklists as &$blackList ) {
-			if ( $blackList['blResponse'] )
-				fwrite( $file, $blackList ['blHostName'] . PHP_EOL );
-		}
+        $blAliveFileTmp = $this->blacklistPath . 'blacklistsAlive.tmp';
+        $blAliveFileOrg = $this->blacklistPath . 'blacklistsAlive.txt';
 
-		unset($blackList);
-		fclose($file);
+        // create temp file
+        if (!@$file = fopen($blAliveFileTmp, 'w'))
+            throw new MxToolboxRuntimeException ('Cannot create new file: ' . $blAliveFileTmp);
 
-		// check filesize
-		if ( !filesize( $blAliveFileTmp ) > 0) {
-			@unlink($blAliveFileTmp);
-			throw new MxToolboxRuntimeException ( 'Blacklist temp file is empty: ' . $blAliveFileTmp );
-		}
-		// create new blacklist
-		if ( !rename( $blAliveFileTmp, $blAliveFileOrg ) )
-			throw new MxToolboxRuntimeException( 'Cannot create Alive Blaclist file. Rename the file failed.' );
+        foreach ($aliveBlacklists as &$blackList) {
+            if ($blackList['blResponse'])
+                fwrite($file, $blackList ['blHostName'] . PHP_EOL);
+        }
 
-		return $this;
-	}
-	
+        unset($blackList);
+        fclose($file);
+
+        // check filesize
+        if (!filesize($blAliveFileTmp) > 0) {
+            @unlink($blAliveFileTmp);
+            throw new MxToolboxRuntimeException ('Blacklist temp file is empty: ' . $blAliveFileTmp);
+        }
+        // create new blacklist file from temp
+        if (!rename($blAliveFileTmp, $blAliveFileOrg))
+            throw new MxToolboxRuntimeException('Cannot create Alive Blaclist file. Rename the file failed.');
+
+        return $this;
+    }
+
+    /**
+     * Delete alive blacklists file
+     * @return $this
+     * @throws MxToolboxRuntimeException
+     */
+    public function deleteAliveBlacklist() {
+        $blAliveFile = $this->blacklistPath . 'blacklistsAlive.txt';
+        if (!is_readable($blAliveFile))
+            throw new MxToolboxRuntimeException("File does not exist: " . $blAliveFile);
+        @unlink($blAliveFile);
+        return $this;
+
+    }
 }

@@ -1,9 +1,11 @@
 <?php
 namespace MxToolbox;
 
+use MxToolbox\DataGrid\MxToolboxDataGrid;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\FileSystem\BlacklistsHostnameFile;
+use MxToolbox\NetworkTools\NetworkTools;
 
 /**
  * MxToolBox - test your IP address on very known spam databases and blacklists
@@ -16,89 +18,107 @@ use MxToolbox\FileSystem\BlacklistsHostnameFile;
  * @version 0.0.2-dev
  *
  */
-class MxToolbox extends AbstractMxToolbox
+abstract class MxToolbox
 {
 
+    private $fileSys;
+    private $dataGrid;
+    private $netTool;
     /**
      * MxToolbox constructor.
      */
     public function __construct()
     {
-        $this->configure();
+       try {
+           $this->fileSys = new BlacklistsHostnameFile();
+           $this->netTool = new NetworkTools();
+           $this->dataGrid = new MxToolboxDataGrid();
+           $this->configure();
+       } catch (MxToolboxLogicException $e) {
+           echo $e->getMessage();
+           exit(1);
+       } catch (MxToolboxRuntimeException $e) {
+           echo $e->getMessage();
+           exit(1);
+       }
     }
 
     /**
-     * Configures the current command.
+     * Configure MxToolbox.
      */
-    protected function configure()
-    {
-    }
+    abstract protected function configure();
 
     /**
-     * Load blacklist and create test array
-     * @param array $blacklistHostNames - optional (you may use your own blaclist array)
+     * Set dig path, etc: /usr/bin/dig
+     * @param string $digPath
      * @return $this
-     * @throws MxToolboxRuntimeException;
-     * @throws MxToolboxLogicException;
+     * @throws MxToolboxLogicException
      */
-    public function buildBlacklistHostnamesArray(&$blacklistHostNames = NULL)
-    {
-        if (is_null($blacklistHostNames)) {
-            $hosts = new BlacklistsHostnameFile();
-            try {
-                $hosts->loadBlacklistsFromFile('blacklistsAlive.txt');
-                $this->setTestResultArray($hosts->getBlacklistsHostNames());
-                return $this;
-            } catch (MxToolboxRuntimeException $e) {
-                if ($e->getCode() == 400) {
-                    $hosts->loadBlacklistsFromFile('blacklists.txt');
-                    $this->setTestResultArray($hosts->getBlacklistsHostNames());
-                    $hosts->makeAliveBlacklistFile($this->setDnsblResponse()->getTestResultArray());
-                    return $this;
-                }
-                return $e;
-            }
-        }
-        $this->setTestResultArray($blacklistHostNames);
+    protected function setDig($digPath) {
+        $this->netTool->setDigPath($digPath);
         return $this;
     }
 
     /**
-     * Get test blacklist array
+     * Set DNS resolver IP address (support for multiples push)
+     * @param string $addr
+     * @return $this
+     * @throws MxToolboxLogicException
+     */
+    protected function setDnsResolver($addr) {
+        $this->netTool->setDnsResolverIP($addr);
+        return $this;
+    }
+
+    /**
+     * @param array $ownBlacklist optional, default nothing
+     * @return $this
+     * @throws MxToolboxRuntimeException
+     * @throws MxToolboxLogicException
+     */
+    protected function setBlacklists(&$ownBlacklist = null) {
+        try {
+            $this->dataGrid->buildBlacklistHostnamesArray($this->fileSys, $ownBlacklist);
+            return $this;
+        }
+        catch (MxToolboxRuntimeException $e) {
+            if ($e->getCode() == 400) {
+                $this->dataGrid->buildNewBlacklistHostNames($this->fileSys,$this->netTool);
+                return $this;
+            }
+            return $e;
+        }
+    }
+
+    /**
+     * Get blacklists array.
      * @return array
      * @throws MxToolboxLogicException
      */
-    public function &getTestBlacklistsArray()
+    protected function &getBlacklistsArray()
     {
-        if (is_array($this->getTestResultArray()) && count($this->getTestResultArray()) > 0)
-            return $this->getTestResultArray();
-        throw new MxToolboxLogicException('Array is empty. Call buildBlacklistHostnamesArray() first.');
+        return $this->dataGrid->getTestResultArray();
     }
-
-    //sprintf('The command defined in "%s" cannot have an empty name.', get_class($this))
 
     /**
-     * Check all (use only alive rBLS - fast check!)
-     * @param string $addr
-     * @return boolean - TRUE if process is done, FALSE on non valid IP address or if the blacklist is not loaded
+     * Refresh alive blacklists host names in static file (/blacklistsAlive.txt)
+     * @return $this
+     * @throws MxToolboxRuntimeException
+     * @throws MxToolboxLogicException
      */
-    public function checkAllDnsbl($addr)
-    {
-        $this->checkDigPath();
-        if ($this->validateIPAddress($addr) && count($this->testResult) > 0) {
-            foreach ($this->testResult as &$blackList) {
-                if ($this->checkDnsblPtrRecord($addr, $blackList['blHostName'])) {
-                    $blackList['blPositive'] = true;
-                    $blackList['blPositiveResult'] = $this->getUrlForPositveCheck($addr, $blackList['blHostName']);
-                }
-            }
-            unset($blackList);
-            return true;
-        }
-        $this->testResult = array();
-        return false;
+    protected function updateAliveBlacklistFile() {
+        $this->fileSys->deleteAliveBlacklist();
+        $this->setBlacklists();
+        return $this;
     }
-
+    
+    protected function checkIpAddressOnDnsbl(&$addr) {
+        $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray(), $this->netTool);
+        return $this;
+    }
+    
+    // not ok under this
+    
     /**
      * Get PTR record
      * @return mixed string|bool
