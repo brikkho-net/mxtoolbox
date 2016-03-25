@@ -86,7 +86,6 @@ class MxToolboxTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('array', $mxt->getBlacklistsArray());
     }
 
-
     /** test check IP address in DNSBL and clean results for next test */
     public function testCheckIpDnsblCleanArray() {
         $mxt = new MxTestTool('/usr/bin/dig','8.8.8.8');
