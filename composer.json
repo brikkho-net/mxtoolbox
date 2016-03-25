@@ -4,12 +4,14 @@
   "type": "library",
   "license": "MIT",
   "keywords": [
-    "mxtoolbox"
+    "mxtoolbox",
+    "dnsbl",
+    "blacklist"
   ],
   "authors": [
     {
       "name": "Lubomir Spacek",
-      "homepage": "https://best-hosting.cz",
+      "homepage": "https://best-hosting.cz"
     }
   ],
   "require": {
@@ -24,7 +26,7 @@
       "MxToolbox\\DataGrid\\": "src/MxToolbox/DataGrid",
       "MxToolbox\\Exceptions\\": "src/MxToolbox/Exceptions",
       "MxToolbox\\FileSystem\\": "src/MxToolbox/FileSystem",
-      "MxToolbox\\NetworkTools\\": "src/MxToolbox/NetworkTools",
+      "MxToolbox\\NetworkTools\\": "src/MxToolbox/NetworkTools"
     }
   }
 }
