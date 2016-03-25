@@ -61,7 +61,5 @@ class easyTest extends MxToolbox
 
 }
 
-$test = new easyTest($myBlacklist);
+$test = new easyTest();
 $test->testMyIPAddress('8.8.8.8');
-
-
