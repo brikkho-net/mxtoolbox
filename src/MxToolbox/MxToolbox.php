@@ -28,27 +28,21 @@ abstract class MxToolbox
 
     /**
      * MxToolbox constructor.
+     * @throws MxToolboxLogicException
+     * @throws MxToolboxRuntimeException
      */
     public function __construct()
     {
-        try {
-            $this->netTool = new NetworkTools();
-            $this->fileSys = new BlacklistsHostnameFile();
-            $this->dataGrid = new MxToolboxDataGrid($this->fileSys, $this->netTool);
-            $this->configure();
-        } catch (MxToolboxLogicException $e) {
-            echo $e->getMessage();
-            exit(1);
-        } catch (MxToolboxRuntimeException $e) {
-            echo $e->getMessage();
-            exit(1);
-        }
+        $this->netTool = new NetworkTools();
+        $this->fileSys = new BlacklistsHostnameFile();
+        $this->dataGrid = new MxToolboxDataGrid($this->fileSys, $this->netTool);
+        $this->configure();
     }
 
     /**
      * Configure MxToolbox.
      */
-    abstract protected function configure();
+    abstract public function configure();
 
     /**
      * Set dig path, etc: /usr/bin/dig
@@ -56,7 +50,7 @@ abstract class MxToolbox
      * @return $this
      * @throws MxToolboxLogicException
      */
-    protected function setDig($digPath)
+    public function setDig($digPath)
     {
         $this->netTool->setDigPath($digPath);
         return $this;
@@ -68,7 +62,7 @@ abstract class MxToolbox
      * @return $this
      * @throws MxToolboxLogicException
      */
-    protected function setDnsResolver($addr)
+    public function setDnsResolver($addr)
     {
         $this->netTool->setDnsResolverIP($addr);
         return $this;
@@ -80,7 +74,7 @@ abstract class MxToolbox
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    protected function setBlacklists(&$ownBlacklist = null)
+    public function setBlacklists(&$ownBlacklist = null)
     {
         try {
             $this->dataGrid->buildBlacklistHostNamesArray($ownBlacklist);
@@ -98,7 +92,7 @@ abstract class MxToolbox
      * Get DNS resolvers
      * @return array
      */
-    protected function getDnsResolvers()
+    public function getDnsResolvers()
     {
         return $this->netTool->getDnsResolvers();
     }
@@ -107,7 +101,7 @@ abstract class MxToolbox
      * Get DIG path
      * @return string
      */
-    protected function getDigPath()
+    public function getDigPath()
     {
         return $this->netTool->getDigPath();
     }
@@ -117,7 +111,7 @@ abstract class MxToolbox
      * @return array
      * @throws MxToolboxLogicException
      */
-    protected function &getBlacklistsArray()
+    public function &getBlacklistsArray()
     {
         return $this->dataGrid->getTestResultArray();
     }
@@ -128,7 +122,7 @@ abstract class MxToolbox
      * @param $addr - ip address
      * @return array|bool - return array or FALSE if no information here.
      */
-    protected function getDomainInformation($addr)
+    public function getDomainInformation($addr)
     {
         $info = $this->netTool->getDomainDetailInfo($addr);
         if (count($info) > 0)
@@ -142,7 +136,7 @@ abstract class MxToolbox
      * @param $addr - ip address
      * @return bool
      */
-    protected function isMailServer($addr)
+    public function isMailServer($addr)
     {
         if ($info = $this->getDomainInformation($addr)) {
             if (!in_array($info['ptrRecord'], $info['mxRecords']) === false)
@@ -157,7 +151,7 @@ abstract class MxToolbox
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    protected function updateAliveBlacklistFile()
+    public function updateAliveBlacklistFile()
     {
         $this->fileSys->deleteAliveBlacklist();
         $this->setBlacklists();
@@ -171,7 +165,7 @@ abstract class MxToolbox
      * @return $this
      * @throws MxToolboxLogicException
      */
-    protected function cleanBlacklistArray($checkResponse = true)
+    public function cleanBlacklistArray($checkResponse = true)
     {
         $this->dataGrid->cleanPrevResults($checkResponse);
         return $this;
@@ -183,7 +177,7 @@ abstract class MxToolbox
      * @return $this
      * @throws MxToolboxRuntimeException
      */
-    protected function checkIpAddressOnDnsbl(&$addr)
+    public function checkIpAddressOnDnsbl(&$addr)
     {
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
         return $this;
