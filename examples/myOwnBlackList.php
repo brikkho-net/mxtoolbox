@@ -6,10 +6,24 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../src/MxToolbox/autoload.php';
 
 /**
- * Class easyTest
+ * Class myOwnBlackList
  */
-class easyTest extends MxToolbox
+class myOwnBlackList extends MxToolbox
 {
+
+    /** @var array - my own blacklist with DNSBL host names array */
+    public $myBlacklist = array();
+
+    /**
+     * easyTest constructor.
+     */
+    public function __construct($myBlacklist)
+    {
+        if(is_array($myBlacklist) && count($myBlacklist) > 0)
+            $this->myBlacklist = $myBlacklist;
+        // MxToolbox construct
+        parent::__construct();
+    }
 
     /**
      * Configure MXToolbox
@@ -26,22 +40,22 @@ class easyTest extends MxToolbox
             //->setDnsResolver('8.8.4.4')
             ->setDnsResolver('127.0.0.1')
 
-            // load default blacklists (from the file: blacklistAlive.txt)
-            ->setBlacklists();
+            // load your own blacklist array (will be auto validate on DNSBL response)    
+            ->setBlacklists($this->myBlacklist);
     }
 
     /**
-     * Test IP address
+     * Test IP address with my own blacklist
      * @param string $addr
      */
     public function testMyIPAddress($addr)
     {
 
         try {
- 
+
             // Checks IP address on all DNSBL
             $this->checkIpAddressOnDnsbl($addr);
- 
+
             /*
              * getBlacklistsArray() structure:
              * []['blHostName'] = dnsbl hostname
@@ -52,6 +66,12 @@ class easyTest extends MxToolbox
              */
             var_dump($this->getBlacklistsArray());
 
+            /* Cleaning old results before next test
+             * TRUE = check responses for all DNSBL again (default value)
+             * FALSE = only cleaning old results (response = true)
+             */
+            $this->cleanBlacklistArray(false);
+
         } catch (MxToolboxRuntimeException $e) {
             echo $e->getMessage();
         } catch (MxToolboxLogicException $e) {
@@ -61,7 +81,12 @@ class easyTest extends MxToolbox
 
 }
 
-$test = new easyTest($myBlacklist);
+$myBlacklist = array(
+    0 => 'zen.spamhaus.org',
+    1 => 'xbl.spamhaus.org'
+);
+
+$test = new myOwnBlackList($myBlacklist);
 $test->testMyIPAddress('8.8.8.8');
 
 

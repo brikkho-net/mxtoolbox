@@ -6,9 +6,9 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../src/MxToolbox/autoload.php';
 
 /**
- * Class easyTest
+ * Class checkIsMailServer
  */
-class easyTest extends MxToolbox
+class checkIsMailServer extends MxToolbox
 {
 
     /**
@@ -24,10 +24,7 @@ class easyTest extends MxToolbox
             // multiple resolvers is allowed
             //->setDnsResolver('8.8.8.8')
             //->setDnsResolver('8.8.4.4')
-            ->setDnsResolver('127.0.0.1')
-
-            // load default blacklists (from the file: blacklistAlive.txt)
-            ->setBlacklists();
+            ->setDnsResolver('127.0.0.1');
     }
 
     /**
@@ -38,19 +35,9 @@ class easyTest extends MxToolbox
     {
 
         try {
- 
-            // Checks IP address on all DNSBL
-            $this->checkIpAddressOnDnsbl($addr);
- 
-            /*
-             * getBlacklistsArray() structure:
-             * []['blHostName'] = dnsbl hostname
-             * []['blPositive'] = true if IP address have the positive check
-             * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
-             * []['blResponse'] = true if DNSBL host name is alive and send test response before test
-             * []['blQueryTime'] = false or response time of a last dig query
-             */
-            var_dump($this->getBlacklistsArray());
+
+            // Is correct setting as mail server (The PTR record for this $addr exist in MX records)
+            var_dump($this->isMailServer($addr));
 
         } catch (MxToolboxRuntimeException $e) {
             echo $e->getMessage();
@@ -61,7 +48,5 @@ class easyTest extends MxToolbox
 
 }
 
-$test = new easyTest($myBlacklist);
+$test = new checkIsMailServer();
 $test->testMyIPAddress('8.8.8.8');
-
-
