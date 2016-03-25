@@ -50,7 +50,7 @@ class easyTest extends MxToolbox
      * Configure MXToolbox
      * configure() is abstract function and must by implemented
      */
-    protected function configure()
+    public function configure()
     {
         $this
             // path to the dig tool
@@ -70,29 +70,31 @@ class easyTest extends MxToolbox
     public function testMyIPAddress($addr)
     {
 
-        try {
-             // Checks IP address on all DNSBL
-            $this->checkIpAddressOnDnsbl($addr);
-             /*
-             * getBlacklistsArray() structure:
-             * []['blHostName'] = dnsbl hostname
-             * []['blPositive'] = true if IP address have the positive check
-             * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
-             * []['blResponse'] = true if DNSBL host name is alive and send test response before test
-             * []['blQueryTime'] = false or response time of a last dig query
-             */
-            var_dump($this->getBlacklistsArray());
-        } catch (MxToolboxRuntimeException $e) {
-            echo $e->getMessage();
-        } catch (MxToolboxLogicException $e) {
-            echo $e->getMessage();
-        }
+        // Checks IP address on all DNSBL
+        $this->checkIpAddressOnDnsbl($addr);
+
+        /*
+         * getBlacklistsArray() structure:
+         * []['blHostName'] = dnsbl hostname
+         * []['blPositive'] = true if IP address have the positive check
+         * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
+         * []['blResponse'] = true if DNSBL host name is alive and send test response before test
+         * []['blQueryTime'] = false or response time of a last dig query
+         */
+        var_dump($this->getBlacklistsArray());
+
     }
 
 }
 
-$test = new easyTest($myBlacklist);
-$test->testMyIPAddress('8.8.8.8');
+try {
+    $test = new easyTest();
+    $test->testMyIPAddress('8.8.8.8');
+} catch (MxToolboxRuntimeException $e) {
+    echo $e->getMessage();
+} catch (MxToolboxLogicException $e) {
+    echo $e->getMessage();
+}
 ```
 
 [More examples](https://github.com/heximcz/mxtoolbox/tree/master/examples)
