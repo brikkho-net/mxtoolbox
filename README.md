@@ -32,7 +32,8 @@
 
 - 3. Example usage:
 
-```php
+``` php
+<?php
 use MxToolbox\MxToolbox;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\Exceptions\MxToolboxLogicException;
