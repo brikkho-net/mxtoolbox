@@ -1,5 +1,7 @@
 <?php
-
+/**
+ * Autoload file
+ */
 spl_autoload_register(
     function ($class) {
         static $map = [

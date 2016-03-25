@@ -1,4 +1,15 @@
 <?php
+/**
+ * DNSBL tool
+ *
+ * test your IP address on very known spam databases and blacklists
+ *
+ * @author Lubomir Spacek
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
+ * @version 0.0.2
+ */
 namespace MxToolbox;
 
 use MxToolbox\NetworkTools\NetworkTools;
@@ -8,22 +19,16 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 /**
- * Abstract Class MxToolBox
- *
+ * Class MxToolbox
  * @package MxToolbox
- * @author Lubomir Spacek
- * @license https://opensource.org/licenses/MIT
- * @link https://github.com/heximcz/mxtoolbox
- * @link https://best-hosting.cz
- * @version 0.0.2
  */
 abstract class MxToolbox
 {
-    /** @var BlacklistsHostnameFile */
+    /** @var BlacklistsHostnameFile object */
     private $fileSys;
-    /** @var MxToolboxDataGrid */
+    /** @var MxToolboxDataGrid object */
     private $dataGrid;
-    /** @var NetworkTools */
+    /** @var NetworkTools object */
     private $netTool;
 
     /**
@@ -69,6 +74,7 @@ abstract class MxToolbox
     }
 
     /**
+     * Initialize blacklist array fom file or custom array
      * @param array $ownBlacklist optional, default nothing
      * @return $this
      * @throws MxToolboxRuntimeException

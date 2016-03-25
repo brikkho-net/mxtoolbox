@@ -1,4 +1,12 @@
 <?php
+/**
+ * File manipulations class
+ * 
+ * @author Lubomir Spacek
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
+ */
 namespace MxToolbox\FileSystem;
 
 use MxToolbox\Exceptions\MxToolboxLogicException;
@@ -7,10 +15,6 @@ use MxToolbox\Exceptions\MxToolboxRuntimeException;
 /**
  * Class BlacklistsHostnameFile
  * @package MxToolbox\FileSystem
- * @author Lubomir Spacek
- * @license https://opensource.org/licenses/MIT
- * @link https://github.com/heximcz/mxtoolbox
- * @link https://best-hosting.cz
  */
 class BlacklistsHostnameFile
 {

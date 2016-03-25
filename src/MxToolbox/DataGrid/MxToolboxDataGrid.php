@@ -1,4 +1,12 @@
 <?php
+/**
+ * Class for arrays and other data
+ * 
+ * @author Lubomir Spacek
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
+ */
 namespace MxToolbox\DataGrid;
 
 use MxToolbox\NetworkTools\NetworkTools;
@@ -6,14 +14,9 @@ use MxToolbox\FileSystem\BlacklistsHostnameFile;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
-
 /**
  * Class MxToolboxDataGrid
  * @package MxToolbox\DataGrid
- * @author Lubomir Spacek
- * @license https://opensource.org/licenses/MIT
- * @link https://github.com/heximcz/mxtoolbox
- * @link https://best-hosting.cz
  */
 class MxToolboxDataGrid
 {
@@ -29,9 +32,9 @@ class MxToolboxDataGrid
      * @var array for dnsbl tests
      */
     protected $testResultStructure;
-    /** @var NetworkTools */
+    /** @var NetworkTools object */
     private $netTool;
-    /** @var BlacklistsHostnameFile */
+    /** @var BlacklistsHostnameFile object */
     private $fileSys;
 
     /**

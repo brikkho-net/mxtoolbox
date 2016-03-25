@@ -1,13 +1,17 @@
 <?php
-namespace MxToolbox\NetworkTools;
-
 /**
- * Class DigParser
- * @package MxToolbox\NetworkTools
+ * Parser for dig tool output
+ * 
  * @author Lubomir Spacek
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
+ */
+namespace MxToolbox\NetworkTools;
+
+/**
+ * Class DigQueryParser
+ * @package MxToolbox\NetworkTools
  */
 class DigQueryParser
 {

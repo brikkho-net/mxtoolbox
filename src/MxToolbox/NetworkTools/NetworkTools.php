@@ -1,4 +1,12 @@
 <?php
+/**
+ * Network tools
+ *
+ * @author Lubomir Spacek
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
+ */
 namespace MxToolbox\NetworkTools;
 
 use MxToolbox\Exceptions\MxToolboxLogicException;
@@ -7,10 +15,6 @@ use MxToolbox\Exceptions\MxToolboxRuntimeException;
 /**
  * Class NetworkTools
  * @package MxToolbox\NetworkTools
- * @author Lubomir Spacek
- * @license https://opensource.org/licenses/MIT
- * @link https://github.com/heximcz/mxtoolbox
- * @link https://best-hosting.cz
  */
 class NetworkTools extends DigQueryParser
 {
