@@ -49,5 +49,5 @@ class refreshDnsblFile extends MxToolbox
 
 }
 
-$test = new refreshDnsblFile($myBlacklist);
+$test = new refreshDnsblFile();
 $test->testMyIPAddress();
