@@ -14,12 +14,11 @@ class getAdditionalInformation extends MxToolbox
      * Configure MXToolbox
      * configure() is abstract function and must by implemented
      */
-    protected function configure()
+    public function configure()
     {
         $this
             // path to the dig tool
             ->setDig('/usr/bin/dig')
-            
             // multiple resolvers is allowed
             ->setDnsResolver('127.0.0.1');
     }
@@ -31,25 +30,24 @@ class getAdditionalInformation extends MxToolbox
     public function testMyIPAddress($addr)
     {
 
-        try {
-
-            /* Get additional information for IP address
-             * Array structure:
-             * ['domainName']
-             * ['ptrRecord']
-             * ['mxRecords'][array]
-             */
-            var_dump($this->getDomainInformation($addr));
+        /* Get additional information for IP address
+         * Array structure:
+         * ['domainName']
+         * ['ptrRecord']
+         * ['mxRecords'][array]
+         */
+        var_dump($this->getDomainInformation($addr));
 
 
-        } catch (MxToolboxRuntimeException $e) {
-            echo $e->getMessage();
-        } catch (MxToolboxLogicException $e) {
-            echo $e->getMessage();
-        }
     }
 
 }
 
-$test = new getAdditionalInformation();
-$test->testMyIPAddress('8.8.8.8');
+try {
+    $test = new getAdditionalInformation();
+    $test->testMyIPAddress('8.8.8.8');
+} catch (MxToolboxRuntimeException $e) {
+    echo $e->getMessage();
+} catch (MxToolboxLogicException $e) {
+    echo $e->getMessage();
+}

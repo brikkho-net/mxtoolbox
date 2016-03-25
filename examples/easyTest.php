@@ -15,17 +15,15 @@ class easyTest extends MxToolbox
      * Configure MXToolbox
      * configure() is abstract function and must by implemented
      */
-    protected function configure()
+    public function configure()
     {
         $this
             // path to the dig tool
             ->setDig('/usr/bin/dig')
-
             // multiple resolvers is allowed
             //->setDnsResolver('8.8.8.8')
             //->setDnsResolver('8.8.4.4')
             ->setDnsResolver('127.0.0.1')
-
             // load default blacklists (from the file: blacklistAlive.txt)
             ->setBlacklists();
     }
@@ -37,29 +35,28 @@ class easyTest extends MxToolbox
     public function testMyIPAddress($addr)
     {
 
-        try {
- 
-            // Checks IP address on all DNSBL
-            $this->checkIpAddressOnDnsbl($addr);
- 
-            /*
-             * getBlacklistsArray() structure:
-             * []['blHostName'] = dnsbl hostname
-             * []['blPositive'] = true if IP address have the positive check
-             * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
-             * []['blResponse'] = true if DNSBL host name is alive and send test response before test
-             * []['blQueryTime'] = false or response time of a last dig query
-             */
-            var_dump($this->getBlacklistsArray());
+        // Checks IP address on all DNSBL
+        $this->checkIpAddressOnDnsbl($addr);
 
-        } catch (MxToolboxRuntimeException $e) {
-            echo $e->getMessage();
-        } catch (MxToolboxLogicException $e) {
-            echo $e->getMessage();
-        }
+        /*
+         * getBlacklistsArray() structure:
+         * []['blHostName'] = dnsbl hostname
+         * []['blPositive'] = true if IP address have the positive check
+         * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
+         * []['blResponse'] = true if DNSBL host name is alive and send test response before test
+         * []['blQueryTime'] = false or response time of a last dig query
+         */
+        var_dump($this->getBlacklistsArray());
+
     }
 
 }
 
-$test = new easyTest();
-$test->testMyIPAddress('8.8.8.8');
+try {
+    $test = new easyTest();
+    $test->testMyIPAddress('8.8.8.8');
+} catch (MxToolboxRuntimeException $e) {
+    echo $e->getMessage();
+} catch (MxToolboxLogicException $e) {
+    echo $e->getMessage();
+}
