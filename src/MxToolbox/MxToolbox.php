@@ -8,15 +8,14 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 /**
- * MxToolBox - test your IP address on very known spam databases and blacklists
+ * Abstract Class MxToolBox
  *
+ * @package MxToolbox
  * @author Lubomir Spacek
- * @license MIT
+ * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
- *
  * @version 0.0.2-dev
- *
  */
 abstract class MxToolbox
 {

@@ -4,11 +4,13 @@ namespace MxToolbox\NetworkTools;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
-//use MxToolbox\Exceptions\MxToolboxRuntimeException;
-
 /**
  * Class NetworkTools
  * @package MxToolbox\NetworkTools
+ * @author Lubomir Spacek
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
  */
 class NetworkTools extends DigQueryParser
 {
@@ -39,7 +41,7 @@ class NetworkTools extends DigQueryParser
      */
     public function setDnsResolverIP($addr)
     {
-        if ($this->validateIPAddress($addr) && $fss = @fsockopen('tcp://' . $addr, 53, $errno, $errstr, 5)) {
+        if ($this->validateIPAddress($addr) && $fss = @fsockopen('tcp://' . $addr, 53, $errNo, $errStr, 5)) {
             fclose($fss);
             $this->dnsResolvers[] = $addr;
             return $this;
@@ -100,12 +102,11 @@ class NetworkTools extends DigQueryParser
      * @param string $addr
      * @param string $dnsResolver
      * @param string $blackList
-     * @param string $record 'A,TXT,AAAA?', default 'A'
+     * @param string $record 'A,TXT,PTR,AAAA?', default 'A'
      * @return string
      */
     public function getDigResult($addr, $dnsResolver, $blackList, $record = 'A')
     {
-        // dig @127.0.0.1 +nocmd 2.0.0.127.xbl.spamhaus.org A
         $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
             ' +time=3 +tries=1 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
         return $checkResult;
@@ -118,11 +119,14 @@ class NetworkTools extends DigQueryParser
      */
     public function getDomainDetailInfo(&$addr)
     {
+        $this->setDigPath($this->digPath);
         $info = array();
         if ($this->checkExistPTR($addr)) {
             $info['domainName'] = $this->domainName;
             $info['ptrRecord'] = $this->ptrRecord;
-            $info['mxRecords'] = $this->getMxRecords($this->domainName);
+            $info['mxRecords'] = array();
+            if ($this->getMxRecords($this->domainName))
+                $info['mxRecords'] = $this->mxRecords;
         }
         return $info;
     }
@@ -213,7 +217,7 @@ class NetworkTools extends DigQueryParser
                 foreach ($ptr as $mx)
                     $mxRecords[] = $mx['target'];
                 $this->mxRecords = $mxRecords;
-                return $this->mxRecords;
+                return true;
             }
         }
         return false;

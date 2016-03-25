@@ -1,12 +1,16 @@
 <?php
 namespace MxToolbox\FileSystem;
 
-use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\Exceptions\MxToolboxLogicException;
+use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 /**
  * Class BlacklistsHostnameFile
  * @package MxToolbox\FileSystem
+ * @author Lubomir Spacek
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
  */
 class BlacklistsHostnameFile
 {
@@ -91,14 +95,14 @@ class BlacklistsHostnameFile
         unset($blackList);
         fclose($file);
 
-        // check filesize
+        // check file size
         if (!filesize($blAliveFileTmp) > 0) {
             @unlink($blAliveFileTmp);
             throw new MxToolboxRuntimeException ('Blacklist temp file is empty: ' . $blAliveFileTmp);
         }
         // create new blacklist file from temp
         if (!rename($blAliveFileTmp, $blAliveFileOrg))
-            throw new MxToolboxRuntimeException('Cannot create Alive Blaclist file. Rename the file failed.');
+            throw new MxToolboxRuntimeException('Cannot create Alive Blacklist file. Rename the file failed.');
 
         return $this;
     }

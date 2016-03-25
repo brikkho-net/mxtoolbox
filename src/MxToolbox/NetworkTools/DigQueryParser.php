@@ -4,6 +4,10 @@ namespace MxToolbox\NetworkTools;
 /**
  * Class DigParser
  * @package MxToolbox\NetworkTools
+ * @author Lubomir Spacek
+ * @license https://opensource.org/licenses/MIT
+ * @link https://github.com/heximcz/mxtoolbox
+ * @link https://best-hosting.cz
  */
 class DigQueryParser
 {
@@ -61,5 +65,5 @@ class DigQueryParser
             return filter_var($matches[0], FILTER_SANITIZE_NUMBER_INT);
         return false;
     }
-
+    
 }
