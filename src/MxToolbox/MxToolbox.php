@@ -144,6 +144,7 @@ abstract class MxToolbox
      */
     public function isMailServer($addr)
     {
+        //TODO: better checks
         if ($info = $this->getDomainInformation($addr)) {
             if (!in_array($info['ptrRecord'], $info['mxRecords']) === false)
                 return true;
