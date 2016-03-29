@@ -163,6 +163,8 @@ class NetworkTools extends DigQueryParser
                 if ($this->isNoError($digOutput)) {
                     $blackList['blPositive'] = true;
                     $blackList['blPositiveResult'] = $this->getPositiveUrlAddresses($digOutput);
+                } else {
+                    $blackList['blResponse'] = false;
                 }
                 $blackList['blQueryTime'] = $this->getQueryTime($digOutput);
             }
