@@ -10,7 +10,6 @@
 namespace MxToolbox\NetworkTools;
 
 use MxToolbox\Exceptions\MxToolboxLogicException;
-use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 /**
  * Class NetworkTools
@@ -153,7 +152,7 @@ class NetworkTools extends DigQueryParser
      * @param string $addr
      * @param array $testResult
      * @return $this
-     * @throws MxToolboxRuntimeException
+     * @throws MxToolboxLogicException
      */
     public function checkAllDnsbl($addr, &$testResult)
     {
@@ -171,7 +170,7 @@ class NetworkTools extends DigQueryParser
             unset($blackList);
             return $this;
         }
-        throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
+        throw new MxToolboxLogicException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
     }
 
     /**
