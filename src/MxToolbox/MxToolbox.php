@@ -17,6 +17,7 @@ use MxToolbox\DataGrid\MxToolboxDataGrid;
 use MxToolbox\FileSystem\BlacklistsHostnameFile;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
+use MxToolbox\NetworkTools\SmtpServerChecks;
 
 /**
  * Class MxToolbox
@@ -134,6 +135,13 @@ abstract class MxToolbox
         if (count($info) > 0)
             return $info;
         return false;
+    }
+    
+    public function getSmtpServerResponse($addr) {
+        $smtp = new SmtpServerChecks();
+        $smtp
+            ->setSmtpConnect($addr,'vps-nx.best-hosting.cz')
+            ->testSmtpServer();
     }
 
     /**

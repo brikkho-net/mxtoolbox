@@ -13,6 +13,7 @@ spl_autoload_register(
             'MxToolbox\FileSystem\BlacklistsHostnameFile' => 'FileSystem/BlacklistsHostnameFile.php',
             'MxToolbox\DataGrid\MxToolboxDataGrid' => 'DataGrid/MxToolboxDataGrid.php',
             'MxToolbox\NetworkTools\NetworkTools' => 'NetworkTools/NetworkTools.php',
+            'MxToolbox\NetworkTools\SmtpServerChecks' => 'NetworkTools/SmtpServerChecks.php',
             'MxToolbox\NetworkTools\DigQueryParser' => 'NetworkTools/DigQueryParser.php'
         ];
 
