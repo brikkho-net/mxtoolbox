@@ -9,7 +9,6 @@
  */
 namespace MxToolbox\NetworkTools;
 
-use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 /**
@@ -20,9 +19,9 @@ class SmtpServerChecks
 {
 
     /** SMTP line break */
-    const CRLF = '\r\n';
+    const CRLF = "\r\n";
 
-    /** @var string stream resource or FALSE */
+    /** @var resource stream resource or FALSE */
     private $smtpConnection = false;
 
     /** @var int SMTP port */
@@ -36,7 +35,8 @@ class SmtpServerChecks
 
     /**
      * Connect to the SMTP server
-     * @param $addr
+     * @param string $addr IP address for test
+     * @param string $myHostName Hostname corresponding with IP address where is this script running
      * @return $this
      * @throws MxToolboxRuntimeException
      */
@@ -44,10 +44,11 @@ class SmtpServerChecks
     {
         $this->myHostName = $myHostName;
         $socket_context = stream_context_create();
-        if ($this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort,
-            $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $socket_context)) 
+        $this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort, 
+            $errno, $errstr, 5, STREAM_CLIENT_CONNECT, $socket_context);
+        if (is_resource($this->smtpConnection)) 
         {
-            $this->smtpResponse[] = fread($this->smtpConnection, 4096);
+            $this->smtpResponse[] = fgets($this->smtpConnection, 4096);
             return $this;
         }
         throw new MxToolboxRuntimeException('Connect to server failed.');
@@ -64,16 +65,34 @@ class SmtpServerChecks
         return false;
     }
 
-    public function testSmtpServer() {
-        if ($this->smtpConnection) {
+    /**
+     * Starting the conversation. Server wants to use the extended SMTP (ESMTP) protocol.
+     * @return $this
+     * @throws MxToolboxRuntimeException
+     */
+    public function testEhloSmtpServer() {
+        if (is_resource($this->smtpConnection)) {
             fwrite($this->smtpConnection, "EHLO " . $this->myHostName . self::CRLF);
-            echo fread($this->smtpConnection, 4096);
-//        $response = explode('\n', fread($this->smtpConnection, 4096));
-//        print_r($response);
-            print_r($this->smtpResponse);
+            $this->smtpResponse[] = array_filter(explode(self::CRLF, fread($this->smtpConnection, 4096)));
+
+            $this->closeSmtpConnection();
+
             return $this;
         }
-        throw new MxToolboxLogicException('Invalid connection');
+        throw new MxToolboxRuntimeException('Invalid connection');
+    }
+
+    /**
+     * Close SMTP connection
+     * @return $this
+     */
+    protected function closeSmtpConnection()
+    {
+        if (is_resource($this->smtpConnection)) {
+            fwrite($this->smtpConnection, 'QUIT' . self::CRLF);
+            fclose($this->smtpConnection);
+        }
+        return $this;
     }
 
 }

@@ -141,7 +141,7 @@ abstract class MxToolbox
         $smtp = new SmtpServerChecks();
         $smtp
             ->setSmtpConnect($addr,'vps-nx.best-hosting.cz')
-            ->testSmtpServer();
+            ->testEhloSmtpServer();
     }
 
     /**
