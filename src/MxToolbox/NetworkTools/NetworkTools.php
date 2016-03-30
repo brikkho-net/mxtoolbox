@@ -15,7 +15,7 @@ use MxToolbox\Exceptions\MxToolboxLogicException;
  * Class NetworkTools
  * @package MxToolbox\NetworkTools
  */
-class NetworkTools extends DigQueryParser
+class NetworkTools
 {
 
     /** @var array DNS resolvers IP addresses */
@@ -32,6 +32,17 @@ class NetworkTools extends DigQueryParser
     private $domainName;
     /** @var array of any mx records for ip address */
     private $mxRecords;
+    
+    /** @var DigQueryParser */
+    private $digParser;
+
+    /**
+     * NetworkTools constructor.
+     */
+    public function __construct()
+    {
+        $this->digParser = new DigQueryParser();
+    }
 
     /**
      * Push one IP address of a DNS resolver to the resolvers list
@@ -142,7 +153,7 @@ class NetworkTools extends DigQueryParser
     public function isDnsblResponse(&$host)
     {
         $digOutput = $this->getDigResult('127.0.0.2', $this->getRandomDNSResolverIP(), $host, 'A');
-        if ($this->isNoError($digOutput))
+        if ($this->digParser->isNoError($digOutput))
             return true;
         return false;
     }
@@ -159,13 +170,13 @@ class NetworkTools extends DigQueryParser
         if ($this->validateIPAddress($addr) && count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
                 $digOutput = $this->getDigResult($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'TXT');
-                if ($this->isNoError($digOutput)) {
+                if ($this->digParser->isNoError($digOutput)) {
                     $blackList['blPositive'] = true;
-                    $blackList['blPositiveResult'] = $this->getPositiveUrlAddresses($digOutput);
+                    $blackList['blPositiveResult'] = $this->digParser->getPositiveUrlAddresses($digOutput);
                 } else {
                     $blackList['blResponse'] = false;
                 }
-                $blackList['blQueryTime'] = $this->getQueryTime($digOutput);
+                $blackList['blQueryTime'] = $this->digParser->getQueryTime($digOutput);
             }
             unset($blackList);
             return $this;
@@ -189,7 +200,7 @@ class NetworkTools extends DigQueryParser
      * @param string $addr
      * @return boolean
      */
-    protected function validateIPAddress($addr)
+    public function validateIPAddress($addr)
     {
         if (filter_var($addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
             return true;
@@ -238,7 +249,7 @@ class NetworkTools extends DigQueryParser
         if (!$this->validateIPAddress($addr))
             return false;
         $digResponse = $this->getDigResult($addr, $this->getRandomDNSResolverIP(), 'in-addr.arpa', 'PTR');
-        if ($this->isNoError($digResponse)) {
+        if ($this->digParser->isNoError($digResponse)) {
             $ptr = dns_get_record($this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR);
             if (isset($ptr[0]['target'])) {
                 $regs = array();
