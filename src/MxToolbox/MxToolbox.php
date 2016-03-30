@@ -140,13 +140,13 @@ abstract class MxToolbox
     public function getSmtpServerResponse($addr, $myHostName, $mailFrom, $mailRcptTo)
     {
         $smtp = new SmtpServerChecks($myHostName, $mailFrom, $mailRcptTo);
-        $smtp
+        return $smtp
             ->setSmtpConnect($addr)
             ->setEhloResponse()
             ->setFromResponse()
             ->setRcptToResponse()
-            ->closeSmtpConnection();
-
+            ->closeSmtpConnection()
+            ->getSmtpResponses();
     }
 
     /**

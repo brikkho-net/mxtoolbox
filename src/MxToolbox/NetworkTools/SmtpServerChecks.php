@@ -103,7 +103,6 @@ class SmtpServerChecks
         throw new MxToolboxRuntimeException('Invalid connection');
     }
 
-
     /**
      * Set MAIL FROM response
      * @return $this
@@ -190,4 +189,5 @@ class SmtpServerChecks
         return true;
     }
 
+    //TODO: parse responses, set final result
 }
