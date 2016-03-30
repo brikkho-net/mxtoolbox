@@ -136,12 +136,17 @@ abstract class MxToolbox
             return $info;
         return false;
     }
-    
-    public function getSmtpServerResponse($addr) {
-        $smtp = new SmtpServerChecks();
+
+    public function getSmtpServerResponse($addr, $myHostName, $mailFrom, $mailRcptTo)
+    {
+        $smtp = new SmtpServerChecks($myHostName, $mailFrom, $mailRcptTo);
         $smtp
-            ->setSmtpConnect($addr,'vps-nx.best-hosting.cz')
-            ->testEhloSmtpServer();
+            ->setSmtpConnect($addr)
+            ->setEhloResponse()
+            ->setFromResponse()
+            ->setRcptToResponse()
+            ->closeSmtpConnection();
+
     }
 
     /**

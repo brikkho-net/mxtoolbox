@@ -37,7 +37,7 @@ class checkIsMailServer extends MxToolbox
 //        var_dump($this->isMailServer($addr));
         
         // Get SMTP server responses
-        $this->getSmtpServerResponse($addr);
+        $this->getSmtpServerResponse($addr,'vps-nx.best-hosting.cz','mxtool@best-hosting.cz','test@example.com');
 
     }
 
