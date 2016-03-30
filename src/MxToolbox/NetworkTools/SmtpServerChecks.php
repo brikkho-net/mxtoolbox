@@ -27,12 +27,21 @@ class SmtpServerChecks
 
     /** @var int SMTP port */
     private $smtpPort = 25;
+    
+    /** @var int Connection timeout in seconds */
+    private $connTimeout = 15;
 
     /** @var array SMTP response */
     private $smtpResponses = array();
 
     /** @var array final results of a SMT server responses */
     private $finalResults = array();
+    
+    /** @var NetworkTools */
+    private $netTool;
+    
+    /** @var string IP Address of a SMTP server */
+    private $addr;
 
     /** @var string My hostname for SMTP command */
     private $myHostName;
@@ -42,19 +51,25 @@ class SmtpServerChecks
 
     /** @var string test MAIL TO: */
     private $emailRcptTo;
-
+    
     /**
      * SmtpServerChecks constructor.
+     * @param NetworkTools $netTool
+     * @param string $addr IP address of a SMTP server
      * @param string $myHostName Hostname corresponding with IP address where is this script running
      * @param string $mailFrom Email address corresponding with your domain
      * @param string $mailRcptTo Non existing email like this: 'test@example.net'
      */
-    public function __construct($myHostName, $mailFrom, $mailRcptTo)
+    public function __construct(NetworkTools $netTool, $addr, $myHostName, $mailFrom, $mailRcptTo)
     {
+        $this->netTool = $netTool;
+        if (!$this->netTool->validateIPAddress($addr))
+            throw new MxToolboxLogicException('Non valid IP address.');
         if (!$this->isEmail($mailFrom) || !$this->isEmail($mailRcptTo))
             throw new MxToolboxLogicException('Non valid email format.');
         if (empty($myHostName))
             throw new MxToolboxLogicException('Missing argument myHostName.');
+        $this->addr = $addr;
         $this->myHostName = $myHostName;
         $this->emailFrom = $mailFrom;
         $this->emailRcptTo = $mailRcptTo;
@@ -62,26 +77,42 @@ class SmtpServerChecks
     }
 
     /**
+     * @return array|bool
+     */
+    public function getSmtpServerDiagnostic() {
+        if (is_array($this->setSmtpConnect($this->addr)))
+            return $this->finalResults;
+        $this
+            ->setEhloResponse()
+            ->setFromResponse()
+            ->setRcptToResponse()
+            ->closeSmtpConnection();
+        return $this->getSmtpResponses();
+    }
+    
+    /**
      * Connect to the SMTP server
      * @param string $addr IP address for test
-     * @return $this
-     * @throws MxToolboxRuntimeException
+     * @return $this | array when connection failed
      */
-    public function setSmtpConnect($addr)
+    private function setSmtpConnect($addr)
     {
-        $this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr, 5, STREAM_CLIENT_CONNECT);
+        $this->smtpConnection = @stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr, 
+            $this->connTimeout, STREAM_CLIENT_CONNECT);
         if (is_resource($this->smtpConnection)) {
-            $this->smtpResponses[] = fgets($this->smtpConnection, 4096);
+            $this->smtpResponses['connection'] = fgets($this->smtpConnection, 4096);
             return $this;
         }
-        throw new MxToolboxRuntimeException('Connect to server failed.');
+        $this->finalResults['errors'] = 'Unable to connect to '.$addr.':25 after ' . $this->connTimeout .
+            ' seconds. (No route to host).';
+        return $this->finalResults;
     }
 
     /**
      * Get SMTP array with responses
      * @return array|bool FALSE if array is blank
      */
-    public function getSmtpResponses()
+    private function getSmtpResponses()
     {
         if (count($this->smtpResponses) > 0)
             return $this->smtpResponses;
@@ -93,11 +124,11 @@ class SmtpServerChecks
      * @return $this
      * @throws MxToolboxRuntimeException
      */
-    public function setEhloResponse()
+    private function setEhloResponse()
     {
         if (is_resource($this->smtpConnection)) {
             $this->writeCommand('EHLO', $this->myHostName);
-            $this->smtpResponses[] = array_filter(explode(self::CRLF, $this->readCommand()));
+            $this->smtpResponses['ehlo'] = array_filter(explode(self::CRLF, $this->readCommand()));
             return $this;
         }
         throw new MxToolboxRuntimeException('Invalid connection');
@@ -107,11 +138,11 @@ class SmtpServerChecks
      * Set MAIL FROM response
      * @return $this
      */
-    public function setFromResponse()
+    private function setFromResponse()
     {
         if (is_resource($this->smtpConnection)) {
             $this->writeCommand('MAIL FROM:', $this->emailFrom);
-            $this->smtpResponses[] = array_filter(explode(self::CRLF, $this->readCommand()));
+            $this->smtpResponses['mailFrom'] = array_filter(explode(self::CRLF, $this->readCommand()));
             return $this;
         }
         throw new MxToolboxRuntimeException('Invalid connection');
@@ -121,11 +152,11 @@ class SmtpServerChecks
      * Set RCPT TO response
      * @return $this
      */
-    public function setRcptToResponse()
+    private function setRcptToResponse()
     {
         if (is_resource($this->smtpConnection)) {
             $this->writeCommand('RCPT TO:', $this->emailFrom);
-            $this->smtpResponses[] = array_filter(explode(self::CRLF, $this->readCommand()));
+            $this->smtpResponses['rcptTo'] = array_filter(explode(self::CRLF, $this->readCommand()));
             return $this;
         }
         throw new MxToolboxRuntimeException('Invalid connection');
@@ -154,7 +185,7 @@ class SmtpServerChecks
      * Close SMTP connection
      * @return $this
      */
-    public function closeSmtpConnection()
+    private function closeSmtpConnection()
     {
         if (is_resource($this->smtpConnection)) {
             fwrite($this->smtpConnection, 'QUIT' . self::CRLF);
@@ -174,6 +205,8 @@ class SmtpServerChecks
         $this->finalResults['tls'] = false;
         $this->finalResults['connectTime'] = false;
         $this->finalResults['openRelay'] = false;
+        $this->finalResults['allResponses'] = false;
+        $this->finalResults['errors'] = false;
         return $this;
     }
 

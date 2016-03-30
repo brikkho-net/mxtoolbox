@@ -33,11 +33,14 @@ class checkIsMailServer extends MxToolbox
     public function testMyIPAddress($addr)
     {
 
-        // Is correct setting as mail server - simply test (The PTR record for this $addr exist in MX records)
+        /**
+         * simply test (If IP address have any PTR record and this PTR record is in MX)
+         * @deprecated deprecated since version 0.0.3
+         */
 //        var_dump($this->isMailServer($addr));
         
         // Get SMTP server responses
-        var_dump($this->getSmtpServerResponse(
+        var_dump($this->getSmtpDiagnostics(
             $addr,
             'vps-nx.best-hosting.cz',
             'mxtool@best-hosting.cz',
@@ -50,7 +53,7 @@ class checkIsMailServer extends MxToolbox
 
 try {
     $test = new checkIsMailServer();
-    $test->testMyIPAddress('194.8.253.5');
+    $test->testMyIPAddress('194.8.253.10');
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
 } catch (MxToolboxLogicException $e) {

@@ -137,21 +137,15 @@ abstract class MxToolbox
         return false;
     }
 
-    public function getSmtpServerResponse($addr, $myHostName, $mailFrom, $mailRcptTo)
+    public function getSmtpDiagnostics($addr, $myHostName, $mailFrom, $mailRcptTo)
     {
-        $smtp = new SmtpServerChecks($myHostName, $mailFrom, $mailRcptTo);
-        return $smtp
-            ->setSmtpConnect($addr)
-            ->setEhloResponse()
-            ->setFromResponse()
-            ->setRcptToResponse()
-            ->closeSmtpConnection()
-            ->getSmtpResponses();
+        $smtp = new SmtpServerChecks($this->netTool, $addr, $myHostName, $mailFrom, $mailRcptTo);
+        return $smtp->getSmtpServerDiagnostic();
     }
 
     /**
-     * Checks if IP address have the PTR record in any MX records.
-     * Evidently this is correct setting MX and PTR for domain.
+     * Checks if IP address have the PTR record and if is this PTR in any MX records of this domain.
+     * @deprecated deprecated since version 0.0.3
      * @param $addr - ip address
      * @return bool
      */
