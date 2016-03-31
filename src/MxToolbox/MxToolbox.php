@@ -176,22 +176,6 @@ abstract class MxToolbox
     }
 
     /**
-     * Checks if IP address have the PTR record and if is this PTR in any MX records of this domain.
-     * @deprecated deprecated since version 0.0.3
-     * @param $addr - ip address
-     * @return bool
-     */
-    public function isMailServer($addr)
-    {
-        //TODO: better checks
-        if ($info = $this->getDomainInformation($addr)) {
-            if (!in_array($info['ptrRecord'], $info['mxRecords']) === false)
-                return true;
-        }
-        return false;
-    }
-
-    /**
      * Refresh alive blacklists host names in static file (/blacklistsAlive.txt)
      * @return $this
      * @throws MxToolboxRuntimeException
