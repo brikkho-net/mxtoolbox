@@ -33,7 +33,7 @@ class NetworkTools
     /** @var array of any mx records for ip address */
     private $mxRecords;
 
-    /** @var DigQueryParser */
+    /** @var DigQueryParser object */
     private $digParser;
 
     /**

@@ -37,7 +37,7 @@ class SmtpServerChecks
     /** @var array final results of a SMT server responses */
     private $finalResults = array();
 
-    /** @var NetworkTools */
+    /** @var NetworkTools object */
     private $netTool;
 
     /** @var string IP Address of a SMTP server */
