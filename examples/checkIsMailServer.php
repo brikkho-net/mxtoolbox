@@ -47,7 +47,7 @@ class checkIsMailServer extends MxToolbox
 
 try {
     $test = new checkIsMailServer();
-    $test->testMyIPAddress('194.8.252.243');
+    $test->testMyIPAddress('64.12.91.197');
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
 } catch (MxToolboxLogicException $e) {
