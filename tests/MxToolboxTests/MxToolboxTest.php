@@ -31,10 +31,15 @@ class MxToolboxTest extends \PHPUnit_Framework_TestCase
     }
 
     /** test is mail server - simple */
-    public function testIsMailServer() {
+    public function testSmtpDiagnostics() {
         $mxt = new MxTestTool('/usr/bin/dig','8.8.8.8');
-        $this->assertFalse( $mxt->isMailServer('8.8.8.8') );
-        $this->assertTrue( $mxt->isMailServer('194.8.253.5') );
+        $info = $mxt->getSmtpDiagnosticsInfo(
+            '194.8.253.5',
+            'best-hosting.cz',
+            'mxtool@best-hosting.cz',
+            'test@example.com'
+        );
+        $this->assertInternalType('array', $info);
     }
 
     /** test setBlacklist() */
