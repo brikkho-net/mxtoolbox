@@ -122,7 +122,7 @@ class NetworkTools
     public function getDigResult($addr, $dnsResolver, $blackList, $record = 'A')
     {
         $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
-            ' +time=3 +tries=1 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
+            ' +time=4 +tries=2 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
         return $checkResult;
     }
 
@@ -277,7 +277,7 @@ class NetworkTools
 
     /**
      * Check if IP address have a PTR record
-     * @param string $addr
+     * @param string $addr IP address
      * @return boolean
      */
     private function checkExistPTR($addr)

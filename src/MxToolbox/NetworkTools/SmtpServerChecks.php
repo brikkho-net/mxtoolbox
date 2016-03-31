@@ -27,7 +27,7 @@ class SmtpServerChecks
 
     /** @var int SMTP port */
     private $smtpPort = 25;
-    
+
     /** @var int Connection timeout in seconds */
     private $connTimeout = 15;
 
@@ -36,10 +36,10 @@ class SmtpServerChecks
 
     /** @var array final results of a SMT server responses */
     private $finalResults = array();
-    
+
     /** @var NetworkTools */
     private $netTool;
-    
+
     /** @var string IP Address of a SMTP server */
     private $addr;
 
@@ -51,7 +51,7 @@ class SmtpServerChecks
 
     /** @var string test MAIL TO: */
     private $emailRcptTo;
-    
+
     /**
      * SmtpServerChecks constructor.
      * @param NetworkTools $netTool
@@ -63,13 +63,13 @@ class SmtpServerChecks
     public function __construct(NetworkTools $netTool, $addr, $myHostName, $mailFrom, $mailRcptTo)
     {
         $this->netTool = $netTool;
-        
+
         if (!$this->netTool->ipValidator($addr))
             throw new MxToolboxLogicException('Non valid IP address.');
-        
+
         if (!$this->isEmail($mailFrom) || !$this->isEmail($mailRcptTo))
             throw new MxToolboxLogicException('Non valid email format.');
-        
+
         if (empty($myHostName) || !$this->netTool->ipValidator($myHostName))
             throw new MxToolboxLogicException('Missing or bad argument myHostName.');
 
@@ -83,7 +83,8 @@ class SmtpServerChecks
     /**
      * @return array with final results
      */
-    public function getSmtpServerDiagnostic() {
+    public function getSmtpServerDiagnostic()
+    {
         if (!$this->setSmtpConnect($this->addr))
             return $this->finalResults;
         $this
@@ -94,7 +95,7 @@ class SmtpServerChecks
             ->parseResults();
         return $this->finalResults;
     }
-    
+
     /**
      * Connect to the SMTP server
      * @param string $addr IP address for test
@@ -102,13 +103,13 @@ class SmtpServerChecks
      */
     private function setSmtpConnect($addr)
     {
-        $this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr, 
+        $this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr,
             $this->connTimeout, STREAM_CLIENT_CONNECT);
         if (is_resource($this->smtpConnection)) {
             $this->smtpResponses['connection'] = fgets($this->smtpConnection, 4096);
             return true;
         }
-        $this->finalResults['errors'] = 'Unable to connect to '.$addr.':25 (Timeout | No route to host).';
+        $this->finalResults['errors'] = 'Unable to connect to ' . $addr . ':25 (Timeout | No route to host).';
         return false;
     }
 
@@ -192,15 +193,29 @@ class SmtpServerChecks
      */
     private function setResultArray()
     {
-        // ALL bad in default
-        $this->finalResults['rDnsMismatch'] = true;
-        $this->finalResults['validHostname'] = false;
-        $this->finalResults['bannerCheck'] = false;
-        $this->finalResults['tls'] = false;
-        $this->finalResults['connectTime'] = false;
-        $this->finalResults['openRelay'] = true;
-        $this->finalResults['allResponses'] = '';
+        $this->finalResults['rDnsMismatch']['state'] = false;
+        $this->finalResults['rDnsMismatch']['info'] = '';
+
+        $this->finalResults['validHostname']['state'] = false;
+        $this->finalResults['validHostname']['info'] = '';
+
+        $this->finalResults['bannerCheck']['state'] = false;
+        $this->finalResults['bannerCheck']['info'] = '';
+
+        $this->finalResults['tls']['state'] = false;
+        $this->finalResults['tls']['info'] = '';
+
+        $this->finalResults['connectTime']['state'] = false;
+        $this->finalResults['connectTime']['info'] = '';
+
+        $this->finalResults['openRelay']['state'] = true;
+        $this->finalResults['openRelay']['info'] = '';
+
+        $this->finalResults['allResponses']['state'] = false;
+        $this->finalResults['allResponses']['info'] = '';
+
         $this->finalResults['errors'] = false;
+
         return $this;
     }
 
@@ -216,23 +231,71 @@ class SmtpServerChecks
         return true;
     }
 
-    //TODO: parse responses, set final result
 
-    private function parseResults() {
+    /**
+     * Parse all responses from SMTP stream
+     */
+    private function parseResults()
+    {
         $parser = new SmtpDiagnosticParser();
+        $info = $this->netTool->getDomainDetailInfo($this->addr);
+
         // check TLS
-        $this->finalResults['tls'] = $parser->isTls($this->smtpResponses['ehlo']);
+        $this->finalResults['tls']['state'] = $parser->isTls($this->smtpResponses['ehlo']);
+        $this->finalResults['tls']['info'] = 'ERR - TLS is not supported!';
+        if ($this->finalResults['tls']['state']) {
+            $this->finalResults['tls']['info'] = 'OK - TLS is supported.';
+        }
 
         // Reverse DNS Mismatch: If the A record of the hostname did not match the PTR = TRUE
-        $info = $this->netTool->getDomainDetailInfo($this->addr);
-        if ($this->netTool->isDomainName($info['ptrRecord'])) {
-            $this->finalResults['rDnsMismatch'] = $parser->isReverseDnsMismatch( 
-                $this->addr, dns_get_record($info['ptrRecord'], DNS_A)
-            );
-        }
-        
-        // next check
+        $this->checkRDnsMismatch($info, $parser);
 
+        // Reverse DNS Hostname validation
+        $this->checkValidHostname($info, $parser);
+
+        // next
+        //TODO: parse responses, set final result
 
     }
+
+    /**
+     * Check valid hostname
+     * @param array $info
+     * @param SmtpDiagnosticParser $parser
+     * @return $this
+     */
+    private function checkValidHostname(&$info, SmtpDiagnosticParser &$parser)
+    {
+        if (isset($info['ptrRecord']) && $this->netTool->isDomainName($info['ptrRecord'])) {
+            $this->finalResults['validHostname']['state'] = $parser->isValidHostname($this->smtpResponses['ehlo'], $info['ptrRecord']);
+        }
+        $this->finalResults['validHostname']['info'] = 'OK - rDNS is a valid hostname';
+        if (!$this->finalResults['validHostname']['state']) {
+            $this->finalResults['validHostname']['info'] = 'rDNS is not a valid hostname';
+        }
+        return $this;
+
+    }
+
+    /**
+     * Check rDNSMismatch
+     * @param $info
+     * @param SmtpDiagnosticParser $parser
+     * @return $this
+     */
+    private function checkRDnsMismatch(&$info, SmtpDiagnosticParser &$parser)
+    {
+        if (isset($info['ptrRecord']) && $this->netTool->isDomainName($info['ptrRecord'])) {
+            $this->finalResults['rDnsMismatch']['state'] = $parser->isReverseDnsMismatch(
+                $this->addr, dns_get_record($info['ptrRecord'], DNS_A)
+            );
+            $this->finalResults['rDnsMismatch']['info'] = 'OK - ' . $this->addr . ' resolves to ' . $info['ptrRecord'];
+        }
+        if (!$this->finalResults['rDnsMismatch']['state']) {
+            $this->finalResults['rDnsMismatch']['info'] = 'ERR - Cannot resolve address: ' . $this->addr;
+        }
+        return $this;
+    }
+
 }
+

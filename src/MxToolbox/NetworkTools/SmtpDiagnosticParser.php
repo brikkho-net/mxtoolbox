@@ -58,9 +58,24 @@ class SmtpDiagnosticParser
         return false;
     }
 
+    /**
+     * Check if PTR record corresponds with SMTP EHLO answer
+     * @param array $smtpOutput
+     * @param string $ptrRecord
+     * @return bool
+     */
+    public function isValidHostname(&$smtpOutput, &$ptrRecord)
+    {
+        foreach ($smtpOutput as $value) {
+            if (preg_match('/250\-' . preg_quote(strtolower($ptrRecord), '.-') . '/', $value))
+                return true;
+        }
+        return false;
+
+    }
 
     /**
-     * Find ip address from ptr record, FALSE = all OK and not a reverse DNS mismatch 
+     * Find ip address from ptr record, TRUE = all OK and not a reverse DNS mismatch
      * @param string $addr IP address
      * @param array $aRecords array from dns_get_record($info['ptrRecord'], DNS_A)
      * @return bool
@@ -68,10 +83,9 @@ class SmtpDiagnosticParser
     public function isReverseDnsMismatch(&$addr, $aRecords)
     {
         foreach ($aRecords as $idx => $value) {
-            print_r($value['ip']);
             if ($value['ip'] == $addr)
-                return false;
+                return true;
         }
-        return true;
+        return false;
     }
 }
