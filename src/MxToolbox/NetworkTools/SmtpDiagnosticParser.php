@@ -52,7 +52,7 @@ class SmtpDiagnosticParser
     public function isTls(&$smtpOutput)
     {
         foreach ($smtpOutput as $value) {
-            if (preg_match('/250\-STARTTLS/', $value))
+            if (preg_match('/^250\-STARTTLS/', $value))
                 return true;
         }
         return false;
@@ -67,7 +67,7 @@ class SmtpDiagnosticParser
     public function isValidHostname(&$smtpOutput, &$ptrRecord)
     {
         foreach ($smtpOutput as $value) {
-            if (preg_match('/250\-' . preg_quote(strtolower($ptrRecord), '.-') . '/', $value))
+            if (preg_match('/^250\-' . preg_quote(strtolower($ptrRecord), '.-') . '/', $value))
                 return true;
         }
         return false;
@@ -88,4 +88,34 @@ class SmtpDiagnosticParser
         }
         return false;
     }
+
+    /**
+     * Check SMTP banner response and PTR match
+     * @param string $smtpBanner
+     * @param string $ptrRecord
+     * @return bool
+     */
+    public function isReverseDnsInBanner(&$smtpBanner, &$ptrRecord)
+    {
+        if (preg_match('/^220/', $smtpBanner)
+            && preg_match('/' . preg_quote(strtolower($ptrRecord), '.-') . '/', $smtpBanner)
+        )
+            return true;
+        return false;
+    }
+
+    //string(55) "554 5.7.1 <mxtool@best-hosting.cz>: Relay access denied"
+
+    /**
+     * Is relay access denied, code 250 is open relay!
+     * @param string $rcptTo
+     * @return bool
+     */
+    public function isOpenRelay($rcptTo)
+    {
+        if (!preg_match('/^250/', $rcptTo))
+            return true;
+        return false;
+    }
+
 }

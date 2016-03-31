@@ -126,7 +126,7 @@ abstract class MxToolbox
     /**
      * Get some additional information about IP address (PTR record, Domain name, MX records )
      * Array structure: ['domainName'],['ptrRecord'],['mxRecords'][array]
-     * @param $addr - ip address
+     * @param string $addr - ip address
      * @return array|bool - return array or FALSE if no information here.
      */
     public function getDomainInformation($addr)
@@ -138,15 +138,38 @@ abstract class MxToolbox
     }
 
     /**
-     * @param $addr
-     * @param $myHostName
-     * @param $mailFrom
-     * @param $mailRcptTo
-     * @return array|bool
+     * Get SMTP diagnostics information.
+     *  
+     *  Return information in array(
+     *      ['rDnsMismatch']['state'] => boolean,
+     *      ['rDnsMismatch']['info'] => string,
+     *      ['validHostname']['state'] => boolean,
+     *      ['validHostname']['info'] => string,
+     *      ['bannerCheck']['state'] => boolean,
+     *      ['bannerCheck']['info'] => string,
+     *      ['tls']['state'] => boolean,
+     *      ['tls']['info'] => string,
+     *      ['openRelay']['state'] => boolean,
+     *      ['openRelay']['info'] => string,
+     *      ['errors']['state'] => boolean,
+     *      ['errors']['info'] => string,
+     *      ['allResponses'] => array(
+     *          [connection] => string,
+     *          [ehlo] => array(),
+     *          [mailFrom] => string,
+     *          [rcptTo] => string,
+     *          ),
+     *  );
+     *
+     * @param string $addr IP address or hostname
+     * @param string $myHostName HostName of the server where script is running
+     * @param string $mailFrom Any testing mail address (domain is same as hostname)
+     * @param string $mailRcptTo non exist email address as test@example.com
+     * @return array
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    public function getSmtpDiagnostics($addr, $myHostName, $mailFrom, $mailRcptTo)
+    public function getSmtpDiagnosticsInfo($addr, $myHostName, $mailFrom, $mailRcptTo)
     {
         $smtp = new SmtpServerChecks($this->netTool, $addr, $myHostName, $mailFrom, $mailRcptTo);
         return $smtp->getSmtpServerDiagnostic();
