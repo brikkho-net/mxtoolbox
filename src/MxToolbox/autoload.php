@@ -14,6 +14,7 @@ spl_autoload_register(
             'MxToolbox\DataGrid\MxToolboxDataGrid' => 'DataGrid/MxToolboxDataGrid.php',
             'MxToolbox\NetworkTools\NetworkTools' => 'NetworkTools/NetworkTools.php',
             'MxToolbox\NetworkTools\SmtpServerChecks' => 'NetworkTools/SmtpServerChecks.php',
+            'MxToolbox\NetworkTools\SmtpDiagnosticParser' => 'NetworkTools/SmtpDiagnosticParser.php',
             'MxToolbox\NetworkTools\DigQueryParser' => 'NetworkTools/DigQueryParser.php'
         ];
 

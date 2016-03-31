@@ -32,7 +32,7 @@ class NetworkTools
     private $domainName;
     /** @var array of any mx records for ip address */
     private $mxRecords;
-    
+
     /** @var DigQueryParser */
     private $digParser;
 
@@ -127,8 +127,14 @@ class NetworkTools
     }
 
     /**
-     * Get some additional information about ip address as PTR,Domain name, MX records
-     * @param $addr
+     * Get some additional information about ip address as PTR,Domain name, MX records.
+     * 
+     *  $info = array(
+     *      ['domainName'] => '',
+     *      ['ptrRecord'] => '',
+     *      ['mxRecords'] => array()
+     *  );
+     * @param string $addr IP address
      * @return array
      */
     public function getDomainDetailInfo(&$addr)
@@ -196,6 +202,36 @@ class NetworkTools
     }
 
     /**
+     * Check if string is valid IPv4 address or domain
+     * @param string $addr
+     * @return boolean
+     */
+    public function ipValidator($addr)
+    {
+        if ($this->isDomainName($addr)) {
+            if ($this->validateIPAddress(gethostbyname($addr)))
+                return true;
+            return false;
+        }
+
+        if ($this->validateIPAddress($addr))
+            return true;
+        return false;
+    }
+
+    /**
+     * Check if a string represents domain name
+     * @param string $addr
+     * @return boolean
+     */
+    public function isDomainName($addr)
+    {
+        if (preg_match("/^[a-zA-Z0-9.\-]{2,256}\.[a-z]{2,6}$/", $addr))
+            return true;
+        return false;
+    }
+
+    /**
      * Validate if string is valid IP address
      * @param string $addr
      * @return boolean
@@ -209,7 +245,7 @@ class NetworkTools
 
     /**
      * Get random DNS IP address from array
-     * @return mixed
+     * @return string '<ip address>'
      * @throws MxToolboxLogicException
      */
     private function getRandomDNSResolverIP()

@@ -63,12 +63,16 @@ class SmtpServerChecks
     public function __construct(NetworkTools $netTool, $addr, $myHostName, $mailFrom, $mailRcptTo)
     {
         $this->netTool = $netTool;
-        if (!$this->netTool->validateIPAddress($addr))
+        
+        if (!$this->netTool->ipValidator($addr))
             throw new MxToolboxLogicException('Non valid IP address.');
+        
         if (!$this->isEmail($mailFrom) || !$this->isEmail($mailRcptTo))
             throw new MxToolboxLogicException('Non valid email format.');
-        if (empty($myHostName))
-            throw new MxToolboxLogicException('Missing argument myHostName.');
+        
+        if (empty($myHostName) || !$this->netTool->ipValidator($myHostName))
+            throw new MxToolboxLogicException('Missing or bad argument myHostName.');
+
         $this->addr = $addr;
         $this->myHostName = $myHostName;
         $this->emailFrom = $mailFrom;
@@ -77,45 +81,34 @@ class SmtpServerChecks
     }
 
     /**
-     * @return array|bool
+     * @return array with final results
      */
     public function getSmtpServerDiagnostic() {
-        if (is_array($this->setSmtpConnect($this->addr)))
+        if (!$this->setSmtpConnect($this->addr))
             return $this->finalResults;
         $this
             ->setEhloResponse()
             ->setFromResponse()
             ->setRcptToResponse()
-            ->closeSmtpConnection();
-        return $this->getSmtpResponses();
+            ->closeSmtpConnection()
+            ->parseResults();
+        return $this->finalResults;
     }
     
     /**
      * Connect to the SMTP server
      * @param string $addr IP address for test
-     * @return $this | array when connection failed
+     * @return true | array when connection failed
      */
     private function setSmtpConnect($addr)
     {
-        $this->smtpConnection = @stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr, 
+        $this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr, 
             $this->connTimeout, STREAM_CLIENT_CONNECT);
         if (is_resource($this->smtpConnection)) {
             $this->smtpResponses['connection'] = fgets($this->smtpConnection, 4096);
-            return $this;
+            return true;
         }
-        $this->finalResults['errors'] = 'Unable to connect to '.$addr.':25 after ' . $this->connTimeout .
-            ' seconds. (No route to host).';
-        return $this->finalResults;
-    }
-
-    /**
-     * Get SMTP array with responses
-     * @return array|bool FALSE if array is blank
-     */
-    private function getSmtpResponses()
-    {
-        if (count($this->smtpResponses) > 0)
-            return $this->smtpResponses;
+        $this->finalResults['errors'] = 'Unable to connect to '.$addr.':25 (Timeout | No route to host).';
         return false;
     }
 
@@ -199,13 +192,14 @@ class SmtpServerChecks
      */
     private function setResultArray()
     {
-        $this->finalResults['rDnsMismatch'] = false;
+        // ALL bad in default
+        $this->finalResults['rDnsMismatch'] = true;
         $this->finalResults['validHostname'] = false;
         $this->finalResults['bannerCheck'] = false;
         $this->finalResults['tls'] = false;
         $this->finalResults['connectTime'] = false;
-        $this->finalResults['openRelay'] = false;
-        $this->finalResults['allResponses'] = false;
+        $this->finalResults['openRelay'] = true;
+        $this->finalResults['allResponses'] = '';
         $this->finalResults['errors'] = false;
         return $this;
     }
@@ -223,4 +217,22 @@ class SmtpServerChecks
     }
 
     //TODO: parse responses, set final result
+
+    private function parseResults() {
+        $parser = new SmtpDiagnosticParser();
+        // check TLS
+        $this->finalResults['tls'] = $parser->isTls($this->smtpResponses['ehlo']);
+
+        // Reverse DNS Mismatch: If the A record of the hostname did not match the PTR = TRUE
+        $info = $this->netTool->getDomainDetailInfo($this->addr);
+        if ($this->netTool->isDomainName($info['ptrRecord'])) {
+            $this->finalResults['rDnsMismatch'] = $parser->isReverseDnsMismatch( 
+                $this->addr, dns_get_record($info['ptrRecord'], DNS_A)
+            );
+        }
+        
+        // next check
+
+
+    }
 }

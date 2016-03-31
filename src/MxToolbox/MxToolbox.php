@@ -137,6 +137,15 @@ abstract class MxToolbox
         return false;
     }
 
+    /**
+     * @param $addr
+     * @param $myHostName
+     * @param $mailFrom
+     * @param $mailRcptTo
+     * @return array|bool
+     * @throws MxToolboxRuntimeException
+     * @throws MxToolboxLogicException
+     */
     public function getSmtpDiagnostics($addr, $myHostName, $mailFrom, $mailRcptTo)
     {
         $smtp = new SmtpServerChecks($this->netTool, $addr, $myHostName, $mailFrom, $mailRcptTo);
