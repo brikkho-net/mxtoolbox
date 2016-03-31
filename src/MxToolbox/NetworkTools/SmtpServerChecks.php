@@ -55,10 +55,10 @@ class SmtpServerChecks
     /**
      * SmtpServerChecks constructor.
      * @param NetworkTools $netTool
-     * @param string $addr IP address of a SMTP server
-     * @param string $myHostName Hostname corresponding with IP address where is this script running
-     * @param string $mailFrom Email address corresponding with your domain
-     * @param string $mailRcptTo Non existing email like this: 'test@example.net'
+     * @param string $addr IP address or hostname for test
+     * @param string $myHostName real HostName of the server where script is running (must be resolved to IP address)
+     * @param string $mailFrom Any testing mail address (domain is same as hostname)
+     * @param string $mailRcptTo non exist email address as test@example.com
      */
     public function __construct(NetworkTools $netTool, $addr, $myHostName, $mailFrom, $mailRcptTo)
     {
@@ -82,7 +82,7 @@ class SmtpServerChecks
 
     /**
      * Get SMTP diagnostics information.
-     *  
+     *
      *  Return information in array(
      *      ['rDnsMismatch']['state'] => boolean,
      *      ['rDnsMismatch']['info'] => string,
@@ -104,7 +104,7 @@ class SmtpServerChecks
      *          [rcptTo] => string,
      *          ),
      *  );
-     * 
+     *
      * @return array
      */
     public function getSmtpServerDiagnostic()
@@ -132,7 +132,7 @@ class SmtpServerChecks
         $this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr,
             $this->connTimeout, STREAM_CLIENT_CONNECT);
         if (is_resource($this->smtpConnection)) {
-            stream_set_timeout($this->smtpConnection,$this->connTimeout);
+            stream_set_timeout($this->smtpConnection, $this->connTimeout);
             $this->smtpResponses['connection'] = $this->readCommand();
             $info = stream_get_meta_data($this->smtpConnection);
             if ($info['timed_out']) {
@@ -190,8 +190,8 @@ class SmtpServerChecks
     }
 
     /**
-     * write command to stream
-     * @param $command
+     * Write command to the SMTP stream
+     * @param string $command
      * @param string $param
      */
     private function writeCommand($command, $param = '')
@@ -200,7 +200,7 @@ class SmtpServerChecks
     }
 
     /**
-     * read command from stream
+     * Read command from the SMTP stream
      * @return mixed
      */
     private function readCommand()
@@ -209,7 +209,7 @@ class SmtpServerChecks
     }
 
     /**
-     * Close SMTP connection
+     * Close the SMTP connection
      * @return $this
      */
     private function closeSmtpConnection()
@@ -228,27 +228,19 @@ class SmtpServerChecks
     {
         $this->finalResults['rDnsMismatch']['state'] = false;
         $this->finalResults['rDnsMismatch']['info'] = '';
-
         $this->finalResults['validHostname']['state'] = false;
         $this->finalResults['validHostname']['info'] = '';
-
         $this->finalResults['bannerCheck']['state'] = false;
         $this->finalResults['bannerCheck']['info'] = '';
-
         $this->finalResults['tls']['state'] = false;
         $this->finalResults['tls']['info'] = '';
-
 //        $this->finalResults['connectTime']['state'] = false;
 //        $this->finalResults['connectTime']['info'] = '';
-
         $this->finalResults['openRelay']['state'] = true;
         $this->finalResults['openRelay']['info'] = '';
-
         $this->finalResults['errors']['state'] = true;
         $this->finalResults['errors']['info'] = '';
-
         $this->finalResults['allResponses'] = false;
-
         return $this;
     }
 
@@ -266,7 +258,7 @@ class SmtpServerChecks
 
 
     /**
-     * Parse all responses from SMTP stream
+     * Parse all responses from the SMTP stream
      * @return $this
      */
     private function parseResults()
@@ -285,9 +277,9 @@ class SmtpServerChecks
             ->checkValidHostname($info, $parser)
             ->checkSmtpBanner($info, $parser)
             ->checkOpenRelay($parser);
-        
+
         // set all responses to final result
-        if(count($this->smtpResponses)>0)
+        if (count($this->smtpResponses) > 0)
             $this->finalResults['allResponses'] = $this->smtpResponses;
         return $this;
     }
@@ -297,14 +289,15 @@ class SmtpServerChecks
      * @param SmtpDiagnosticParser $parser
      * @return $this
      */
-    private function checkTls(&$parser) {
+    private function checkTls(&$parser)
+    {
         $this->finalResults['tls']['state'] = $parser->isTls($this->smtpResponses['ehlo']);
         $this->finalResults['tls']['info'] = 'OK - TLS is supported.';
         if (!$this->finalResults['tls']['state'])
             $this->finalResults['tls']['info'] = 'ERR - TLS is not supported!';
         return $this;
     }
-    
+
     /**
      * Check valid hostname
      * @param array $info
@@ -349,7 +342,8 @@ class SmtpServerChecks
      * @param SmtpDiagnosticParser $parser
      * @return $this
      */
-    private function checkSmtpBanner(&$info, SmtpDiagnosticParser &$parser) {
+    private function checkSmtpBanner(&$info, SmtpDiagnosticParser &$parser)
+    {
         if (isset($info['ptrRecord']) && $this->netTool->isDomainName($info['ptrRecord'])) {
             $this->finalResults['bannerCheck']['state'] = $parser->isReverseDnsInBanner(
                 $this->smtpResponses['connection'], $info['ptrRecord']
@@ -375,6 +369,6 @@ class SmtpServerChecks
             $this->finalResults['openRelay']['info'] = 'ERR - Relay access open!';
         return $this;
     }
-    
+
 }
 

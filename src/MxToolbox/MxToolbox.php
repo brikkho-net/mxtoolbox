@@ -161,8 +161,8 @@ abstract class MxToolbox
      *          ),
      *  );
      *
-     * @param string $addr IP address or hostname
-     * @param string $myHostName HostName of the server where script is running
+     * @param string $addr IP address or hostname for test
+     * @param string $myHostName real HostName of the server where script is running (must be resolved to IP address)
      * @param string $mailFrom Any testing mail address (domain is same as hostname)
      * @param string $mailRcptTo non exist email address as test@example.com
      * @return array
