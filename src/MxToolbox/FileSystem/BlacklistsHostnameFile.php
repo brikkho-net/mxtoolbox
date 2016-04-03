@@ -77,12 +77,11 @@ class BlacklistsHostnameFile
      * @param array $aliveBlacklists
      * @return $this
      * @throws MxToolboxRuntimeException
-     * @throws MxToolboxLogicException
      */
-    public function makeAliveBlacklistFile($aliveBlacklists)
+    public function makeAliveBlacklistFile(&$aliveBlacklists)
     {
         if (!array_key_exists('blHostName', $aliveBlacklists[0]))
-            throw new MxToolboxLogicException("Cannot found index ['blHostName'] in array. Build test array first.");
+            throw new MxToolboxRuntimeException("Cannot found index ['blHostName'] in array. Build test array first.");
 
         $blAliveFileTmp = $this->blacklistPath . 'blacklistsAlive.tmp';
         $blAliveFileOrg = $this->blacklistPath . 'blacklistsAlive.txt';
@@ -92,11 +91,10 @@ class BlacklistsHostnameFile
             throw new MxToolboxRuntimeException ('Cannot create new file: ' . $blAliveFileTmp);
 
         foreach ($aliveBlacklists as $blackList) {
-            if ($blackList['blResponse'])
-                fwrite($file, $blackList ['blHostName'] . PHP_EOL);
+            if ($blackList['blResponse']) {
+                fwrite($file, $blackList['blHostName'] . PHP_EOL);
+            }
         }
-
-        unset($blackList);
         fclose($file);
 
         // check file size
@@ -112,16 +110,14 @@ class BlacklistsHostnameFile
     }
 
     /**
-     * Delete alive blacklists file
+     * Delete alive blacklists file if exist
      * @return $this
-     * @throws MxToolboxRuntimeException
      */
     public function deleteAliveBlacklist()
     {
         $blAliveFile = $this->blacklistPath . 'blacklistsAlive.txt';
-        if (!is_readable($blAliveFile))
-            throw new MxToolboxRuntimeException("File does not exist: " . $blAliveFile);
-        @unlink($blAliveFile);
+        if (is_readable($blAliveFile))
+            @unlink($blAliveFile);
         return $this;
 
     }

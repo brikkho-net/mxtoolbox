@@ -1,7 +1,7 @@
 <?php
 /**
  * Class for arrays and other data
- * 
+ *
  * @author Lubomir Spacek
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
@@ -46,10 +46,8 @@ class MxToolboxDataGrid
      */
     public function __construct(BlacklistsHostnameFile $fileSys, NetworkTools $netTool)
     {
-        if ($fileSys instanceof BlacklistsHostnameFile)
-            $this->fileSys = $fileSys;
-        if ($netTool instanceof NetworkTools)
-            $this->netTool = $netTool;
+        $this->fileSys = $fileSys;
+        $this->netTool = $netTool;
     }
 
     /**
@@ -57,7 +55,7 @@ class MxToolboxDataGrid
      * @return array
      * @throws MxToolboxLogicException
      */
-    public function getTestResultArray()
+    public function &getTestResultArray()
     {
         if ($this->isArrayInitialized($this->testResultStructure))
             return $this->testResultStructure;

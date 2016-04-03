@@ -83,7 +83,7 @@ class NetworkTools
      * @param array $testResults
      * @return $this
      */
-    public function setDnsblResponse($testResults)
+    public function setDnsblResponse(&$testResults)
     {
         foreach ($testResults as $key => $val) {
             if ($this->isDnsblResponse($val['blHostName']))
