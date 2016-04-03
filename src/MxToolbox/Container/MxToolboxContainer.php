@@ -71,7 +71,7 @@ class MxToolboxContainer
      * @param string $mailRcptTo
      * @return SmtpServerChecks
      */
-    protected function createServiceSmtpServerChecks(string $addr, string $myHostName, string $mailFrom, string $mailRcptTo)
+    protected function createServiceSmtpServerChecks($addr, $myHostName, $mailFrom, $mailRcptTo)
     {
         if (!isset($this->container['smtpDiagnostics']) || !$this->container['smtpDiagnostics'] instanceof SmtpServerChecks)
             $this->container['smtpDiagnostics'] = new SmtpServerChecks(
