@@ -67,8 +67,14 @@ class example extends MxToolbox
          */
         var_dump($this->getDomainInformation($addr));
 
-        // Is correct setting as mail server
-        var_dump($this->isMailServer($addr));
+        // Get SMTP server diagnostics responses
+        // '64.12.91.197' is any public SMTP server
+        var_dump($this->getSmtpDiagnosticsInfo(
+            '64.12.91.197',
+            'google.com',
+            'mxtool@example.com',
+            'test@example.com'
+        ));
 
     }
 

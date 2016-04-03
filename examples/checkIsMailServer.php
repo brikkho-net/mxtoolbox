@@ -33,8 +33,8 @@ class checkIsMailServer extends MxToolbox
     public function testMyIPAddress($addr)
     {
 
-        // Get SMTP server responses
-        print_r($this->getSmtpDiagnosticsInfo(
+        // Get SMTP server diagnostics responses
+        var_dump($this->getSmtpDiagnosticsInfo(
             $addr,
             'google.com',
             'mxtool@example.com',
@@ -47,6 +47,7 @@ class checkIsMailServer extends MxToolbox
 
 try {
     $test = new checkIsMailServer();
+    // '64.12.91.197' is any public SMTP server
     $test->testMyIPAddress('64.12.91.197');
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
