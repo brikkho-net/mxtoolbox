@@ -35,7 +35,7 @@ class DigQueryParser
      */
     public function isNoError($digOutput)
     {
-        if (preg_match('/\NOERROR\b/', $digOutput))
+        if (preg_match('/NOERROR/', $digOutput))
             return true;
         return false;
     }
