@@ -7,7 +7,7 @@ spl_autoload_register(
         static $map = [
             'MxToolbox\MxToolbox' => 'MxToolbox.php',
             'MxToolbox\IMxToolbox' => 'IMxToolbox.php',
-            'MxToolbox\AbstractMxToolbox' => 'AbstractMxToolbox.php',
+            'MxToolbox\Container\MxToolboxContainer' => 'Container/MxToolboxContainer.php',
             'MxToolbox\Exceptions\MxToolboxLogicException' => 'Exceptions/MxToolboxLogicExceptions.php',
             'MxToolbox\Exceptions\MxToolboxRuntimeException' => 'Exceptions/MxToolboxRuntimeExceptions.php',
             'MxToolbox\FileSystem\BlacklistsHostnameFile' => 'FileSystem/BlacklistsHostnameFile.php',
