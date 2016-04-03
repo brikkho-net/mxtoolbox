@@ -8,28 +8,25 @@
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
- * @version 0.0.3
+ * @version 0.0.4-dev
  */
 namespace MxToolbox;
 
-use MxToolbox\NetworkTools\NetworkTools;
-use MxToolbox\DataGrid\MxToolboxDataGrid;
-use MxToolbox\FileSystem\BlacklistsHostnameFile;
+use MxToolbox\Container\MxToolboxContainer;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
-use MxToolbox\NetworkTools\SmtpServerChecks;
 
 /**
  * Class MxToolbox
  * @package MxToolbox
  */
-abstract class MxToolbox
+abstract class MxToolbox extends MxToolboxContainer
 {
-    /** @var BlacklistsHostnameFile object */
+    /** @var \MxToolbox\FileSystem\BlacklistsHostnameFile service */
     private $fileSys;
-    /** @var MxToolboxDataGrid object */
+    /** @var \MxToolbox\DataGrid\MxToolboxDataGrid service */
     private $dataGrid;
-    /** @var NetworkTools object */
+    /** @var \MxToolbox\NetworkTools\NetworkTools service */
     private $netTool;
 
     /**
@@ -39,9 +36,9 @@ abstract class MxToolbox
      */
     public function __construct()
     {
-        $this->netTool = new NetworkTools();
-        $this->fileSys = new BlacklistsHostnameFile();
-        $this->dataGrid = new MxToolboxDataGrid($this->fileSys, $this->netTool);
+        $this->netTool = $this->createServiceNetworkTool();
+        $this->fileSys = $this->createServiceBlacklistsHostnameFile();
+        $this->dataGrid = $this->createServiceMxToolboxDataGrid();
         $this->configure();
     }
 
@@ -81,7 +78,7 @@ abstract class MxToolbox
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    public function setBlacklists(&$ownBlacklist = null)
+    public function setBlacklists($ownBlacklist = null)
     {
         try {
             $this->dataGrid->buildBlacklistHostNamesArray($ownBlacklist);
@@ -126,7 +123,7 @@ abstract class MxToolbox
      * @return array
      * @throws MxToolboxLogicException
      */
-    public function &getBlacklistsArray()
+    public function getBlacklistsArray()
     {
         return $this->dataGrid->getTestResultArray();
     }
@@ -179,8 +176,10 @@ abstract class MxToolbox
      */
     public function getSmtpDiagnosticsInfo($addr, $myHostName, $mailFrom, $mailRcptTo)
     {
-        $smtp = new SmtpServerChecks($this->netTool, $addr, $myHostName, $mailFrom, $mailRcptTo);
-        return $smtp->getSmtpServerDiagnostic();
+        return $this
+            ->createServiceSmtpServerChecks($addr, $myHostName, $mailFrom, $mailRcptTo)
+            ->getSmtpServerDiagnostic();
+        //return $smtp->getSmtpServerDiagnostic();
     }
 
     /**
@@ -215,7 +214,7 @@ abstract class MxToolbox
      * @return $this
      * @throws MxToolboxRuntimeException
      */
-    public function checkIpAddressOnDnsbl(&$addr)
+    public function checkIpAddressOnDnsbl($addr)
     {
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
         return $this;
