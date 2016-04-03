@@ -289,7 +289,7 @@ class SmtpServerChecks
      * @param SmtpDiagnosticParser $parser
      * @return $this
      */
-    private function checkTls(&$parser)
+    private function checkTls($parser)
     {
         $this->finalResults['tls']['state'] = $parser->isTls($this->smtpResponses['ehlo']);
         $this->finalResults['tls']['info'] = 'OK - TLS is supported.';
@@ -304,7 +304,7 @@ class SmtpServerChecks
      * @param SmtpDiagnosticParser $parser
      * @return $this
      */
-    private function checkValidHostname(&$info, SmtpDiagnosticParser &$parser)
+    private function checkValidHostname($info, SmtpDiagnosticParser $parser)
     {
         if (isset($info['ptrRecord']) && $this->netTool->isDomainName($info['ptrRecord']))
             $this->finalResults['validHostname']['state'] = $parser->isValidHostname(
@@ -323,7 +323,7 @@ class SmtpServerChecks
      * @param SmtpDiagnosticParser $parser
      * @return $this
      */
-    private function checkRDnsMismatch(&$info, SmtpDiagnosticParser &$parser)
+    private function checkRDnsMismatch($info, SmtpDiagnosticParser $parser)
     {
         if (isset($info['ptrRecord']) && $this->netTool->isDomainName($info['ptrRecord'])) {
             $this->finalResults['rDnsMismatch']['state'] = $parser->isReverseDnsMismatch(
@@ -342,7 +342,7 @@ class SmtpServerChecks
      * @param SmtpDiagnosticParser $parser
      * @return $this
      */
-    private function checkSmtpBanner(&$info, SmtpDiagnosticParser &$parser)
+    private function checkSmtpBanner($info, SmtpDiagnosticParser $parser)
     {
         if (isset($info['ptrRecord']) && $this->netTool->isDomainName($info['ptrRecord'])) {
             $this->finalResults['bannerCheck']['state'] = $parser->isReverseDnsInBanner(
@@ -360,7 +360,7 @@ class SmtpServerChecks
      * @param SmtpDiagnosticParser $parser
      * @return $this
      */
-    private function checkOpenRelay(SmtpDiagnosticParser &$parser)
+    private function checkOpenRelay(SmtpDiagnosticParser $parser)
     {
         if (isset($this->smtpResponses['rcptTo']))
             $this->finalResults['openRelay']['state'] = $parser->isOpenRelay($this->smtpResponses['rcptTo'][0]);

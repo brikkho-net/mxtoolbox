@@ -39,7 +39,7 @@ class BlacklistsHostnameFile
      * @return array
      * @throws MxToolboxLogicException
      */
-    public function &getBlacklistsHostNames()
+    public function getBlacklistsHostNames()
     {
         if (is_array($this->blacklistHostNames) && count($this->blacklistHostNames) > 0)
             return $this->blacklistHostNames;
@@ -79,7 +79,7 @@ class BlacklistsHostnameFile
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    public function makeAliveBlacklistFile(&$aliveBlacklists)
+    public function makeAliveBlacklistFile($aliveBlacklists)
     {
         if (!array_key_exists('blHostName', $aliveBlacklists[0]))
             throw new MxToolboxLogicException("Cannot found index ['blHostName'] in array. Build test array first.");
@@ -91,7 +91,7 @@ class BlacklistsHostnameFile
         if (!@$file = fopen($blAliveFileTmp, 'w'))
             throw new MxToolboxRuntimeException ('Cannot create new file: ' . $blAliveFileTmp);
 
-        foreach ($aliveBlacklists as &$blackList) {
+        foreach ($aliveBlacklists as $blackList) {
             if ($blackList['blResponse'])
                 fwrite($file, $blackList ['blHostName'] . PHP_EOL);
         }

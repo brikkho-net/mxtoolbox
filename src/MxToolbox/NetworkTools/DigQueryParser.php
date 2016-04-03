@@ -33,7 +33,7 @@ class DigQueryParser
      * @param string $digOutput
      * @return bool
      */
-    public function isNoError(&$digOutput)
+    public function isNoError($digOutput)
     {
         if (preg_match('/\NOERROR\b/', $digOutput))
             return true;
@@ -45,7 +45,7 @@ class DigQueryParser
      * @param string $digOutput
      * @return array
      */
-    public function getPositiveUrlAddresses(&$digOutput)
+    public function getPositiveUrlAddresses($digOutput)
     {
         $txtResult = explode(PHP_EOL, trim($digOutput));
         $matches = array();
@@ -63,7 +63,7 @@ class DigQueryParser
      * @param $digOutput
      * @return string|bool
      */
-    public function getQueryTime(&$digOutput)
+    public function getQueryTime($digOutput)
     {
         if (preg_match("/\;; Query time:.*\b/", $digOutput, $matches))
             return filter_var($matches[0], FILTER_SANITIZE_NUMBER_INT);

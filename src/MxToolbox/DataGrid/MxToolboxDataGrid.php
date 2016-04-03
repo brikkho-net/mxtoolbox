@@ -44,7 +44,7 @@ class MxToolboxDataGrid
      * @param BlacklistsHostnameFile $fileSys
      * @param NetworkTools $netTool
      */
-    public function __construct(BlacklistsHostnameFile &$fileSys, NetworkTools &$netTool)
+    public function __construct(BlacklistsHostnameFile $fileSys, NetworkTools $netTool)
     {
         if ($fileSys instanceof BlacklistsHostnameFile)
             $this->fileSys = $fileSys;
@@ -57,7 +57,7 @@ class MxToolboxDataGrid
      * @return array
      * @throws MxToolboxLogicException
      */
-    public function &getTestResultArray()
+    public function getTestResultArray()
     {
         if ($this->isArrayInitialized($this->testResultStructure))
             return $this->testResultStructure;
@@ -72,7 +72,7 @@ class MxToolboxDataGrid
      * @throws MxToolboxRuntimeException;
      * @throws MxToolboxLogicException;
      */
-    public function buildBlacklistHostNamesArray(&$blacklistHostNames = NULL)
+    public function buildBlacklistHostNamesArray($blacklistHostNames = NULL)
     {
         if (is_null($blacklistHostNames) || !is_array($blacklistHostNames)) {
             $this->fileSys->loadBlacklistsFromFile('blacklistsAlive.txt');
@@ -113,11 +113,11 @@ class MxToolboxDataGrid
      * @return $this
      * @throws MxToolboxLogicException
      */
-    protected function setTestResultArray(&$blacklistHostNamesArray, $alive = true, $ownBlacklist = false)
+    protected function setTestResultArray($blacklistHostNamesArray, $alive = true, $ownBlacklist = false)
     {
         if ($this->isArrayInitialized($blacklistHostNamesArray)) {
             $this->testResultStructure = array();
-            foreach ($blacklistHostNamesArray as $index => &$blackList) {
+            foreach ($blacklistHostNamesArray as $index => $blackList) {
                 $this->testResultStructure[$index]['blHostName'] = $blackList;
                 $this->testResultStructure[$index]['blPositive'] = false;
                 $this->testResultStructure[$index]['blPositiveResult'] = array();
@@ -141,7 +141,7 @@ class MxToolboxDataGrid
     public function cleanPrevResults($checkResponse = true)
     {
         if ($this->isArrayInitialized($this->testResultStructure)) {
-            foreach ($this->testResultStructure as $index => &$blackList) {
+            foreach ($this->testResultStructure as $index => $blackList) {
                 // here is default true because blacklist is loaded from alive file 
                 $this->testResultStructure[$index]['blResponse'] = true;
                 if ($checkResponse)
@@ -161,7 +161,7 @@ class MxToolboxDataGrid
      * @param array $anyArray
      * @return bool
      */
-    protected function isArrayInitialized(&$anyArray)
+    protected function isArrayInitialized($anyArray)
     {
         if (is_array($anyArray) && count($anyArray) > 0)
             return true;

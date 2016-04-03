@@ -49,7 +49,7 @@ class SmtpDiagnosticParser
      * @param array $smtpOutput Output array from EHLO SMTP command
      * @return bool
      */
-    public function isTls(&$smtpOutput)
+    public function isTls($smtpOutput)
     {
         foreach ($smtpOutput as $value) {
             if (preg_match('/^250\-STARTTLS/', $value))
@@ -64,7 +64,7 @@ class SmtpDiagnosticParser
      * @param string $ptrRecord
      * @return bool
      */
-    public function isValidHostname(&$smtpOutput, &$ptrRecord)
+    public function isValidHostname($smtpOutput, $ptrRecord)
     {
         foreach ($smtpOutput as $value) {
             if (preg_match('/^250\-' . preg_quote(strtolower($ptrRecord), '.-') . '/', $value))
@@ -80,7 +80,7 @@ class SmtpDiagnosticParser
      * @param array $aRecords array from dns_get_record($info['ptrRecord'], DNS_A)
      * @return bool
      */
-    public function isReverseDnsMismatch(&$addr, $aRecords)
+    public function isReverseDnsMismatch($addr, $aRecords)
     {
         foreach ($aRecords as $idx => $value) {
             if ($value['ip'] == $addr)
@@ -95,7 +95,7 @@ class SmtpDiagnosticParser
      * @param string $ptrRecord
      * @return bool
      */
-    public function isReverseDnsInBanner(&$smtpBanner, &$ptrRecord)
+    public function isReverseDnsInBanner($smtpBanner, $ptrRecord)
     {
         if (preg_match('/^220/', $smtpBanner)
             && preg_match('/' . preg_quote(strtolower($ptrRecord), '.-') . '/', $smtpBanner)

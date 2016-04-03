@@ -83,7 +83,7 @@ class NetworkTools
      * @param array $testResults
      * @return $this
      */
-    public function setDnsblResponse(&$testResults)
+    public function setDnsblResponse($testResults)
     {
         foreach ($testResults as $key => $val) {
             if ($this->isDnsblResponse($val['blHostName']))
@@ -96,7 +96,7 @@ class NetworkTools
      * Get Dns resolvers array
      * @return array
      */
-    public function &getDnsResolvers()
+    public function getDnsResolvers()
     {
         return $this->dnsResolvers;
     }
@@ -105,7 +105,7 @@ class NetworkTools
      * Get DIG path
      * @return string
      */
-    public function &getDigPath()
+    public function getDigPath()
     {
         return $this->digPath;
     }
@@ -137,7 +137,7 @@ class NetworkTools
      * @param string $addr IP address
      * @return array
      */
-    public function getDomainDetailInfo(&$addr)
+    public function getDomainDetailInfo($addr)
     {
         $this->setDigPath($this->digPath);
         $info = array();
@@ -156,7 +156,7 @@ class NetworkTools
      * @param string $host
      * @return bool
      */
-    public function isDnsblResponse(&$host)
+    public function isDnsblResponse($host)
     {
         $digOutput = $this->getDigResult('127.0.0.2', $this->getRandomDNSResolverIP(), $host, 'A');
         if ($this->digParser->isNoError($digOutput))
@@ -171,10 +171,10 @@ class NetworkTools
      * @return $this
      * @throws MxToolboxLogicException
      */
-    public function checkAllDnsbl($addr, &$testResult)
+    public function checkAllDnsbl($addr, $testResult)
     {
         if ($this->validateIPAddress($addr) && count($testResult) > 0) {
-            foreach ($testResult as &$blackList) {
+            foreach ($testResult as $blackList) {
                 $digOutput = $this->getDigResult($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'TXT');
                 if ($this->digParser->isNoError($digOutput)) {
                     $blackList['blPositive'] = true;
