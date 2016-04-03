@@ -23,11 +23,13 @@ class MxToolboxDataGrid
 
     /**
      * Structure:
-     * []['blHostName'] = dnsbl hostname
-     * []['blPositive'] = true if IP addres have the positive check
-     * []['blPositiveResult'] = array() array of a URL addresses if IP address have the positive check
-     * []['blResponse'] = true if DNSBL host name is alive and send test response before test
-     * []['blQueryTime'] = false or response time of a last dig query
+     *      array( array(
+     *      ['blHostName'] => string '<dnsbl hostname>',
+     *      ['blPositive'] => boolean <true if IP address have the positive check for blHostName>,
+     *      ['blPositiveResult'] => array() <array of a URL addresses if IP address have the positive check>,
+     *      ['blResponse'] => boolean <true if DNSBL host name is alive and send test response before test>,
+     *      ['blQueryTime'] => boolean <false or response time of a last dig query>
+     *      ));
      *
      * @var array for dnsbl tests
      */
