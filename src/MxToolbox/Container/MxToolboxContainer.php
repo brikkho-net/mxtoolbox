@@ -29,6 +29,7 @@ class MxToolboxContainer
 
     /** 
      * Create service NetworkTool
+     * @return NetworkTools
      */
     protected function createServiceNetworkTool()
     {
@@ -39,6 +40,7 @@ class MxToolboxContainer
 
     /**
      * Create service BlacklistsHostnameFile
+     * @return BlacklistsHostnameFile
      */
     protected function createServiceBlacklistsHostnameFile()
     {
@@ -49,6 +51,7 @@ class MxToolboxContainer
 
     /**
      * Create service MxToolboxDataGrid
+     * @return MxToolboxDataGrid
      */
     protected function createServiceMxToolboxDataGrid()
     {
@@ -61,13 +64,14 @@ class MxToolboxContainer
     }
 
     /**
+     * Create service MxToolbox\NetworkTools\SmtpServerChecks
      * @param string $addr
      * @param string $myHostName
      * @param string $mailFrom
      * @param string $mailRcptTo
      * @return SmtpServerChecks
      */
-    protected function createServiceSmtpServerChecks($addr, $myHostName, $mailFrom, $mailRcptTo)
+    protected function createServiceSmtpServerChecks(string $addr, string $myHostName, string $mailFrom, string $mailRcptTo)
     {
         if (!isset($this->container['smtpDiagnostics']) || !$this->container['smtpDiagnostics'] instanceof SmtpServerChecks)
             $this->container['smtpDiagnostics'] = new SmtpServerChecks(
