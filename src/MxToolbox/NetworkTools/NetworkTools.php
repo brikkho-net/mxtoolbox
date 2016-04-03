@@ -128,12 +128,13 @@ class NetworkTools
 
     /**
      * Get some additional information about ip address as PTR,Domain name, MX records.
-     * 
-     *  $info = array(
-     *      ['domainName'] => '',
-     *      ['ptrRecord'] => '',
-     *      ['mxRecords'] => array()
-     *  );
+     *
+     *  Structure:
+     *  array(
+     *      ['domainName'] => string,
+     *      ['ptrRecord'] => string,
+     *      ['mxRecords'] => array(
+     *  ));
      * @param string $addr IP address
      * @return array
      */
@@ -149,6 +150,19 @@ class NetworkTools
                 $info['mxRecords'] = $this->mxRecords;
         }
         return $info;
+    }
+
+    /**
+     * Get IP address from domain name
+     * @param string $addr Domain name or IP address
+     * @return string ip address
+     */
+    public function getIpAddressFromDomainName($addr) {
+        
+        if ($this->isDomainName($addr) &&
+            $this->ipValidator($ipAddress = gethostbyname($addr)))
+                return $ipAddress;
+        return $addr;
     }
 
     /**
@@ -171,20 +185,26 @@ class NetworkTools
      * @return $this
      * @throws MxToolboxLogicException
      */
-    public function checkAllDnsbl($addr, $testResult)
+    public function checkAllDnsbl($addr, &$testResult)
     {
-        if ($this->validateIPAddress($addr) && count($testResult) > 0) {
-            foreach ($testResult as $blackList) {
-                $digOutput = $this->getDigResult($addr, $this->getRandomDNSResolverIP(), $blackList['blHostName'], 'TXT');
+        if ($this->ipValidator($addr) && count($testResult) > 0) {
+            foreach ($testResult as &$blackList) {
+                $digOutput = $this->getDigResult(
+                    $this->getIpAddressFromDomainName($addr),
+                    $this->getRandomDNSResolverIP(),
+                    $blackList['blHostName'], 'TXT'
+                );
+
                 if ($this->digParser->isNoError($digOutput)) {
                     $blackList['blPositive'] = true;
                     $blackList['blPositiveResult'] = $this->digParser->getPositiveUrlAddresses($digOutput);
                 } else {
                     $blackList['blResponse'] = false;
                 }
+
+echo $blackList['blHostName'].':'.$this->digParser->getQueryTime($digOutput).PHP_EOL;
                 $blackList['blQueryTime'] = $this->digParser->getQueryTime($digOutput);
             }
-            unset($blackList);
             return $this;
         }
         throw new MxToolboxLogicException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
@@ -236,7 +256,7 @@ class NetworkTools
      * @param string $addr
      * @return boolean
      */
-    public function validateIPAddress($addr)
+    private function validateIPAddress($addr)
     {
         if (filter_var($addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
             return true;
