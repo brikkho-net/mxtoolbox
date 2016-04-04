@@ -8,6 +8,7 @@ spl_autoload_register(
             'MxToolbox\MxToolbox' => 'MxToolbox.php',
             'MxToolbox\IMxToolbox' => 'IMxToolbox.php',
             'MxToolbox\Container\MxToolboxContainer' => 'Container/MxToolboxContainer.php',
+            'MxToolbox\Container\MxContainer' => 'Container/MxContainer.php',
             'MxToolbox\Exceptions\MxToolboxLogicException' => 'Exceptions/MxToolboxLogicExceptions.php',
             'MxToolbox\Exceptions\MxToolboxRuntimeException' => 'Exceptions/MxToolboxRuntimeExceptions.php',
             'MxToolbox\FileSystem\BlacklistsHostnameFile' => 'FileSystem/BlacklistsHostnameFile.php',

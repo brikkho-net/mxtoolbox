@@ -21,7 +21,7 @@ use MxToolbox\NetworkTools\SmtpServerChecks;
  * Class MxToolboxContainer
  * @package MxToolbox\Container
  */
-class MxToolboxContainer
+class MxToolboxContainer extends MxContainer
 {
 
     /** @var array Container of any services */
