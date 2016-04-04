@@ -89,7 +89,7 @@ class easyTest extends MxToolbox
 
 try {
     $test = new easyTest();
-    $test->testMyIPAddress('8.8.8.8');
+    $test->testMyIPAddress('127.0.0.2');
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
 } catch (MxToolboxLogicException $e) {
