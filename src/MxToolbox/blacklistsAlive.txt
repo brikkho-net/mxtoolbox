@@ -40,6 +40,7 @@ dnsbl-2.uceprotect.net
 dnsbl-3.uceprotect.net
 dnsbl.anticaptcha.net
 dnsbl.aspnet.hu
+dnsbl.cobion.com
 dnsbl.dronebl.org
 dnsbl.inps.de
 dnsbl.justspam.org
@@ -72,6 +73,7 @@ ips.whitelisted.org
 ix.dnsbl.manitu.net
 korea.services.net
 l1.bbfh.ext.sorbs.net
+l3.bbfh.ext.sorbs.net
 l4.bbfh.ext.sorbs.net
 list.bbfh.org
 list.blogspambl.com
@@ -82,7 +84,6 @@ mtawlrev.dnsbl.rediris.es
 multi.surbl.org
 multi.uribl.com
 netbl.spameatingmonkey.net
-netblockbl.spamgrouper.to
 netscan.rbl.blockedservers.com
 new.spam.dnsbl.sorbs.net
 no-more-funn.moensted.dk
@@ -101,7 +102,6 @@ public.sarbl.org
 query.bondedsender.org
 rbl.abuse.ro
 rbl.blockedservers.com
-rbl.efnet.org
 rbl.efnetrbl.org
 rbl.interserver.net
 rbl.iprange.net
@@ -122,7 +122,6 @@ sbl.spamhaus.org
 service.mailblacklist.com
 service.mailwhitelist.com
 short.rbl.jp
-singlebl.spamgrouper.com
 singular.ttk.pte.hu
 smtp.dnsbl.sorbs.net
 socks.dnsbl.sorbs.net
