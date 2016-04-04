@@ -33,7 +33,7 @@ class MxToolboxDataGrid
      *
      * @var array for dnsbl tests
      */
-    protected $testResultStructure;
+    protected $testStructure;
     /** @var NetworkTools object */
     private $netTool;
     /** @var BlacklistsHostnameFile object */
@@ -57,8 +57,8 @@ class MxToolboxDataGrid
      */
     public function &getTestResultArray()
     {
-        if ($this->isArrayInitialized($this->testResultStructure))
-            return $this->testResultStructure;
+        if ($this->isArrayInitialized($this->testStructure))
+            return $this->testStructure;
         throw new MxToolboxLogicException(sprintf('Array is empty in %s\%s(), set first test results array.', get_class(), __FUNCTION__));
     }
 
@@ -114,15 +114,15 @@ class MxToolboxDataGrid
     protected function setTestResultArray($blacklistHostNamesArray, $alive = true, $ownBlacklist = false)
     {
         if ($this->isArrayInitialized($blacklistHostNamesArray)) {
-            $this->testResultStructure = array();
+            $this->testStructure = array();
             foreach ($blacklistHostNamesArray as $index => $blackList) {
-                $this->testResultStructure[$index]['blHostName'] = $blackList;
-                $this->testResultStructure[$index]['blPositive'] = false;
-                $this->testResultStructure[$index]['blPositiveResult'] = array();
-                $this->testResultStructure[$index]['blResponse'] = $alive;
+                $this->testStructure[$index]['blHostName'] = $blackList;
+                $this->testStructure[$index]['blPositive'] = false;
+                $this->testStructure[$index]['blPositiveResult'] = array();
+                $this->testStructure[$index]['blResponse'] = $alive;
                 if ($ownBlacklist)
-                    $this->testResultStructure[$index]['blResponse'] = $this->netTool->isDnsblResponse($blackList);
-                $this->testResultStructure[$index]['blQueryTime'] = false;
+                    $this->testStructure[$index]['blResponse'] = $this->netTool->isDnsblResponse($blackList);
+                $this->testStructure[$index]['blQueryTime'] = false;
             }
             unset($blackList);
             return $this;
@@ -138,17 +138,16 @@ class MxToolboxDataGrid
      */
     public function cleanPrevResults($checkResponse = true)
     {
-        if ($this->isArrayInitialized($this->testResultStructure)) {
-            foreach ($this->testResultStructure as $index => $blackList) {
+        if ($this->isArrayInitialized($this->testStructure)) {
+            foreach ($this->testStructure as $index => $blackList) {
                 // here is default true because blacklist is loaded from alive file 
-                $this->testResultStructure[$index]['blResponse'] = true;
+                $this->testStructure[$index]['blResponse'] = true;
                 if ($checkResponse)
-                    $this->testResultStructure[$index]['blResponse'] = $this->netTool->isDnsblResponse($this->testResultStructure[$index]['blHostName']);
-                $this->testResultStructure[$index]['blPositive'] = false;
-                $this->testResultStructure[$index]['blPositiveResult'] = array();
-                $this->testResultStructure[$index]['blQueryTime'] = false;
+                    $this->testStructure[$index]['blResponse'] = $this->netTool->isDnsblResponse($this->testStructure[$index]['blHostName']);
+                $this->testStructure[$index]['blPositive'] = false;
+                $this->testStructure[$index]['blPositiveResult'] = array();
+                $this->testStructure[$index]['blQueryTime'] = false;
             }
-            unset($blackList);
             return $this;
         }
         throw new MxToolboxLogicException(sprintf('Array is empty in %s\%s(), set first test results array.', get_class(), __FUNCTION__));

@@ -61,7 +61,7 @@ abstract class MxToolbox extends MxToolboxContainer
 
     /**
      * Set DNS resolver IP address (support for multiples push)
-     * @param string $addr
+     * @param string $addr IP address
      * @return $this
      * @throws MxToolboxLogicException
      */
@@ -130,8 +130,14 @@ abstract class MxToolbox extends MxToolboxContainer
 
     /**
      * Get some additional information about IP address (PTR record, Domain name, MX records )
-     * Array structure: ['domainName'],['ptrRecord'],['mxRecords'][array]
-     * @param string $addr - ip address
+     *  
+     *  Structure:
+     *  array(
+     *      ['domainName'] => string,
+     *      ['ptrRecord'] => string,
+     *      ['mxRecords'] => array(
+     *  ));
+     * @param string $addr IP address or domain name
      * @return array|bool - return array or FALSE if no information here.
      */
     public function getDomainInformation($addr)
@@ -166,7 +172,7 @@ abstract class MxToolbox extends MxToolboxContainer
      *          ),
      *  );
      *
-     * @param string $addr IP address or hostname for test
+     * @param string $addr IP address or domain name
      * @param string $myHostName real HostName of the server where script is running (must be resolved to IP address)
      * @param string $mailFrom Any testing mail address (domain is same as hostname)
      * @param string $mailRcptTo non exist email address as test@example.com
@@ -209,10 +215,11 @@ abstract class MxToolbox extends MxToolboxContainer
     }
 
     /**
-     * Check IP address on all DNSBL servers
-     * @param string $addr
+     * Check IP address or domain name on all DNSBL servers
+     * @param string $addr ip address or domain name
      * @return $this
      * @throws MxToolboxRuntimeException
+     * @throws MxToolboxLogicException
      */
     public function checkIpAddressOnDnsbl($addr)
     {

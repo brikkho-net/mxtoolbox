@@ -10,6 +10,7 @@
 namespace MxToolbox\NetworkTools;
 
 use MxToolbox\Exceptions\MxToolboxLogicException;
+use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 /**
  * Class NetworkTools
@@ -180,17 +181,21 @@ class NetworkTools
 
     /**
      * Check all (use only alive rBLS - fast check!)
-     * @param string $addr
+     * @param string $addr IP address or domain name
      * @param array $testResult
-     * @return $this
+     * @return self
      * @throws MxToolboxLogicException
+     * @throws MxToolboxRuntimeException
      */
     public function checkAllDnsbl($addr, &$testResult)
     {
-        if ($this->ipValidator($addr) && count($testResult) > 0) {
+        if (!$this->ipValidator($addr))
+            throw new MxToolboxLogicException('Input IP address or domain name ' . $addr . ' is not valid!');
+        $ipAddress = $this->getIpAddressFromDomainName($addr);
+        if (count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
                 $digOutput = $this->getDigResult(
-                    $this->getIpAddressFromDomainName($addr),
+                    $ipAddress,
                     $this->getRandomDNSResolverIP(),
                     $blackList['blHostName'], 'TXT'
                 );
@@ -198,16 +203,13 @@ class NetworkTools
                 if ($this->digParser->isNoError($digOutput)) {
                     $blackList['blPositive'] = true;
                     $blackList['blPositiveResult'] = $this->digParser->getPositiveUrlAddresses($digOutput);
-                } else {
-                    $blackList['blResponse'] = false;
                 }
 
-echo $blackList['blHostName'].':'.$this->digParser->getQueryTime($digOutput).PHP_EOL;
                 $blackList['blQueryTime'] = $this->digParser->getQueryTime($digOutput);
             }
             return $this;
         }
-        throw new MxToolboxLogicException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
+        throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
     }
 
     /**
@@ -260,7 +262,7 @@ echo $blackList['blHostName'].':'.$this->digParser->getQueryTime($digOutput).PHP
     {
         if (filter_var($addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
             return true;
-        throw new MxToolboxLogicException('IP address: ' . $addr . ' is not valid.');
+        throw new MxToolboxLogicException('Value: ' . $addr . ' is not valid ip address.');
     }
 
     /**
@@ -302,11 +304,12 @@ echo $blackList['blHostName'].':'.$this->digParser->getQueryTime($digOutput).PHP
      */
     private function checkExistPTR($addr)
     {
-        if (!$this->validateIPAddress($addr))
+        if (!$this->ipValidator($addr))
             return false;
-        $digResponse = $this->getDigResult($addr, $this->getRandomDNSResolverIP(), 'in-addr.arpa', 'PTR');
+        $ipAddress = $this->getIpAddressFromDomainName($addr);
+        $digResponse = $this->getDigResult($ipAddress, $this->getRandomDNSResolverIP(), 'in-addr.arpa', 'PTR');
         if ($this->digParser->isNoError($digResponse)) {
-            $ptr = dns_get_record($this->reverseIP($addr) . '.in-addr.arpa.', DNS_PTR);
+            $ptr = dns_get_record($this->reverseIP($ipAddress) . '.in-addr.arpa.', DNS_PTR);
             if (isset($ptr[0]['target'])) {
                 $regs = array();
                 $this->ptrRecord = $ptr[0]['target'];

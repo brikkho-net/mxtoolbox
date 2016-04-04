@@ -65,7 +65,7 @@ class SmtpServerChecks
         $this->netTool = $netTool;
 
         if (!$this->netTool->ipValidator($addr))
-            throw new MxToolboxLogicException('Non valid IP address.');
+            throw new MxToolboxLogicException('Non valid IP address or host name.');
 
         if (!$this->isEmail($mailFrom) || !$this->isEmail($mailRcptTo))
             throw new MxToolboxLogicException('Non valid email format.');
@@ -73,7 +73,7 @@ class SmtpServerChecks
         if (empty($myHostName) || !$this->netTool->ipValidator($myHostName))
             throw new MxToolboxLogicException('Missing or bad argument myHostName.');
 
-        $this->addr = $addr;
+        $this->addr = $this->netTool->getIpAddressFromDomainName($addr);
         $this->myHostName = $myHostName;
         $this->emailFrom = $mailFrom;
         $this->emailRcptTo = $mailRcptTo;
