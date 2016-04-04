@@ -38,7 +38,6 @@ class getAdditionalInformation extends MxToolbox
          */
         var_dump($this->getDomainInformation($addr));
 
-
     }
 
 }
