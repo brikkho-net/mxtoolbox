@@ -183,7 +183,7 @@ class NetworkTools
      * Check all (use only alive rBLS - fast check!)
      * @param string $addr IP address or domain name
      * @param array $testResult
-     * @return self
+     * @return $this
      * @throws MxToolboxLogicException
      * @throws MxToolboxRuntimeException
      */
