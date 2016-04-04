@@ -1,15 +1,11 @@
-abuse-contacts.abusix.org
 access.redhawk.org
 accredit.habeas.com
 all.rbl.jp
 all.s5h.net
 all.spamrats.com
-asn.routeviews.org
-aspath.routeviews.org
 aspews.ext.sorbs.net
 b.barracudacentral.org
 backscatter.spameatingmonkey.net
-bad.psky.me
 bb.barracudacentral.org
 bl.blocklist.de
 bl.emailbasura.org
@@ -24,7 +20,6 @@ bl.spameatingmonkey.net
 bl.spamstinks.com
 bl.suomispam.net
 black.uribl.com
-blackholes.scconsult.com
 block.dnsbl.sorbs.net
 bogons.cymru.com
 bsb.empty.us
@@ -32,7 +27,6 @@ bsb.spamlookup.net
 cbl.abuseat.org
 cidr.bl.mcafee.com
 combined.rbl.msrbl.net
-contacts.abuse.net
 db.wpbl.info
 dnsbl-0.uceprotect.net
 dnsbl-1.uceprotect.net
@@ -40,6 +34,7 @@ dnsbl-2.uceprotect.net
 dnsbl-3.uceprotect.net
 dnsbl.anticaptcha.net
 dnsbl.aspnet.hu
+dnsbl.cobion.com
 dnsbl.dronebl.org
 dnsbl.inps.de
 dnsbl.justspam.org
@@ -57,8 +52,6 @@ dul.dnsbl.sorbs.net
 dul.pacifier.net
 dyna.spamrats.com
 escalations.dnsbl.sorbs.net
-forbidden.icm.edu.pl
-free.v4bl.org
 grey.uribl.com
 hostkarma.junkemailfilter.com
 http.dnsbl.sorbs.net
@@ -66,12 +59,12 @@ hul.habeas.com
 iadb.isipp.com
 iadb2.isipp.com
 images.rbl.msrbl.net
-ip.v4bl.org
 ips.backscatterer.org
 ips.whitelisted.org
 ix.dnsbl.manitu.net
 korea.services.net
 l1.bbfh.ext.sorbs.net
+l2.bbfh.ext.sorbs.net
 l3.bbfh.ext.sorbs.net
 list.bbfh.org
 list.blogspambl.com
@@ -87,7 +80,6 @@ no-more-funn.moensted.dk
 nobl.junkemailfilter.com
 noptr.spamrats.com
 old.spam.dnsbl.sorbs.net
-origin.asn.spameatingmonkey.net
 pbl.spamhaus.org
 phishing.rbl.msrbl.net
 plus.bondedsender.org
@@ -95,17 +87,14 @@ pofon.foobar.hu
 problems.dnsbl.sorbs.net
 proxies.dnsbl.sorbs.net
 psbl.surriel.com
-public.sarbl.org
 query.bondedsender.org
 rbl.abuse.ro
 rbl.blockedservers.com
 rbl.efnet.org
 rbl.efnetrbl.org
 rbl.interserver.net
-rbl.iprange.net
 rbl.lugh.ch
 rbl.megarbl.net
-rbl.rbldns.ru
 recent.spam.dnsbl.sorbs.net
 red.uribl.com
 relays.dnsbl.sorbs.net
@@ -116,6 +105,7 @@ sa-accredit.habeas.com
 safe.dnsbl.sorbs.net
 sbl-xbl.spamhaus.org
 sbl.nszones.com
+sbl.spamhaus.org
 service.mailblacklist.com
 service.mailwhitelist.com
 short.rbl.jp
@@ -147,5 +137,7 @@ web.rbl.msrbl.net
 white.uribl.com
 whitelist.surriel.com
 wl.mailspike.net
+xbl.spamhaus.org
 z.mailspike.net
+zen.spamhaus.org
 zombie.dnsbl.sorbs.net

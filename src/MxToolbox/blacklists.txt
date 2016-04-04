@@ -3,7 +3,6 @@
 0spamtrust.fusionzero.com
 0spamurl.fusionzero.com
 88.blocklist.zap
-abuse-contacts.abusix.org
 abuse.rfc-clueless.org
 access.redhawk.org
 accredit.habeas.com
@@ -15,12 +14,9 @@ all.s5h.net
 all.spam-rbl.fr
 all.spamrats.com
 all.v6.ascc.dnsbl.bit.nl
-asn.routeviews.org
-aspath.routeviews.org
 aspews.ext.sorbs.net
 b.barracudacentral.org
 backscatter.spameatingmonkey.net
-bad.psky.me
 badconf.rhsbl.sorbs.net
 badnets.spameatingmonkey.net
 bb.barracudacentral.org
@@ -63,10 +59,7 @@ cdl.anti-spam.org.cn
 cidr.bl.mcafee.com
 cml.anti-spam.org.cn
 combined.rbl.msrbl.net
-contacts.abuse.net
 db.wpbl.info
-dbl.spamhaus.org
-dbl.tiopan.com
 dnsbl-0.uceprotect.net
 dnsbl-1.uceprotect.net
 dnsbl-2.uceprotect.net
@@ -98,7 +91,6 @@ dnsbl1.dnsbl.borderware.com
 dnsbl2.dnsbl.borderware.com
 dnsbl3.dnsbl.borderware.com
 dnsbl6.anticaptcha.net
-dnsblchile.org
 dnsrbl.org
 dnsrbl.swinog.ch
 dnswl.inps.de
@@ -120,8 +112,6 @@ ex.dnsbl.org
 exitnodes.tor.dnsbl.sectoor.de
 feb.spamlab.com
 fnrbl.fast.net
-forbidden.icm.edu.pl
-free.v4bl.org
 fresh.spameatingmonkey.net
 fresh10.spameatingmonkey.net
 fresh15.spameatingmonkey.net
@@ -158,7 +148,6 @@ l4.bbfh.ext.sorbs.net
 list.anonwhois.net
 list.bbfh.org
 list.blogspambl.com
-list.dnswl.org
 mail-abuse.blacklist.jippg.org
 misc.dnsbl.sorbs.net
 mtawlrev.dnsbl.rediris.es
@@ -174,7 +163,6 @@ nomail.rhsbl.sorbs.net
 noptr.spamrats.com
 old.spam.dnsbl.sorbs.net
 origin.asn.cymru.com
-origin.asn.spameatingmonkey.net
 origin6.asn.cymru.com
 orvedb.aupads.org
 pbl.spamhaus.org
@@ -186,7 +174,6 @@ postmaster.rfc-clueless.org
 problems.dnsbl.sorbs.net
 proxies.dnsbl.sorbs.net
 psbl.surriel.com
-public.sarbl.org
 q.mail-abuse.com
 query.bondedsender.org
 query.senderbase.org
@@ -200,10 +187,8 @@ rbl.efnet.org
 rbl.efnetrbl.org
 rbl.fasthosts.co.uk
 rbl.interserver.net
-rbl.iprange.net
 rbl.lugh.ch
 rbl.megarbl.net
-rbl.rbldns.ru
 rbl.schulte.org
 rbl.spamlab.com
 rbl.talkactive.net
