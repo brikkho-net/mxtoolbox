@@ -24,10 +24,10 @@ class getAdditionalInformation extends MxToolbox
     }
 
     /**
-     * Test IP address
+     * Get information about IP address or domain name
      * @param string $addr
      */
-    public function testMyIPAddress($addr)
+    public function getInfo($addr)
     {
 
         /* Get additional information for IP address
@@ -45,7 +45,7 @@ class getAdditionalInformation extends MxToolbox
 
 try {
     $test = new getAdditionalInformation();
-    $test->testMyIPAddress('8.8.8.8');
+    $test->getInfo('8.8.8.8');
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
 } catch (MxToolboxLogicException $e) {

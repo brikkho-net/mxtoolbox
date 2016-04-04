@@ -29,7 +29,7 @@ class easyTest extends MxToolbox
     }
 
     /**
-     * Test IP address
+     * Test IP address or domain name
      * @param string $addr
      */
     public function testMyIPAddress($addr)
@@ -71,7 +71,7 @@ class easyTest extends MxToolbox
 
 try {
     $test = new easyTest();
-    $test->testMyIPAddress('127.0.0.2');
+    $test->testMyIPAddress('8.8.8.8');
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
 } catch (MxToolboxLogicException $e) {

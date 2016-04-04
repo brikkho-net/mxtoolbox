@@ -43,7 +43,7 @@ class myOwnBlackList extends MxToolbox
     }
 
     /**
-     * Test IP address with my own blacklist
+     * Test IP address or domain name - with my own blacklists
      * @param string $addr
      */
     public function testMyIPAddress($addr)

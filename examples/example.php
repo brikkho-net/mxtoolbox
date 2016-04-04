@@ -29,7 +29,7 @@ class example extends MxToolbox
     }
 
     /**
-     * Test IP address
+     * Test IP address or domain name
      * @param string $addr
      */
     public function testMyIPAddress($addr)
@@ -94,7 +94,6 @@ class example extends MxToolbox
 try {
     $test = new example();
     $test->testMyIPAddress('8.8.8.8');
-    $test->testMyIPAddress('8.8.4.4');
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
 } catch (MxToolboxLogicException $e) {

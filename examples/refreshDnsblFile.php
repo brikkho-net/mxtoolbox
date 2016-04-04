@@ -26,17 +26,20 @@ class refreshDnsblFile extends MxToolbox
     }
 
     /**
-     * Refresh DNSBL file
+     * Refresh file with alive blacklists
      */
-    public function testMyIPAddress()
+    public function refreshAliveBlacklistsFile()
     {
 
-        // update the blacklistAlive.txt file
+        /*
+         * Update the blacklistAlive.txt file - ! time-consuming process !
+         */
         $this->updateAliveBlacklistFile();
 
-        // get array with dns resolvers
+        /*
+         * Get new test array prepared for check (without any test results)
+         */
         var_dump($this->getBlacklistsArray());
-
 
     }
 
@@ -44,7 +47,7 @@ class refreshDnsblFile extends MxToolbox
 
 try {
     $test = new refreshDnsblFile();
-    $test->testMyIPAddress();
+    $test->refreshAliveBlacklistsFile();
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();
 } catch (MxToolboxLogicException $e) {
