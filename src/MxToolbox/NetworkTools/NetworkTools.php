@@ -125,7 +125,7 @@ class NetworkTools
     public function getDigResult($addr, $dnsResolver, $blackList, $record = 'A')
     {
         $checkResult = shell_exec($this->digPath . ' @' . $dnsResolver .
-            ' +time=4 +tries=2 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
+            ' +time=2 +tries=2 +nocmd ' . $this->reverseIP($addr) . '.' . $blackList . ' ' . $record);
         return $checkResult;
     }
 
