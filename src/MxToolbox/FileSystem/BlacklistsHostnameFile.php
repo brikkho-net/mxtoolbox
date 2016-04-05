@@ -30,14 +30,7 @@ class BlacklistsHostnameFile
      */
     public function __construct()
     {
-        $this->blacklistPath = dirname(__FILE__) .
-            DIRECTORY_SEPARATOR . '..' .
-            DIRECTORY_SEPARATOR . '..' .
-            DIRECTORY_SEPARATOR . '..' .
-            DIRECTORY_SEPARATOR . '..' .
-            DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR .
-            'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR .
-            'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR;
+        $this->setBlacklistFileParh();
     }
 
     /**
@@ -129,4 +122,34 @@ class BlacklistsHostnameFile
 
     }
 
+    /**
+     * Set blacklist file path
+     * @return $this
+     */
+    private function setBlacklistFileParh() {
+        // standard composer installation
+        $this->blacklistPath = dirname(__FILE__) .
+            DIRECTORY_SEPARATOR . '..' .
+            DIRECTORY_SEPARATOR . '..' .
+            DIRECTORY_SEPARATOR . '..' .
+            DIRECTORY_SEPARATOR . '..' .
+            DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR .
+            'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR .
+            'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR;
+        if (!file_exists($this->blacklistPath.'blacklists.txt')) {
+            // install blacklist files directly to mxtoolbox (travis,...)
+            $this->blacklistPath = dirname(__FILE__) .
+                DIRECTORY_SEPARATOR . '..' .
+                DIRECTORY_SEPARATOR . '..' .
+                DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR .
+                'vendor' . DIRECTORY_SEPARATOR .
+                'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR .
+                'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR;
+            if (!file_exists($this->blacklistPath.'blacklists.txt')) {
+                throw new MxToolboxRuntimeException('Path to the blacklist file not exist.');
+            }
+        }
+        return $this;
+
+    }
 }
