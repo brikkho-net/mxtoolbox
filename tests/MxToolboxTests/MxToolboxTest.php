@@ -27,7 +27,7 @@ class MxToolboxTest extends \PHPUnit_Framework_TestCase
         $dnsRecords = $mxt->getDomainInformation('8.8.8.8');
         $this->assertInternalType('array', $dnsRecords);
         $this->assertInternalType('array', $dnsRecords['mxRecords']);
-        $this->assertEquals(3, count($dnsRecords));
+        $this->assertEquals(4, count($dnsRecords));
     }
 
     /** test is mail server - simple */
