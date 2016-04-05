@@ -66,7 +66,6 @@ dnsbl-2.uceprotect.net
 dnsbl-3.uceprotect.net
 dnsbl.anticaptcha.net
 dnsbl.aspnet.hu
-dnsbl.cobion.com
 dnsbl.cyberlogic.net
 dnsbl.dronebl.org
 dnsbl.forefront.microsoft.com
