@@ -24,6 +24,7 @@
   "autoload": {
     "psr-4": {
       "MxToolbox\\": "src/MxToolbox",
+      "MxToolbox\\Container\\": "src/MxToolbox/Container",
       "MxToolbox\\DataGrid\\": "src/MxToolbox/DataGrid",
       "MxToolbox\\Exceptions\\": "src/MxToolbox/Exceptions",
       "MxToolbox\\FileSystem\\": "src/MxToolbox/FileSystem",
