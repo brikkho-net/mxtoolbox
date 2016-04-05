@@ -9,6 +9,7 @@
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
  * @version 0.0.7
+ *
  */
 namespace MxToolbox;
 
