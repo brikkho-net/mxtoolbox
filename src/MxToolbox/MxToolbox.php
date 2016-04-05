@@ -8,7 +8,7 @@
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
- * @version 0.0.6
+ * @version 0.0.7
  */
 namespace MxToolbox;
 
@@ -185,7 +185,6 @@ abstract class MxToolbox extends MxToolboxContainer
         return $this
             ->createServiceSmtpServerChecks($addr, $myHostName, $mailFrom, $mailRcptTo)
             ->getSmtpServerDiagnostic();
-        //return $smtp->getSmtpServerDiagnostic();
     }
 
     /**
