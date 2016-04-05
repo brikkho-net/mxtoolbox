@@ -33,6 +33,8 @@ class NetworkTools
     private $domainName;
     /** @var array of any mx records for ip address */
     private $mxRecords;
+    /** @var string ip address from domain name */
+    private $ipAddress;
 
     /** @var DigQueryParser object */
     private $digParser;
@@ -144,6 +146,7 @@ class NetworkTools
         $this->setDigPath($this->digPath);
         $info = array();
         if ($this->checkExistPTR($addr)) {
+            $info['ipAddress'] = $this->ipAddress;
             $info['domainName'] = $this->domainName;
             $info['ptrRecord'] = $this->ptrRecord;
             $info['mxRecords'] = array();
@@ -191,11 +194,11 @@ class NetworkTools
     {
         if (!$this->ipValidator($addr))
             throw new MxToolboxLogicException('Input IP address or domain name ' . $addr . ' is not valid!');
-        $ipAddress = $this->getIpAddressFromDomainName($addr);
+        $this->ipAddress = $this->getIpAddressFromDomainName($addr);
         if (count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
                 $digOutput = $this->getDigResult(
-                    $ipAddress,
+                    $this->ipAddress,
                     $this->getRandomDNSResolverIP(),
                     $blackList['blHostName'], 'TXT'
                 );
@@ -306,10 +309,10 @@ class NetworkTools
     {
         if (!$this->ipValidator($addr))
             return false;
-        $ipAddress = $this->getIpAddressFromDomainName($addr);
-        $digResponse = $this->getDigResult($ipAddress, $this->getRandomDNSResolverIP(), 'in-addr.arpa', 'PTR');
+        $this->ipAddress = $this->getIpAddressFromDomainName($addr);
+        $digResponse = $this->getDigResult($this->ipAddress, $this->getRandomDNSResolverIP(), 'in-addr.arpa', 'PTR');
         if ($this->digParser->isNoError($digResponse)) {
-            $ptr = dns_get_record($this->reverseIP($ipAddress) . '.in-addr.arpa.', DNS_PTR);
+            $ptr = dns_get_record($this->reverseIP($this->ipAddress) . '.in-addr.arpa.', DNS_PTR);
             if (isset($ptr[0]['target'])) {
                 $regs = array();
                 $this->ptrRecord = $ptr[0]['target'];

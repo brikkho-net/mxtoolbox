@@ -32,6 +32,7 @@ class getAdditionalInformation extends MxToolbox
 
         /* Get additional information for IP address
          * Array structure:
+         * ['ipAddress']
          * ['domainName']
          * ['ptrRecord']
          * ['mxRecords'][array]
