@@ -8,7 +8,7 @@
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
- * @version 0.0.7
+ * @version 0.0.8-dev
  *
  */
 namespace MxToolbox;
@@ -130,10 +130,10 @@ abstract class MxToolbox extends MxToolboxContainer
     }
 
     /**
-     * Get some additional information about IP address (PTR record, Domain name, MX records )
+     * Get some additional information about IP address (IP Address, PTR record, Domain name, MX records )
      *  
-     *  Structure:
-     *  array(
+     *  Return information in array(
+     *      ['ipAddress'] => string,
      *      ['domainName'] => string,
      *      ['ptrRecord'] => string,
      *      ['mxRecords'] => array(
