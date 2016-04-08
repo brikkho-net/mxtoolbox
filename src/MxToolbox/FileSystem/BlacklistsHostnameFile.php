@@ -111,11 +111,12 @@ class BlacklistsHostnameFile
      */
     public function deleteAliveBlacklist()
     {
+        if (empty($this->blacklistPath))
+            $this->setBlacklistFilePath();
         $blAliveFile = $this->blacklistPath . 'blacklistsAlive.txt';
         if (is_readable($blAliveFile))
             @unlink($blAliveFile);
         return $this;
-
     }
 
     /**
