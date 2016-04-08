@@ -1,7 +1,4 @@
 <?php
-/**
- * How to get additional information from IP address or domain name
- */
 use MxToolbox\MxToolbox;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\Exceptions\MxToolboxLogicException;
@@ -23,17 +20,18 @@ try {
         //->setDnsResolver('8.8.4.4')
         ->setDnsResolver('127.0.0.1');
 
-    /* Get additional information for IP address
-     *  Return array structure:
-     *  ['ipAddress']
-     *  ['domainName']
-     *  ['ptrRecord']
-     *  ['mxRecords'][array]
+    /**
+     * Get SMTP server diagnostics responses
      */
-    var_dump($test->getDomainInformation('8.8.8.8'));
+    var_dump($test->getSmtpDiagnosticsInfo(
+        '64.12.91.197',
+        'google.com',
+        'mxtool@example.com',
+        'test@example.com'
+    ));
 
 } catch (MxToolboxRuntimeException $e) {
-    echo $e->getMessage();
+    echo $e->getMessage().PHP_EOL;
 } catch (MxToolboxLogicException $e) {
-    echo $e->getMessage();
+    echo $e->getMessage().PHP_EOL;
 }

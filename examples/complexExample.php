@@ -1,17 +1,12 @@
 <?php
 /**
- * How to use user defined blacklist input array
+ * Most complex example
  */
 use MxToolbox\MxToolbox;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../src/MxToolbox/autoload.php';
-
-$myBlacklist = array(
-    0 => 'zen.spamhaus.org',
-    1 => 'xbl.spamhaus.org'
-);
 
 try {
 
@@ -27,8 +22,14 @@ try {
         //->setDnsResolver('8.8.8.8')
         //->setDnsResolver('8.8.4.4')
         ->setDnsResolver('127.0.0.1')
-        // load user defined blacklists for dnsbl check
-        ->setBlacklists($myBlacklist);
+        // set user path to the blacklist files - optional
+        //->setBlacklistFilePath(<any path to directory where is blacklists.txt>);
+        // load default blacklists for dnsbl check - optional
+        ->setBlacklists();
+    /*
+     * Get test array prepared for check (without any test results)
+     */
+    //var_dump($this->getBlacklistsArray());
 
     /*
      * Check IP address on all DNSBL
@@ -45,6 +46,7 @@ try {
      *  []['blResponse'] = true if DNSBL host name is alive or DNSBL responded during the test
      *  []['blQueryTime'] = false or response time of a last dig query
      */
+
     var_dump($test->getBlacklistsArray());
 
     /*
@@ -53,6 +55,30 @@ try {
      * FALSE = only cleaning old results ([blResponse] => true)
      */
     $test->cleanBlacklistArray(false);
+
+    // Get SMTP server diagnostics responses
+    // '64.12.91.197' is any public SMTP server
+    var_dump($this->getSmtpDiagnosticsInfo(
+        '64.12.91.197',
+        'google.com',
+        'mxtool@example.com',
+        'test@example.com'
+    ));
+
+    /* Get additional information for IP address
+     *  Array structure:
+     *  ['ipAddress']
+     *  ['domainName']
+     *  ['ptrRecord']
+     *  ['mxRecords'][array]
+     */
+    var_dump($test->getDomainInformation('8.8.8.8'));
+
+    // get array with dns resolvers
+    var_dump($test->getDnsResolvers());
+
+    // get DIG path
+    var_dump($test->getDigPath());
 
 } catch (MxToolboxRuntimeException $e) {
     echo $e->getMessage();

@@ -1,17 +1,12 @@
 <?php
 /**
- * How to use user defined blacklist input array
+ * Same as basicUsage.php but wit user defined blacklists file path
  */
 use MxToolbox\MxToolbox;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 
 require_once dirname(__FILE__) . DIRECTORY_SEPARATOR . '../src/MxToolbox/autoload.php';
-
-$myBlacklist = array(
-    0 => 'zen.spamhaus.org',
-    1 => 'xbl.spamhaus.org'
-);
 
 try {
 
@@ -27,8 +22,10 @@ try {
         //->setDnsResolver('8.8.8.8')
         //->setDnsResolver('8.8.4.4')
         ->setDnsResolver('127.0.0.1')
-        // load user defined blacklists for dnsbl check
-        ->setBlacklists($myBlacklist);
+        // set user path to the blacklist files - optional
+        ->setBlacklistFilePath(dirname(__FILE__) . '/../vendor/mxtoolbox-blacklists/mxtoolbox-blacklists/')
+        // load default blacklists for dnsbl check - optional
+        ->setBlacklists();
 
     /*
      * Check IP address on all DNSBL
@@ -36,7 +33,7 @@ try {
     $test->checkIpAddressOnDnsbl('8.8.8.8');
 
     /*
-     *  Get the same array but with a check results
+     *  Get array with a check results
      * 
      *  Return structure:
      *  []['blHostName'] = dnsbl hostname
