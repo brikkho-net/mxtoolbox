@@ -9,15 +9,15 @@ try {
     $test = new MxToolbox();
     // Configure MxToolbox
     $test
-        // path to the dig tool
+        // path to the dig tool - required
         ->setDig('/usr/bin/dig')
-        // set multiple resolvers is allowed
+        // set dns resolver - required
         //->setDnsResolver('8.8.8.8')
         //->setDnsResolver('8.8.4.4')
         ->setDnsResolver('127.0.0.1')
-        // set user path to the blacklist files
+        // set user path to the blacklist files - optional
         ->setBlacklistFilePath(dirname(__FILE__) . '/../vendor/mxtoolbox-blacklists/mxtoolbox-blacklists/')
-        // load default blacklists (from the file: blacklistAlive.txt)
+        // load default blacklists for dnsbl check - optional
         ->setBlacklists();
 
     /*
