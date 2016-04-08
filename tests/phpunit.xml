@@ -10,9 +10,9 @@
 		 bootstrap="./bootstrap.php"
 	>
 	<testsuite name="MxToolbox">
-		<directory>./</directory>	  	
+		<directory>./</directory>
 	</testsuite>
-    
+
 	<filter>
 		<whitelist>
 			<directory suffix=".php">../*</directory>
@@ -23,5 +23,6 @@
 				<file>../src/MxToolbox/autoload.php</file>
 			</exclude>
 		</whitelist>
-	</filter>   
+	</filter>
+
 </phpunit>
