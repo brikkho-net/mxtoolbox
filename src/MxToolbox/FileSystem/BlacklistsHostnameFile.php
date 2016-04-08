@@ -26,14 +26,6 @@ class BlacklistsHostnameFile
     private $blacklistPath;
 
     /**
-     * BlacklistsHostnameFile constructor.
-     */
-    public function __construct()
-    {
-        $this->setBlacklistFileParh();
-    }
-
-    /**
      * Get blacklists host names
      *
      * @return array
@@ -56,9 +48,13 @@ class BlacklistsHostnameFile
      */
     public function loadBlacklistsFromFile($fileName)
     {
+        // user not defined any path
+        if (empty($this->blacklistPath))
+            $this->setBlacklistFilePath();
+        
         $blFile = $this->blacklistPath . $fileName;
         if (!is_readable($blFile))
-            throw new MxToolboxRuntimeException("Blacklists file does not exist", 400);
+            throw new MxToolboxRuntimeException("Blacklists file does not exist in: " . $blFile, 400);
 
         if (!($this->blacklistHostNames = file($blFile, FILE_SKIP_EMPTY_LINES | FILE_IGNORE_NEW_LINES)) === false) {
             if (!count($this->blacklistHostNames) > 0) {
@@ -124,10 +120,17 @@ class BlacklistsHostnameFile
 
     /**
      * Set blacklist file path
+     * @param string|boolean $path - default FALSE for auto configuration
      * @return $this
      */
-    private function setBlacklistFileParh()
+    public function setBlacklistFilePath($path=false)
     {
+        // user configuration path
+        if (is_string($path)) {
+            $this->blacklistPath = $path;
+            return $this;
+        }
+        
         // standard composer installation
         $this->blacklistPath = dirname(__FILE__) .
             DIRECTORY_SEPARATOR . '..' .
@@ -137,6 +140,7 @@ class BlacklistsHostnameFile
             DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR .
             'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR .
             'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR;
+        
         if (!file_exists($this->blacklistPath . 'blacklists.txt')) {
             // install blacklist files directly to mxtoolbox (travis,...)
             $this->blacklistPath = dirname(__FILE__) .
@@ -147,7 +151,7 @@ class BlacklistsHostnameFile
                 'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR .
                 'mxtoolbox-blacklists' . DIRECTORY_SEPARATOR;
             if (!file_exists($this->blacklistPath . 'blacklists.txt')) {
-                throw new MxToolboxRuntimeException('Path to the blacklist file not exist.');
+                throw new MxToolboxRuntimeException('Standard path to the blacklist file not exist.');
             }
         }
         return $this;
