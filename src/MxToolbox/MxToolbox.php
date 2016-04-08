@@ -21,7 +21,7 @@ use MxToolbox\Exceptions\MxToolboxRuntimeException;
  * Class MxToolbox
  * @package MxToolbox
  */
-abstract class MxToolbox extends MxToolboxContainer
+class MxToolbox extends MxToolboxContainer
 {
     /** @var \MxToolbox\FileSystem\BlacklistsHostnameFile service */
     private $fileSys;
@@ -40,16 +40,10 @@ abstract class MxToolbox extends MxToolboxContainer
         $this->netTool = $this->createServiceNetworkTool();
         $this->fileSys = $this->createServiceBlacklistsHostnameFile();
         $this->dataGrid = $this->createServiceMxToolboxDataGrid();
-        $this->configure();
     }
 
-    /**
-     * Configure MxToolbox.
-     */
-    abstract public function configure();
-
-    /**
-     * Set dig path, etc: /usr/bin/dig
+     /**
+     * Set dig path - required, etc: /usr/bin/dig
      * @param string $digPath
      * @return $this
      * @throws MxToolboxLogicException
@@ -61,7 +55,17 @@ abstract class MxToolbox extends MxToolboxContainer
     }
 
     /**
-     * Set DNS resolver IP address (support for multiples push)
+     * Set path to the blacklist files - optional
+     * @param string $path
+     * @return $this
+     */
+    public function setBlacklistFilePath($path) {
+        $this->fileSys->setBlacklistFilePath($path);
+        return $this;
+    }
+    
+    /**
+     * Set DNS resolver IP address - required (support for multiples push)
      * @param string $addr IP address
      * @return $this
      * @throws MxToolboxLogicException
@@ -73,7 +77,7 @@ abstract class MxToolbox extends MxToolboxContainer
     }
 
     /**
-     * Initialize blacklist array fom file or custom array
+     * Initialize blacklist array from file or custom array - optional
      * @param array $ownBlacklist optional, default nothing
      * @return $this
      * @throws MxToolboxRuntimeException
