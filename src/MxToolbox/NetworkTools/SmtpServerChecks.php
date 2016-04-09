@@ -129,7 +129,7 @@ class SmtpServerChecks
      */
     private function setSmtpConnect($addr)
     {
-        $this->smtpConnection = stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr,
+        $this->smtpConnection = @stream_socket_client($addr . ':' . $this->smtpPort, $errno, $errstr,
             $this->connTimeout, STREAM_CLIENT_CONNECT);
         if (is_resource($this->smtpConnection)) {
             stream_set_timeout($this->smtpConnection, $this->connTimeout);
