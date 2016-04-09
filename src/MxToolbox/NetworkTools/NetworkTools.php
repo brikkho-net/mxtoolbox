@@ -265,7 +265,7 @@ class NetworkTools
     {
         if (filter_var($addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
             return true;
-        throw new MxToolboxLogicException('Value: ' . $addr . ' is not valid ip address.');
+        throw new MxToolboxLogicException('Value: ' . $addr . ' is not valid ip address or domain name.');
     }
 
     /**
