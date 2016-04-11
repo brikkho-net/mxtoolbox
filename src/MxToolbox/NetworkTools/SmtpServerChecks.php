@@ -63,9 +63,7 @@ class SmtpServerChecks
     public function __construct(NetworkTools $netTool, $addr, $myHostName, $mailFrom, $mailRcptTo)
     {
         $this->netTool = $netTool;
-
-        if (!$this->netTool->ipValidator($addr))
-            throw new MxToolboxLogicException('The value: ' . $addr . ' is not valid an IP address or domain name.');
+        $this->netTool->ipValidator($addr);
 
         if (!$this->isEmail($mailFrom) || !$this->isEmail($mailRcptTo))
             throw new MxToolboxLogicException('Non valid email format.');
