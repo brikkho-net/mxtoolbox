@@ -134,6 +134,7 @@ class NetworkTools
      *
      *  Structure:
      *  array(
+     *      ['ipAddress'] => string
      *      ['domainName'] => string,
      *      ['ptrRecord'] => string,
      *      ['mxRecords'] => array(
@@ -192,8 +193,7 @@ class NetworkTools
      */
     public function checkAllDnsbl($addr, &$testResult)
     {
-        if (!$this->ipValidator($addr))
-            throw new MxToolboxLogicException('Input IP address or domain name ' . $addr . ' is not valid!');
+        $this->ipValidator($addr);
         $this->ipAddress = $this->getIpAddressFromDomainName($addr);
         if (count($testResult) > 0) {
             foreach ($testResult as &$blackList) {
@@ -265,7 +265,7 @@ class NetworkTools
     {
         if (filter_var($addr, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4))
             return true;
-        throw new MxToolboxLogicException('Value: ' . $addr . ' is not valid ip address or domain name.');
+        throw new MxToolboxLogicException('The value: ' . $addr . ' is not valid an IP address or domain name.');
     }
 
     /**
