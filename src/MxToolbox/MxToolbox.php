@@ -8,7 +8,7 @@
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
- * @version 0.0.8
+ * @version 0.0.9
  *
  */
 namespace MxToolbox;
