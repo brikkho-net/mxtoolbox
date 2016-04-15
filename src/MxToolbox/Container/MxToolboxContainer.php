@@ -15,6 +15,7 @@ namespace MxToolbox\Container;
 use MxToolbox\DataGrid\MxToolboxDataGrid;
 use MxToolbox\FileSystem\BlacklistsHostnameFile;
 use MxToolbox\NetworkTools\NetworkTools;
+use MxToolbox\NetworkTools\QuickDig;
 use MxToolbox\NetworkTools\SmtpServerChecks;
 
 /**
@@ -27,7 +28,18 @@ class MxToolboxContainer extends MxContainer
     /** @var array Container of any services */
     private $container = array();
 
-    /** 
+    /**
+     * Create service NetworkTool
+     * @return NetworkTools
+     */
+    protected function createServiceQuickDig()
+    {
+        if (!isset($this->container['quickDig']) || !$this->container['quickDig'] instanceof QuickDig)
+            $this->container['quickDig'] = new QuickDig();
+        return $this->container['quickDig'];
+    }
+    
+    /**
      * Create service NetworkTool
      * @return NetworkTools
      */

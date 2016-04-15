@@ -8,7 +8,7 @@
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
  * @link https://best-hosting.cz
- * @version 0.0.9
+ * @version 0.1.0-dev
  *
  */
 namespace MxToolbox;
@@ -225,8 +225,12 @@ class MxToolbox extends MxToolboxContainer
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    public function checkIpAddressOnDnsbl($addr)
+    public function checkIpAddressOnDnsbl($addr,$quick = false)
     {
+        if($quick) {
+            $quickDig = $this->createServiceQuickDig($addr, $this->dataGrid->getTestResultArray(), $this->netTool);
+            return $this;
+        }
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
         return $this;
     }
