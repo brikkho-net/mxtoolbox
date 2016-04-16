@@ -13,7 +13,10 @@ namespace MxToolbox\NetworkTools;
 use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
-
+/**
+ * Class QuickDig
+ * @package MxToolbox\NetworkTools
+ */
 class QuickDig
 {
     /** @var NetworkTools */
@@ -22,15 +25,53 @@ class QuickDig
     private $addr;
     /** @var array */
     private $testResult;
-    
-    public function __construct($addr, &$testResult, $netTool)
+    /** @var string json */
+    private $jsonData;
+    /** @var array */
+    private $dnsblDomainNames;
+
+    /**
+     * QuickDig constructor.
+     * @param string $addr
+     * @param array $testResult
+     * @param NetworkTools $netTool
+     */
+    public function __construct($addr, &$testResult, NetworkTools $netTool)
     {
-        $this->netTool = $netTool;
         $this->addr = $addr;
         $this->testResult = $testResult;
+        $this->netTool = $netTool;
     }
-    
-    public function digMultiprocess(){
-       // $jsonData = shell_exec('python ./quickDig.py 2.0.0.127 /usr/bin/dig 127.0.0.1 /<path>/blacklistsAlive.txt');
+
+    /**
+     * Start dig multiprocessing - fast process how to run multiple dig tasks in the same time
+     * @return $this
+     */
+    public function getJsonFromDigMultiprocess()
+    {
+        foreach ($this->testResult as $item) {
+            if ($item['blResponse'])
+                $this->dnsblDomainNames[] = $item['blHostName'];
+        }
+        $this->netTool->ipValidator($this->addr);
+        $this->jsonData = shell_exec(
+            'python ' .
+            dirname(__FILE__) .
+            DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Python' . DIRECTORY_SEPARATOR . 'quickDig.py ' .
+            $this->netTool->reverseIP($this->addr) . ' ' .
+            $this->netTool->getDigPath() . ' ' .
+            $this->netTool->getRandomDNSResolverIP() . ' ' .
+            escapeshellarg(json_encode($this->dnsblDomainNames))
+        );
+        if ($this->jsonData == 'error')
+            throw new MxToolboxRuntimeException('Python exception!');
+        return $this;
     }
+
+    public function parseJsonDataFromPython()
+    {
+        $parser = new DigQueryParser();
+        
+    }
+
 }

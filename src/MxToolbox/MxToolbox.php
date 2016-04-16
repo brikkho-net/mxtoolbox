@@ -221,14 +221,16 @@ class MxToolbox extends MxToolboxContainer
     /**
      * Check IP address or domain name on all DNSBL servers
      * @param string $addr ip address or domain name
+     * @param boolean $quick (default false) for run quick multiprocess Python >=2.7 required
      * @return $this
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
      */
-    public function checkIpAddressOnDnsbl($addr,$quick = false)
+    public function checkIpAddressOnDnsbl($addr, $quick = false)
     {
         if($quick) {
-            $quickDig = $this->createServiceQuickDig($addr, $this->dataGrid->getTestResultArray(), $this->netTool);
+            $quickDig = $this->createServiceQuickDig($addr, $this->dataGrid->getTestResultArray());
+            $quickDig->startDigMultiprocess();
             return $this;
         }
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());

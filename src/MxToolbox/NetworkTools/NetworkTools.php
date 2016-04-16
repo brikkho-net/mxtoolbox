@@ -220,7 +220,7 @@ class NetworkTools
      * @param string $addr
      * @return string
      */
-    protected function reverseIP($addr)
+    public function reverseIP($addr)
     {
         $revIpAddr = explode(".", $addr);
         return $revIpAddr[3] . '.' . $revIpAddr[2] . '.' . $revIpAddr[1] . '.' . $revIpAddr[0];
@@ -273,7 +273,7 @@ class NetworkTools
      * @return string '<ip address>'
      * @throws MxToolboxLogicException
      */
-    private function getRandomDNSResolverIP()
+    public function getRandomDNSResolverIP()
     {
         if (!count($this->dnsResolvers) > 0)
             throw new MxToolboxLogicException('No DNS resolver here!');

@@ -1,5 +1,4 @@
-import json, sys, subprocess, multiprocessing
-
+import json, sys, subprocess, multiprocessing, re
 
 class DataObject:
     def __init__(self, params):
@@ -9,25 +8,19 @@ class DataObject:
 def run_process(obj_instance):
     domain, ip, digPath, resolver = obj_instance.domain, obj_instance.ip, obj_instance.digPath, obj_instance.resolver
     processed = []
-    processed.append(subprocess.check_output([digPath + ' @' + resolver + ' ' + ip + '.' + domain + ' A'], shell=True))
+    processed.append(subprocess.check_output([digPath + ' @' + resolver + ' ' + ip + '.' + domain + ' TXT'], shell=True))
     return processed
-
-
-def load(path):
-    with open(path, "r") as file:
-        blacklist = file.read().splitlines()
-    return blacklist
 
 
 if __name__ == '__main__':
     """ sys.argv[1] = test ip address (must be reversed)
         sys.argv[2] = dig path (/usr/bin/dig)
         sys.argv[3] = resolver ip address
-        sys.argv[4] = blacklistsAlive.txt path
+        sys.argv[4] = blacklists json array
         Usage example: python ./quickDig.py 2.0.0.127 /usr/bin/dig 127.0.0.1 /<path>/blacklistsAlive.txt
     """
     try:
-        blacklist = load(sys.argv[4])
+        blacklist = json.loads(sys.argv[4])
         objList = []
         for domain in blacklist:
             objList.append(DataObject((domain, sys.argv[1], sys.argv[2], sys.argv[3])))
@@ -36,4 +29,3 @@ if __name__ == '__main__':
         print(json.dumps(results))
     except Exception as e:
         print ('error')
-

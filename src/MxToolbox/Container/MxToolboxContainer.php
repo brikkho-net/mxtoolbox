@@ -29,13 +29,13 @@ class MxToolboxContainer extends MxContainer
     private $container = array();
 
     /**
-     * Create service NetworkTool
-     * @return NetworkTools
+     * Create service QuickDig
+     * @return QuickDig
      */
-    protected function createServiceQuickDig()
+    protected function createServiceQuickDig($addr, &$testResult)
     {
         if (!isset($this->container['quickDig']) || !$this->container['quickDig'] instanceof QuickDig)
-            $this->container['quickDig'] = new QuickDig();
+            $this->container['quickDig'] = new QuickDig($addr, $testResult, $this->createServiceNetworkTool());
         return $this->container['quickDig'];
     }
     
