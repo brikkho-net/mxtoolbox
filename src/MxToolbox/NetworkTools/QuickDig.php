@@ -1,6 +1,6 @@
 <?php
 /**
- * Quick DIG - python multiprocessing
+ * Quick DIG - python dig multiprocessing
  *
  * @author Lubomir Spacek
  * @license https://opensource.org/licenses/MIT
@@ -10,7 +10,6 @@
 
 namespace MxToolbox\NetworkTools;
 
-use MxToolbox\Exceptions\MxToolboxLogicException;
 use MxToolbox\Exceptions\MxToolboxRuntimeException;
 
 /**
@@ -21,16 +20,15 @@ class QuickDig
 {
     /** @var NetworkTools */
     private $netTool;
-    /** @var string */
+    /** @var DigQueryParser object */
+    private $digParser;
+
+    /** @var string IP address*/
     private $ipAddress;
-    /** @var array */
+    /** @var array reference */
     private $testResult;
     /** @var mixed (json|array)QuickDig output */
     private $digOutput;
-    /** @var array */
-    private $dnsblDomainNames;
-    /** @var DigQueryParser object */
-    private $digParser;
 
     /**
      * QuickDig constructor.
@@ -56,10 +54,11 @@ class QuickDig
         $this->ipAddress = $this->netTool->getIpAddressFromDomainName($this->ipAddress);
         if (!count($this->testResult) > 0)
             throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
-        // prepare domain names only for python
+        // prepare domain names only for python script
+        $dnsblDomainNames = array();
         foreach ($this->testResult as $item) {
             if ($item['blResponse'])
-                $this->dnsblDomainNames[] = $item['blHostName'];
+                $dnsblDomainNames[] = $item['blHostName'];
         }
         // call python script
         $this->digOutput = shell_exec(
@@ -69,11 +68,11 @@ class QuickDig
             $this->netTool->reverseIP($this->ipAddress) . ' ' .
             $this->netTool->getDigPath() . ' ' .
             $this->netTool->getRandomDNSResolverIP() . ' ' .
-            escapeshellarg(json_encode($this->dnsblDomainNames))
+            escapeshellarg(json_encode($dnsblDomainNames))
         );
         // check errors
         if($this->digOutput == 'error')
-            throw new MxToolboxRuntimeException('Python exception!');
+            throw new MxToolboxRuntimeException('Python multiprocessing script exception!');
         // parse json to array
         if(!empty($this->digOutput) && $this->isJson($this->digOutput)) {
             $this->digOutput = json_decode($this->digOutput);
