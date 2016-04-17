@@ -44,7 +44,7 @@ try {
      */
     foreach ($test->getBlacklistsArray() as $list) {
         if($list['blPositive'])
-            exit('ERR');
+            exit(1);
     }
     exit(0);
 
