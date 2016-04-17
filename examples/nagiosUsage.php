@@ -43,15 +43,21 @@ try {
      * Exception - return UNKNOWN
      */
     foreach ($test->getBlacklistsArray() as $list) {
-        if($list['blPositive'])
+        if($list['blPositive']) {
+            print('WARNING');
             exit(1);
+        }
     }
+    print('OK');
     exit(0);
 
 } catch (MxToolboxRuntimeException $e) {
+    print('UNKNOWN');
     exit(3);
 } catch (MxToolboxLogicException $e) {
+    print('UNKNOWN');
     exit(3);
 } catch (Exception $e) {
+    print('UNKNOWN');
     exit(3);
 }
