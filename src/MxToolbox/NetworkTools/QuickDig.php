@@ -22,62 +22,102 @@ class QuickDig
     /** @var NetworkTools */
     private $netTool;
     /** @var string */
-    private $addr;
+    private $ipAddress;
     /** @var array */
     private $testResult;
-    /** @var string QuickDig output */
+    /** @var mixed (json|array)QuickDig output */
     private $digOutput;
     /** @var array */
     private $dnsblDomainNames;
+    /** @var DigQueryParser object */
+    private $digParser;
 
     /**
      * QuickDig constructor.
-     * @param string $addr
-     * @param array $testResult
      * @param NetworkTools $netTool
      */
-    public function __construct($addr, &$testResult, NetworkTools $netTool)
+    public function __construct(NetworkTools $netTool)
     {
-        $this->addr = $addr;
-        $this->testResult = $testResult;
         $this->netTool = $netTool;
+        $this->digParser = new DigQueryParser();
     }
 
     /**
      * Start dig multiprocessing - fast process how to run multiple dig tasks in the same time
+     * @param string $addr
+     * @param array $testResult
      * @return $this
      */
-    public function getJsonFromDigMultiprocess()
+    public function getJsonFromDigMultiprocess($addr, &$testResult)
     {
+        $this->ipAddress = $addr;
+        $this->testResult = &$testResult;
+        $this->netTool->ipValidator($this->ipAddress);
+        $this->ipAddress = $this->netTool->getIpAddressFromDomainName($this->ipAddress);
+        if (!count($this->testResult) > 0)
+            throw new MxToolboxRuntimeException(sprintf('Array is empty for dig checks in: %s\%s.', get_class(), __FUNCTION__));
+        // prepare domain names only for python
         foreach ($this->testResult as $item) {
             if ($item['blResponse'])
                 $this->dnsblDomainNames[] = $item['blHostName'];
         }
-        $this->netTool->ipValidator($this->addr);
+        // call python script
         $this->digOutput = shell_exec(
             'python ' .
             dirname(__FILE__) .
             DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Python' . DIRECTORY_SEPARATOR . 'quickDig.py ' .
-            $this->netTool->reverseIP($this->addr) . ' ' .
+            $this->netTool->reverseIP($this->ipAddress) . ' ' .
             $this->netTool->getDigPath() . ' ' .
             $this->netTool->getRandomDNSResolverIP() . ' ' .
             escapeshellarg(json_encode($this->dnsblDomainNames))
         );
+        // check errors
         if($this->digOutput == 'error')
             throw new MxToolboxRuntimeException('Python exception!');
-        return $this;
-    }
-
-    public function parseJsonDataFromPython()
-    {
-        $parser = new DigQueryParser();
+        // parse json to array
         if(!empty($this->digOutput) && $this->isJson($this->digOutput)) {
             $this->digOutput = json_decode($this->digOutput);
-            //TODO: parse response
-            var_dump($this->digOutput);
-            exit();
+            return $this;
         }
-        
+        throw new MxToolboxRuntimeException('Python digOutput is empty or does not json format.');
+    }
+
+    /**
+     * Parse data array returned from multiprocessing 
+     * @return $this
+     */
+    public function parseDataFromMultiprocessing()
+    {
+        if(is_array($this->digOutput) && count($this->digOutput) > 0) {
+
+            foreach ($this->testResult as &$blackList) {
+                if ($digOutput = $this->searchDigResult($blackList['blHostName'])) {
+                    if ($this->digParser->isNoError($digOutput)) {
+                        $blackList['blPositive'] = true;
+                        $blackList['blPositiveResult'] = $this->digParser->getPositiveUrlAddresses($digOutput);
+                    }
+                    $blackList['blQueryTime'] = $this->digParser->getQueryTime($digOutput);
+                }
+            }
+            //var_dump($this->testResult);
+            return $this;
+        }
+        throw new MxToolboxRuntimeException('DigOutput is empty or does not array. Maybe call getJsonFromDigMultiprocess() first.');
+    }
+
+    /**
+     * Search dig output for a specific dnsbl domain
+     * @param string $domainName
+     * @return false|string
+     */
+    private function searchDigResult($domainName) {
+        foreach ($this->digOutput as $item) {
+            if (($firstLine = strtok($item[0], "\n")) !== false) {
+                if ($this->digParser->isDomainNameInString($domainName, $firstLine))
+                    return $item[0];
+            }
+        }
+        return false;
     }
 
     /**
@@ -90,22 +130,4 @@ class QuickDig
         return (json_last_error() == JSON_ERROR_NONE);
     }
     
-    /*
-     *             foreach ($testResult as &$blackList) {
-                $digOutput = $this->getDigResult(
-                    $this->ipAddress,
-                    $this->getRandomDNSResolverIP(),
-                    $blackList['blHostName'], 'TXT'
-                );
-
-                if ($this->digParser->isNoError($digOutput)) {
-                    $blackList['blPositive'] = true;
-                    $blackList['blPositiveResult'] = $this->digParser->getPositiveUrlAddresses($digOutput);
-                }
-
-                $blackList['blQueryTime'] = $this->digParser->getQueryTime($digOutput);
-            }
-            return $this;
-
-     */
 }

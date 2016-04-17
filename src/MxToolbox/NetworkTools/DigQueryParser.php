@@ -41,6 +41,19 @@ class DigQueryParser
     }
 
     /**
+     * Is domain name in input string
+     * @param string $domainName
+     * @param string $digOutput
+     * @return bool
+     */
+    public function isDomainNameInString($domainName,$digOutput)
+    {
+        if (preg_match('/'.$domainName.'/', $digOutput))
+            return true;
+        return false;
+    }
+
+    /**
      * Get positive url addresses from dig output
      * @param string $digOutput
      * @return array
