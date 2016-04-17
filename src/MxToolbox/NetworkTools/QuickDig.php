@@ -25,8 +25,8 @@ class QuickDig
     private $addr;
     /** @var array */
     private $testResult;
-    /** @var string json */
-    private $jsonData;
+    /** @var string QuickDig output */
+    private $digOutput;
     /** @var array */
     private $dnsblDomainNames;
 
@@ -54,7 +54,7 @@ class QuickDig
                 $this->dnsblDomainNames[] = $item['blHostName'];
         }
         $this->netTool->ipValidator($this->addr);
-        $this->jsonData = shell_exec(
+        $this->digOutput = shell_exec(
             'python ' .
             dirname(__FILE__) .
             DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'Python' . DIRECTORY_SEPARATOR . 'quickDig.py ' .
@@ -63,7 +63,7 @@ class QuickDig
             $this->netTool->getRandomDNSResolverIP() . ' ' .
             escapeshellarg(json_encode($this->dnsblDomainNames))
         );
-        if ($this->jsonData == 'error')
+        if($this->digOutput == 'error')
             throw new MxToolboxRuntimeException('Python exception!');
         return $this;
     }
@@ -71,7 +71,41 @@ class QuickDig
     public function parseJsonDataFromPython()
     {
         $parser = new DigQueryParser();
+        if(!empty($this->digOutput) && $this->isJson($this->digOutput)) {
+            $this->digOutput = json_decode($this->digOutput);
+            //TODO: parse response
+            var_dump($this->digOutput);
+            exit();
+        }
         
     }
 
+    /**
+     * is json
+     * @param string $string
+     * @return bool
+     */
+    private function isJson($string) {
+        json_decode($string);
+        return (json_last_error() == JSON_ERROR_NONE);
+    }
+    
+    /*
+     *             foreach ($testResult as &$blackList) {
+                $digOutput = $this->getDigResult(
+                    $this->ipAddress,
+                    $this->getRandomDNSResolverIP(),
+                    $blackList['blHostName'], 'TXT'
+                );
+
+                if ($this->digParser->isNoError($digOutput)) {
+                    $blackList['blPositive'] = true;
+                    $blackList['blPositiveResult'] = $this->digParser->getPositiveUrlAddresses($digOutput);
+                }
+
+                $blackList['blQueryTime'] = $this->digParser->getQueryTime($digOutput);
+            }
+            return $this;
+
+     */
 }

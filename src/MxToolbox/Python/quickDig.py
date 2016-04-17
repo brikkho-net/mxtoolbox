@@ -1,4 +1,5 @@
-import json, sys, subprocess, multiprocessing, re
+import json, sys, subprocess, multiprocessing
+
 
 class DataObject:
     def __init__(self, params):

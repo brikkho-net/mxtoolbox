@@ -230,7 +230,9 @@ class MxToolbox extends MxToolboxContainer
     {
         if($quick) {
             $quickDig = $this->createServiceQuickDig($addr, $this->dataGrid->getTestResultArray());
-            $quickDig->startDigMultiprocess();
+            $quickDig
+                ->getJsonFromDigMultiprocess()
+                ->parseJsonDataFromPython();
             return $this;
         }
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
