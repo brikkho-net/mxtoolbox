@@ -222,7 +222,7 @@ class MxToolbox extends MxToolboxContainer
     /**
      * Check IP address or domain name on all DNSBL servers
      * @param string $addr ip address or domain name
-     * @param boolean $quick (default false) for run quick multiprocess Python >=2.7 required
+     * @param boolean $quick (default false) for run quick multiprocess (Python >=2.7 required!)
      * @return $this
      * @throws MxToolboxRuntimeException
      * @throws MxToolboxLogicException
