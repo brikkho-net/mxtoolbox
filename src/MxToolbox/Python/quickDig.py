@@ -17,8 +17,8 @@ if __name__ == '__main__':
     """ sys.argv[1] = test ip address (must be reversed)
         sys.argv[2] = dig path (/usr/bin/dig)
         sys.argv[3] = resolver ip address
-        sys.argv[4] = blacklists json array
-        Usage example: python ./quickDig.py 2.0.0.127 /usr/bin/dig 127.0.0.1 /<path>/blacklistsAlive.txt
+        sys.argv[4] = dnsbl host names json array
+        Usage example: python ./quickDig.py 2.0.0.127 /usr/bin/dig 127.0.0.1 [<json array>]
     """
     try:
         blacklist = json.loads(sys.argv[4])
