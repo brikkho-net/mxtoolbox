@@ -42,7 +42,7 @@ class MxToolbox extends MxToolboxContainer
         $this->dataGrid = $this->createServiceMxToolboxDataGrid();
     }
 
-     /**
+    /**
      * Set dig path - required, etc: /usr/bin/dig
      * @param string $digPath
      * @return $this
@@ -59,11 +59,12 @@ class MxToolbox extends MxToolboxContainer
      * @param string $path
      * @return $this
      */
-    public function setBlacklistFilePath($path) {
+    public function setBlacklistFilePath($path)
+    {
         $this->fileSys->setBlacklistFilePath($path);
         return $this;
     }
-    
+
     /**
      * Set DNS resolver IP address - required (support for multiples push)
      * @param string $addr IP address
@@ -117,7 +118,7 @@ class MxToolbox extends MxToolboxContainer
 
     /**
      * Get blacklists array.
-     *      
+     *
      *      array( array(
      *      ['blHostName'] => string '<dnsbl hostname>',
      *      ['blPositive'] => boolean <true if IP address have the positive check for blHostName>,
@@ -135,7 +136,7 @@ class MxToolbox extends MxToolboxContainer
 
     /**
      * Get some additional information about IP address (IP Address, PTR record, Domain name, MX records )
-     *  
+     *
      *  Return information in array(
      *      ['ipAddress'] => string,
      *      ['domainName'] => string,
@@ -155,7 +156,7 @@ class MxToolbox extends MxToolboxContainer
 
     /**
      * Get SMTP diagnostics information.
-     *  
+     *
      *  Return information in array(
      *      ['rDnsMismatch']['state'] => boolean,
      *      ['rDnsMismatch']['info'] => string,
@@ -228,11 +229,11 @@ class MxToolbox extends MxToolboxContainer
      */
     public function checkIpAddressOnDnsbl($addr, $quick = false)
     {
-        if($quick) {
-            $quickDig = $this->createServiceQuickDig($addr, $this->dataGrid->getTestResultArray());
+        if ($quick) {
+            $quickDig = $this->createServiceQuickDig();
             $quickDig
-                ->getJsonFromDigMultiprocess()
-                ->parseJsonDataFromPython();
+                ->getJsonFromDigMultiprocess($addr, $this->dataGrid->getTestResultArray())
+                ->parseDataFromMultiprocessing();
             return $this;
         }
         $this->netTool->checkAllDnsbl($addr, $this->dataGrid->getTestResultArray());
