@@ -136,7 +136,9 @@ class MxToolboxTest extends \PHPUnit_Framework_TestCase
         $this->assertInternalType('array', $mxt->getBlacklistsArray());
     }
 
-    /** test check IP address in DNSBL and clean results for next test */
+    /**
+     * test check IP address in DNSBL and clean results for next test
+     */
     public function testCheckIpDnsblCleanArray()
     {
         $mxt = new MxToolbox();
@@ -145,6 +147,23 @@ class MxToolboxTest extends \PHPUnit_Framework_TestCase
             $mxt
                 ->setBlacklists()
                 ->checkIpAddressOnDnsbl('127.0.0.2')
+        );
+        $this->assertInternalType('array', $mxt->getBlacklistsArray());
+        $this->assertInstanceOf('MxToolbox\MxToolbox', $mxt->cleanBlacklistArray());
+        $this->assertInternalType('array', $mxt->getBlacklistsArray());
+    }
+
+    /**
+     * test check IP address in DNSBL with python multiprocess script and clean results for next test
+     */
+    public function testCheckIpDnsblMultiprocess()
+    {
+        $mxt = new MxToolbox();
+        $this->basicConfigureMxToolbox($mxt, '/usr/bin/dig', '8.8.8.8');
+        $this->assertInstanceOf('MxToolbox\MxToolbox',
+            $mxt
+                ->setBlacklists()
+                ->checkIpAddressOnDnsbl('127.0.0.2',true)
         );
         $this->assertInternalType('array', $mxt->getBlacklistsArray());
         $this->assertInstanceOf('MxToolbox\MxToolbox', $mxt->cleanBlacklistArray());
