@@ -5,7 +5,7 @@
  * @author Lubomir Spacek
  * @license https://opensource.org/licenses/MIT
  * @link https://github.com/heximcz/mxtoolbox
- * @link https://best-hosting.cz
+ * @link https://dns-tools.best-hosting.cz/
  */
 namespace MxToolbox\DataGrid;
 
